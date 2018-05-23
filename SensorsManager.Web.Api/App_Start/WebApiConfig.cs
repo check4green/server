@@ -21,6 +21,8 @@ namespace SensorsManager.Web.Api
                 new CamelCasePropertyNamesContractResolver();
 
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            config.EnableCors();
+          
 
         }
     }

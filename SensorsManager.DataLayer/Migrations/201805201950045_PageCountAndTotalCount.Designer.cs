@@ -7,13 +7,13 @@ namespace SensorsManager.DataLayer.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class ModelError : IMigrationMetadata
+    public sealed partial class PageCountAndTotalCount : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(ModelError));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(PageCountAndTotalCount));
         
         string IMigrationMetadata.Id
         {
-            get { return "201804030944479_ModelError"; }
+            get { return "201805201950045_PageCountAndTotalCount"; }
         }
         
         string IMigrationMetadata.Source

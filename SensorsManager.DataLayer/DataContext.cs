@@ -11,7 +11,7 @@ namespace SensorsManager.DataLayer
         public DbSet<SensorReading> SensorReadings { get; set; }
 
         public DataContext()
-            :base("name=DataContext")
+            :base("DataContext")
         {
 
         }

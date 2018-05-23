@@ -60,9 +60,13 @@
     <Compile Include="Migrations\201803041638321_Sensor.Designer.cs">
       <DependentUpon>201803041638321_Sensor.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201804030944479_ModelError.cs" />
-    <Compile Include="Migrations\201804030944479_ModelError.Designer.cs">
-      <DependentUpon>201804030944479_ModelError.cs</DependentUpon>
+    <Compile Include="Migrations\201805201950045_PageCountAndTotalCount.cs" />
+    <Compile Include="Migrations\201805201950045_PageCountAndTotalCount.Designer.cs">
+      <DependentUpon>201805201950045_PageCountAndTotalCount.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805211113021_ForeignKeysForReadings.cs" />
+    <Compile Include="Migrations\201805211113021_ForeignKeysForReadings.Designer.cs">
+      <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,8 +87,11 @@
     <EmbeddedResource Include="Migrations\201803041638321_Sensor.resx">
       <DependentUpon>201803041638321_Sensor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201804030944479_ModelError.resx">
-      <DependentUpon>201804030944479_ModelError.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201805201950045_PageCountAndTotalCount.resx">
+      <DependentUpon>201805201950045_PageCountAndTotalCount.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805211113021_ForeignKeysForReadings.resx">
+      <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

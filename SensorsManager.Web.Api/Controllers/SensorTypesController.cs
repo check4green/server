@@ -1,16 +1,23 @@
 ﻿using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Repository;
-using System.Collections.Generic;
 using System.Net;
 using System.Web.Http;
 using System.Linq;
+using System.Web.Http.Cors;
+using SensorsManager.Web.Api.Models;
+using System.Net.Http;
+using System;
 
 namespace SensorsManager.Web.Api.Controllers
 {
+    [EnableCors("*", "*", "*", 
+        exposedHeaders: "X-Tracker-Pagination-Page,X-Tracker-Pagination-PageSize," +
+        "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-SensorTypeCount")]
     [RoutePrefix("api/sensor-types")]
     public class SensorTypesController : ApiController
     {
-            SensorTypesRepository sensorTypeRep = new SensorTypesRepository();//Dependecy injection
+            SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
+            ModelFactory modelFactory = new ModelFactory();    
 
             [Route("", Name = "AddSensorTypeRoute")]
             [HttpPost]
@@ -27,28 +34,56 @@ namespace SensorsManager.Web.Api.Controllers
 
             [Route("{id:int}", Name = "GetSensorTypeByIdRoute")]
             [HttpGet]
-            public SensorType GetSensorTypeById(int id)
+            public HttpResponseMessage GetSensorTypeById(int id)
             {
-                var sensorType = sensorTypeRep.GetSensorTypeById(id);
-                return sensorType;
+                var sensorType = modelFactory.CreateSensorTypesModel(sensorTypeRep.GetSensorTypeById(id));
+                
+               if(sensorType == null)
+               {
+                return new  HttpResponseMessage(HttpStatusCode.NotFound);
+               }
+               var response = Request.CreateResponse(HttpStatusCode.OK, sensorType);
+               return response;
             }
+
 
             [Route("", Name = "GetAllSensorsTypeRoute")]
             [HttpGet]
-            public List<SensorType> GetAllSensorTypes()
+            public HttpResponseMessage GetAllSensorTypes(int page = 0, int pageSize = 30)
             {
-                var sensorsType = sensorTypeRep.GetAllSensorTypes();
-                return sensorsType.OrderBy(p => p.Id).ToList();
+            var totalCount = sensorTypeRep.GetAllSensorTypes().Count();
+            var totalPages = Math.Ceiling((float)totalCount / pageSize);
+
+            var sensorTypes = sensorTypeRep.GetAllSensorTypes()
+                    .Skip(pageSize * page)
+                    .Take(pageSize)
+                    .OrderBy(p => p.Id)
+                    .Select(p => modelFactory.CreateSensorTypesModel(p)).ToList();
+
+            if(totalCount == 0)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
-            [Route("{id}", Name = "DeleteSensorTypeRoute")]
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorTypes);
+            response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
+            response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
+            response.Headers.Add("X-Tracker-Pagination-PageCount", totalPages.ToString());
+            response.Headers.Add("X-Tracker-Pagination-SensorTypeCount", totalCount.ToString());
+
+            return response;
+        }
+
+            
+
+            [Route("{id:int}", Name = "DeleteSensorTypeRoute")]
             [HttpDelete]
             public void DeleteSensorType(int id)
             {
                 sensorTypeRep.DeleteSensorType(id);
             }
 
-            [Route("{id}")]
+            [Route("{id:int}")]
             [HttpPut]
             public IHttpActionResult UpdateSensorType(int id,SensorType sensorType)
             {

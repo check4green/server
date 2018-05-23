@@ -2,7 +2,7 @@
     [Id]             INT      IDENTITY (1, 1) NOT NULL,
     [SensorTypeId]   INT      NOT NULL,
     [ProductionDate] DATETIME NULL,
-    [UploadInteval]  INT      NOT NULL,
+    [UploadInterval]  INT      NOT NULL,
     [BatchSize]      INT      NOT NULL,
     [UserId]         INT      NOT NULL,
     CONSTRAINT [PK_dbo.Sensors] PRIMARY KEY CLUSTERED ([Id] ASC),

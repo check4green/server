@@ -10,15 +10,24 @@ namespace SensorsManager.DomainClasses
         [Key]
         public int Id { get; set; }
         [Required]
-        [ForeignKey("Sensor")]
+        [ForeignKey("Sensor"), Column(Order = 0)]
         public int SensorId { get; set; }
+
+        [MaxLength(4)]
+        [ForeignKey("Sensor"), Column(Order = 1)]
+        public string SensorGatewayAdress { get; set; }
+
+        [MaxLength(4)]
+        [ForeignKey("Sensor"), Column(Order = 2)]
+        public string SensorClientAdress { get; set; }
+
         [Required]
         public decimal Value { get; set; }
         [Required]
         public DateTimeOffset ReadingDate { get; set; }
-       
+
         public DateTimeOffset InsertDate { get; set; }
- 
-        public  Sensor Sensor { get; set; }
+
+        public Sensor Sensor { get; set; }
     }
 }
