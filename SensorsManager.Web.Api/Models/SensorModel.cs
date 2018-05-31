@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class SensorsModel
+    public class SensorModel
     {
         public int Id { get; set; }
         public int SensorTypeId { get; set; }
@@ -14,6 +14,6 @@ namespace SensorsManager.Web.Api.Models
         public int BatchSize { get; set; }
         public string GatewayAddress { get; set; }
         public string ClientAddress { get; set; }
-        public int UserId { get; set; }
+
     }
 }

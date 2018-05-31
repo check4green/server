@@ -111,11 +111,16 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\MeasurementsModel.cs" />
+    <Compile Include="Models\MeasurementModel.cs" />
     <Compile Include="Models\ModelFactory.cs" />
-    <Compile Include="Models\SensorReadingsModel.cs" />
-    <Compile Include="Models\SensorsModel.cs" />
-    <Compile Include="Models\SensorTypesModel.cs" />
+    <Compile Include="Models\ModelToEntityMap.cs" />
+    <Compile Include="Models\SensorReadingModel.cs" />
+    <Compile Include="Models\SensorReadingModel2.cs" />
+    <Compile Include="Models\SensorModel.cs" />
+    <Compile Include="Models\SensorModel2.cs" />
+    <Compile Include="Models\SensorModel3.cs" />
+    <Compile Include="Models\SensorReadingModel3.cs" />
+    <Compile Include="Models\SensorTypeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\MeasurementRepository.cs" />
     <Compile Include="Repository\SensorReadingRepository.cs" />
@@ -123,7 +128,9 @@
     <Compile Include="Repository\SensorTypesRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\PublishProfiles\swiss-iot - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\swiss-iot - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
@@ -132,6 +139,7 @@
     </None>
     <None Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +170,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59508</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:59508/</IISUrl>
+          <IISUrl>http://localhost:32333/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

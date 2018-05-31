@@ -8,6 +8,7 @@ using System.Web.Http.Cors;
 using SensorsManager.DataLayer;
 using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
+using SensorsManager.Web.Api.Repository.Models;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -19,15 +20,17 @@ namespace SensorsManager.Web.Api.Controllers
     {
         MeasurementRepository measureRep = new MeasurementRepository();
         ModelFactory modelFactory = new ModelFactory();
+        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
         [Route("", Name = "AddMeasurementRoute")]
         [HttpPost]
-        public IHttpActionResult AddMeasurement(Measurement newMeasure)
+        public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
         {
-            if (newMeasure == null || ModelState.IsValid == false)
+            if (newMeasureModel == null || ModelState.IsValid == false)
             {
                 return BadRequest();
             }
+            var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
             var addedMeasure = measureRep.AddMeasurement(newMeasure);
             return CreatedAtRoute("GetMeasurementByIdRoute", new { id = addedMeasure.Id }, addedMeasure);
         }
@@ -37,14 +40,15 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public HttpResponseMessage GetMeasurementById(int id)
         {
-            var measurement = modelFactory.CreateMeasurementsModel(measureRep.GetMeasurementById(id));
 
+            var measurement = measureRep.GetMeasurementById(id);
             if (measurement == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, measurement);
+            var measurementModel = modelFactory.CreateMeasurementModel(measurement);
+            var response = Request.CreateResponse(HttpStatusCode.OK, measurementModel);
             return response;
         }
 
@@ -58,7 +62,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             var measurements = measureRep.GetAllMeasurements()
                 .Skip(pageSize * page)
-                .Take(pageSize).Select(p => modelFactory.CreateMeasurementsModel(p))
+                .Take(pageSize).Select(p => modelFactory.CreateMeasurementModel(p))
                 .OrderBy(p => p.Id).ToList();
 
             if(totalCount == 0)
@@ -78,24 +82,30 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("{id:int}", Name = "DeleteMeasurementRoute")]
         [HttpDelete]
-        public void DeleteMeasurement(int id)
+        public HttpResponseMessage DeleteMeasurement(int id)
         {
             measureRep.DeleteMeasurement(id);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
 
-        [Route("{id}")]
+        [Route("{id:int}")]
         [HttpPut]
-        public IHttpActionResult UpdateMeasurement(int id, Measurement measurement)
+        public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measurementModel)
         {
-            if (measurement == null || ModelState.IsValid == false || id != measurement.Id)
+            if (measurementModel == null || 
+                ModelState.IsValid == false || 
+                measurementModel.Id != id)
             {
                 return BadRequest();
             }
+
             var result = measureRep.GetMeasurementById(id);
             if (result == null)
             {
                 return NotFound();
             }
+
+            var measurement = modelToEntityMap.MapMeasurementModelToMeasurementEntity(measurementModel, result);
             measureRep.UpdateMeasurement(measurement);
             return StatusCode(HttpStatusCode.NoContent);
         }

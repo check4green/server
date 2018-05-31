@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class MeasurementsModel
+    public class MeasurementModel
     {
         public int Id { get; set; }
         public string UnitOfMeasure { get; set; }

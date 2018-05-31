@@ -2,6 +2,7 @@
 using SensorsManager.DomainClasses;
 using System;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 
 namespace SensorsManager.Web.Api.Repository
@@ -19,7 +20,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public Sensor GetSensorByAdress(string gatewayAdress, string clientAdress)
+        public Sensor GetSensorByAddress(string gatewayAdress, string clientAdress)
         {
             using (DataContext db = new DataContext())
             {
@@ -29,7 +30,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public IQueryable<Sensor> GetSensosByGatewayAdress(string gatewayAdress)
+        public IQueryable<Sensor> GetSensosByGatewayAddress(string gatewayAdress)
         {
             using (DataContext db = new DataContext())
             {
@@ -62,8 +63,33 @@ namespace SensorsManager.Web.Api.Repository
             using (DataContext db = new DataContext())
             {
                 var sensor = new Sensor() { Id = id };
-                db.Entry(sensor).State = EntityState.Deleted;
-                db.SaveChanges();
+                bool saveFailed;
+                do
+                {
+                    saveFailed = false;
+                    db.Entry(sensor).State = EntityState.Deleted;
+                    try
+                    {
+                       
+                        db.SaveChanges();
+                    }
+
+                    catch(DbUpdateConcurrencyException ex)
+                    {
+                        saveFailed = true;
+                        var entry = ex.Entries.Single();
+                        if (entry.State == EntityState.Deleted)
+                        {
+                            entry.State = EntityState.Detached;
+                        }
+                        else
+                        {
+                            entry.OriginalValues.SetValues(entry.GetDatabaseValues());
+                        }
+                    }
+
+                } while (saveFailed);
+                
             }
         }
 
@@ -71,10 +97,11 @@ namespace SensorsManager.Web.Api.Repository
         {
             using (DataContext db = new DataContext())
             {
-                var sensor = new Sensor()
-                { GatewayAddress = gatewayAdress, ClientAddress = clientAdress};
-                db.Entry(sensor).State = EntityState.Deleted;
-                db.SaveChanges();
+                var id = db.Sensors.Where(p =>
+                p.GatewayAddress == gatewayAdress && p.ClientAddress == clientAdress)
+                .SingleOrDefault().Id;
+
+                DeleteSensor(id);
             }
         }
 

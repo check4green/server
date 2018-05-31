@@ -7,6 +7,7 @@ using System;
 using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System.Net.Http;
+using SensorsManager.Web.Api.Repository.Models;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -17,29 +18,41 @@ namespace SensorsManager.Web.Api.Controllers
     public class SensorsController : ApiController
     {
         SensorRepository sensorRep = new SensorRepository();
+        SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
         ModelFactory modelFactory = new ModelFactory();
+        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
         [Route("", Name = "AddSensorRoute")]
         [HttpPost]
-        public IHttpActionResult AddSensor(Sensor sensor)
+        public IHttpActionResult AddSensor(SensorModel3 sensorModel)
         {
-            if (sensor == null)
+            if (sensorModel == null)
             {
                 return BadRequest();
             }
-
-            sensor.UserId = 1;
 
             if (ModelState.IsValid == false)
             {
                 return BadRequest();
             }
 
+            if(sensorTypeRep.GetSensorTypeById(sensorModel.SensorTypeId) == null)
+            {
+                return NotFound();
+            }
+
+            if(!sensorModel.AddressValidation(sensorModel.GatewayAddress)
+                || !sensorModel.AddressValidation(sensorModel.ClientAddress))
+            {
+                return BadRequest();
+            }
+
+
             var compare = sensorRep.GetAllSensors()
                 .Where(p => 
-                p.ClientAddress == sensor.ClientAddress 
-                || p.GatewayAddress == sensor.ClientAddress
-                || p.ClientAddress == sensor.GatewayAddress).Count();
+                p.ClientAddress == sensorModel.ClientAddress 
+                || p.GatewayAddress == sensorModel.ClientAddress
+                || p.ClientAddress == sensorModel.GatewayAddress).Count();
 
             
 
@@ -48,48 +61,54 @@ namespace SensorsManager.Web.Api.Controllers
                 return Content(HttpStatusCode.Conflict,compare.ToString());
             }
 
-            sensor.GatewayAddress = sensor.GatewayAddress.ToLower();
-            sensor.ClientAddress = sensor.ClientAddress.ToLower();
 
-            var addedSensorReading = sensorRep.AddSensor(sensor);
+            var sensor = modelToEntityMap.MapSensorModelToSensorEntity(sensorModel);
+            var addedSensor = sensorRep.AddSensor(sensor);
 
-            return CreatedAtRoute("GetSensorByAdressRoute",
-                new { gatewayAdress = addedSensorReading.GatewayAddress, clientAdress = addedSensorReading.ClientAddress },
-                addedSensorReading);
+            return CreatedAtRoute("GetSensorRoute",
+                new { id = addedSensor.Id },
+                addedSensor);
 
         }
 
-        [Route("adress/{gatewayAdress}/{clientAdress}", Name = "GetSensorByAdressRoute")]
+        [Route("address/{gatewayAddress}/{clientAddress}", Name = "GetSensorByAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorByAdress(string gatewayAdress, string clientAdress)
+        public HttpResponseMessage GetSensorByAddress(string gatewayAddress, string clientAddress)
         {
-            var sensor = modelFactory.CreateSensorsModel
-                (sensorRep.GetSensorByAdress(gatewayAdress, clientAdress));
+
+            var sensor = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
 
             if (sensor == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensor);
+            var sensorModel = modelFactory.CreateSensorModel(sensor);
+
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorModel);
             return response; 
         }
 
-        [Route("adress/{gatewayAdress}", Name = "GetSensorByGatewayAdressRoute")]
+        [Route("address/{gatewayAddress}", Name = "GetSensorByGatewayAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorsBygatewayAdress(string gatewayAdress, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorsBygatewayAddress(string gatewayAddress, int page = 0, int pageSize = 30)
         {
-            var totalCount = sensorRep.GetSensosByGatewayAdress(gatewayAdress).Count();
+            var totalCount = sensorRep.GetSensosByGatewayAddress(gatewayAddress).Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
-            var sensors = sensorRep.GetSensosByGatewayAdress(gatewayAdress)
+            var sensorModels = sensorRep.GetSensosByGatewayAddress(gatewayAddress)
                .Skip(pageSize * page)
                .Take(pageSize)
                .OrderBy(p => p.Id)
-               .Select(p => modelFactory.CreateSensorsModel(p))
+               .Select(p => modelFactory.CreateSensorModel(p))
                .ToList();
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
+            if(sensorModels.Count() == 0)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
+
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorModels);
 
             response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
             response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
@@ -103,13 +122,16 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public HttpResponseMessage GetSensorById(int id)
         {
-            var sensor = modelFactory.CreateSensorsModel(sensorRep.GetSensorById(id));
-            if(sensor == null)
+            var sensor = sensorRep.GetSensorById(id);
+            if (sensor == null)
             {
                 return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensor);
+            var sensorModel = modelFactory.CreateSensorModel(sensor);
+            
+
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorModel);
             return response ;
         }
 
@@ -121,14 +143,19 @@ namespace SensorsManager.Web.Api.Controllers
             var totalCount = sensorRep.GetAllSensors().Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
-            var sensors = sensorRep.GetAllSensors()
+            var sensorModels = sensorRep.GetAllSensors()
                 .Skip(pageSize * page)
                 .Take(pageSize)
                 .OrderBy(p => p.Id)
-                .Select(p => modelFactory.CreateSensorsModel(p))
+                .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
+            if(sensorModels.Count() == 0)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
+
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorModels);
             response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
             response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
             response.Headers.Add("X-Tracker-Pagination-PageCount", pageCount.ToString());
@@ -150,7 +177,7 @@ namespace SensorsManager.Web.Api.Controllers
                 .Skip(pageSize * page)
                 .Take(pageSize)
                 .OrderBy(p => p.Id)
-                .Select(p => modelFactory.CreateSensorsModel(p))
+                .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
             var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
@@ -173,7 +200,7 @@ namespace SensorsManager.Web.Api.Controllers
                 .Skip(pageSize * page)
                 .Take(pageSize)
                 .OrderBy(p => p.Id)
-                .Select(p => modelFactory.CreateSensorsModel(p))
+                .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
             var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
@@ -186,40 +213,45 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
 
-
         [Route("{id:int}")]
         [HttpPut]
-        public IHttpActionResult UpdateSensor(int id, Sensor sensor)
+        public IHttpActionResult UpdateSensor(int id, SensorModel2 sensorModel)
         {
-            if (sensor == null || ModelState.IsValid == false || id != sensor.Id)
+            if (sensorModel == null || ModelState.IsValid == false)
             {
                 return BadRequest();
             }
-            var result = sensorRep.GetSensorById(id);
-            if (result == null)
+            
+            var sensor = sensorRep.GetSensorById(id);
+            if (sensor == null)
             {
                 return NotFound();
             }
-            sensorRep.UpdateSensor(sensor);
+
+            var result = modelToEntityMap
+                .MapSensorModelToSensorEntity(sensorModel, sensor);
+
+            sensorRep.UpdateSensor(result);
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [Route("adress/{gatewayAdress}/{clientAdress}")]
+        [Route("address/{gatewayAddress}/{clientAddress}")]
         [HttpPut]
-        public IHttpActionResult UpdateSensorByAdress(string gatewayAdress, string clientAdress, Sensor sensor)
+        public IHttpActionResult UpdateSensorByAddress(string gatewayAddress, 
+            string clientAddress, SensorModel2 sensorModel)
         {
-            if (sensor == null || ModelState.IsValid == false
-                || gatewayAdress != sensor.GatewayAddress
-                || clientAdress != sensor.GatewayAddress)
-            {
-                return BadRequest();
-            }
-            var result = sensorRep.GetSensorByAdress(gatewayAdress, clientAdress);
-            if (result == null)
+            
+            var sensor = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
+
+            if (sensor == null)
             {
                 return NotFound();
             }
+
+            var rezult = modelToEntityMap
+                .MapSensorModelToSensorEntity(sensorModel, sensor);
             sensorRep.UpdateSensor(sensor);
+
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -231,7 +263,24 @@ namespace SensorsManager.Web.Api.Controllers
             return StatusCode(HttpStatusCode.NotImplemented);
         }
 
+        [Route("{id:int}", Name = "DeleteSensorByIdRoute")]
+        [HttpDelete]
+        public HttpResponseMessage DeleteSensorById(int id) {
 
+           
+            sensorRep.DeleteSensor(id);
+
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
+
+        [Route("address/{gatewayAddress}/{clientAddress}", Name = "DeleteSensorAddressRoute")]
+        [HttpDelete]
+        public HttpResponseMessage DeleteSensorByAddress(string gatewayAddress, string clientAddress)
+        {
+        
+            sensorRep.DeleteSensorByAdress(gatewayAddress, clientAddress);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        }
 
     }
 }

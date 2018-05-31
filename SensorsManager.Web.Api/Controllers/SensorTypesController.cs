@@ -7,6 +7,8 @@ using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System.Net.Http;
 using System;
+using SensorsManager.Web.Api.Repository.Models;
+using SensorsManager.DataLayer;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -17,18 +19,27 @@ namespace SensorsManager.Web.Api.Controllers
     public class SensorTypesController : ApiController
     {
             SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
-            ModelFactory modelFactory = new ModelFactory();    
+            MeasurementRepository measureRep = new MeasurementRepository();
+            ModelFactory modelFactory = new ModelFactory();
+            ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
             [Route("", Name = "AddSensorTypeRoute")]
             [HttpPost]
-            public IHttpActionResult AddSensorType(SensorType sensorType)
+            public IHttpActionResult AddSensorType(SensorTypeModel sensorTypeModel)
             {
-                if (sensorType == null || ModelState.IsValid == false)
+                if (sensorTypeModel == null || ModelState.IsValid == false)
                 {
                     return BadRequest();
                 }
+                var measure = measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
+                if (measure == null)
+                {
+                    return NotFound();
+                }
 
+                var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
                 var addedSensorType = sensorTypeRep.AddSensorType(sensorType);
+
                 return CreatedAtRoute("GetSensorTypeByIdRoute", new { id = addedSensorType.Id }, addedSensorType);
             }
 
@@ -36,13 +47,14 @@ namespace SensorsManager.Web.Api.Controllers
             [HttpGet]
             public HttpResponseMessage GetSensorTypeById(int id)
             {
-                var sensorType = modelFactory.CreateSensorTypesModel(sensorTypeRep.GetSensorTypeById(id));
-                
+
+            var sensorType = sensorTypeRep.GetSensorTypeById(id);
                if(sensorType == null)
                {
                 return new  HttpResponseMessage(HttpStatusCode.NotFound);
                }
-               var response = Request.CreateResponse(HttpStatusCode.OK, sensorType);
+            var sensorTypeModel = modelFactory.CreateSensorTypeModel(sensorType);
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensorTypeModel);
                return response;
             }
 
@@ -58,7 +70,7 @@ namespace SensorsManager.Web.Api.Controllers
                     .Skip(pageSize * page)
                     .Take(pageSize)
                     .OrderBy(p => p.Id)
-                    .Select(p => modelFactory.CreateSensorTypesModel(p)).ToList();
+                    .Select(p => modelFactory.CreateSensorTypeModel(p)).ToList();
 
             if(totalCount == 0)
             {
@@ -78,25 +90,31 @@ namespace SensorsManager.Web.Api.Controllers
 
             [Route("{id:int}", Name = "DeleteSensorTypeRoute")]
             [HttpDelete]
-            public void DeleteSensorType(int id)
+            public HttpResponseMessage DeleteSensorType(int id)
             {
-                sensorTypeRep.DeleteSensorType(id);
+            sensorTypeRep.DeleteSensorType(id);
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             [Route("{id:int}")]
             [HttpPut]
-            public IHttpActionResult UpdateSensorType(int id,SensorType sensorType)
+            public IHttpActionResult UpdateSensorType(int id,SensorTypeModel sensorTypeModel)
             {
-                if (sensorType == null || ModelState.IsValid == false || id != sensorType.Id)
+                if (sensorTypeModel == null || ModelState.IsValid == false || id != sensorTypeModel.Id)
                 {
-                return BadRequest();
+                    return BadRequest();
                 }
+
                 var result = sensorTypeRep.GetSensorTypeById(id);
+
                 if(result == null)
                 {
-                return NotFound();
+                    return NotFound();
                 }
-                sensorTypeRep.UpdateSensorType(sensorType);
+                 var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEntity(sensorTypeModel, result);
+
+                 sensorTypeRep.UpdateSensorType(sensorType);
+
                  return StatusCode(HttpStatusCode.NoContent);
             }
 

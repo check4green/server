@@ -5,9 +5,9 @@ namespace SensorsManager.Web.Api.Models
 {
     public class ModelFactory
     {
-       public SensorsModel CreateSensorsModel(Sensor sensor)
+       public SensorModel CreateSensorModel(Sensor sensor)
         {
-            return new SensorsModel
+            return new SensorModel
             {
                 Id = sensor.Id,
                 BatchSize = sensor.BatchSize,
@@ -16,12 +16,12 @@ namespace SensorsManager.Web.Api.Models
                 UploadInterval = sensor.UploadInterval,
                 GatewayAddress = sensor.GatewayAddress,
                 ClientAddress = sensor.ClientAddress,
-                UserId = sensor.UserId
+               
             };
         }
-       public SensorTypesModel CreateSensorTypesModel(SensorType sensorType)
+       public SensorTypeModel CreateSensorTypeModel(SensorType sensorType)
         {
-            return new SensorTypesModel
+            return new SensorTypeModel
             {
                 Id = sensorType.Id,
                 Code = sensorType.Code,
@@ -32,9 +32,9 @@ namespace SensorsManager.Web.Api.Models
                 Multiplier = sensorType.Multiplier
             };
         }
-        public MeasurementsModel CreateMeasurementsModel(Measurement measurement)
+        public MeasurementModel CreateMeasurementModel(Measurement measurement)
         {
-            return new MeasurementsModel
+            return new MeasurementModel
             {
                 Id = measurement.Id,
                 UnitOfMeasure = measurement.UnitOfMeasure,
@@ -47,16 +47,10 @@ namespace SensorsManager.Web.Api.Models
             return new SensorReadingModel
             {
                 Id = sensorReading.Id,
-                SensorGatewayAdress = sensorReading.SensorGatewayAdress,
-                SensorClientAdress = sensorReading.SensorClientAdress,
                 Value = sensorReading.Value,
                 ReadingDate = sensorReading.ReadingDate
             };
         }
 
-        internal SensorReadingModel CreateSensorReadingModel(Sensor p)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using SensorsManager.DomainClasses;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 
 namespace SensorsManager.DataLayer
@@ -37,17 +38,45 @@ namespace SensorsManager.DataLayer
             using(DataContext db = new DataContext())
             {
                 var measure = new Measurement { Id = id };
-                db.Entry(measure).State = EntityState.Deleted;
-                db.SaveChanges();
+                bool saveFailed;
+                do
+                {
+                    saveFailed = false;
+                    db.Entry(measure).State = EntityState.Deleted;
+                    try
+                    {
+
+                        db.SaveChanges();
+                    }
+
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        saveFailed = true;
+                        var entry = ex.Entries.Single();
+                        if (entry.State == EntityState.Deleted)
+                        {
+                            entry.State = EntityState.Detached;
+                        }
+                        else
+                        {
+                            entry.OriginalValues.SetValues(entry.GetDatabaseValues());
+                        }
+                    }
+
+                } while (saveFailed);
             }
         }
 
        public void UpdateMeasurement(Measurement measurement)
         {
+          
             using (DataContext db = new DataContext())
             {
+
                 db.Entry(measurement).State = EntityState.Modified;
                 db.SaveChanges();
+                   
+                
             }
         }
     }

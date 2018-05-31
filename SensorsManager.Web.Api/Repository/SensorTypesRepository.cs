@@ -1,6 +1,7 @@
 ﻿using SensorsManager.DataLayer;
 using SensorsManager.DomainClasses;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 
 namespace SensorsManager.Web.Api.Repository
@@ -38,8 +39,32 @@ namespace SensorsManager.Web.Api.Repository
             using (DataContext db = new DataContext())
             {
                 var sensorType = new SensorType() { Id = id };
-                db.Entry(sensorType).State = EntityState.Deleted;
-                db.SaveChanges();
+                bool saveFailed;
+                do
+                {
+                    saveFailed = false;
+                    db.Entry(sensorType).State = EntityState.Deleted;
+                    try
+                    {
+
+                        db.SaveChanges();
+                    }
+
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        saveFailed = true;
+                        var entry = ex.Entries.Single();
+                        if (entry.State == EntityState.Deleted)
+                        {
+                            entry.State = EntityState.Detached;
+                        }
+                        else
+                        {
+                            entry.OriginalValues.SetValues(entry.GetDatabaseValues());
+                        }
+                    }
+
+                } while (saveFailed);
             }
         }
 

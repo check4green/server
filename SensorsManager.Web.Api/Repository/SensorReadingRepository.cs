@@ -26,21 +26,11 @@ namespace SensorsManager.Web.Api.Repository
             using(DataContext db = new DataContext())
             {
                 var readings = db.SensorReadings.Where(p => p.SensorId == id)
-                    .OrderByDescending(p => p.Id).ToList().AsQueryable();
+                    .ToList().AsQueryable();
                 return readings;
             }
         }
 
-        public IQueryable<SensorReading> GetSensorReadingBySensorAdress(string gatewayAdress, string clientAdress)
-        {
-            using(DataContext db = new DataContext())
-            {
-                var readings = db.SensorReadings.Where
-                    (p => p.SensorGatewayAdress == gatewayAdress
-                    && p.SensorClientAdress == clientAdress).OrderByDescending(p => p.Id).ToList().AsQueryable();
-
-                return readings;
-            }
-        }
+        
     }
 }

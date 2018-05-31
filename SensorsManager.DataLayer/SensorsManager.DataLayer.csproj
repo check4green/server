@@ -68,6 +68,14 @@
     <Compile Include="Migrations\201805211113021_ForeignKeysForReadings.Designer.cs">
       <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201805240854113_FixedSpellingErrors.cs" />
+    <Compile Include="Migrations\201805240854113_FixedSpellingErrors.Designer.cs">
+      <DependentUpon>201805240854113_FixedSpellingErrors.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.cs" />
+    <Compile Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.Designer.cs">
+      <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -92,6 +100,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201805211113021_ForeignKeysForReadings.resx">
       <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805240854113_FixedSpellingErrors.resx">
+      <DependentUpon>201805240854113_FixedSpellingErrors.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.resx">
+      <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

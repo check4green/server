@@ -8,6 +8,7 @@ using System.Web.Http.Cors;
 using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
+using SensorsManager.Web.Api.Repository.Models;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -19,27 +20,76 @@ namespace SensorsManager.Web.Api.Controllers
     {
   
         SensorReadingRepository readingRep = new SensorReadingRepository();
+        SensorRepository sensorRep = new SensorRepository();
         ModelFactory modelFactory = new ModelFactory();
+        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
         [Route("~/api/readings")]
         [HttpPost]
-        public IHttpActionResult AddSensorReadings(SensorReading sensorReading)
+        public IHttpActionResult AddSensorReadings(SensorReadingModel3 sensorReadingModel)
         {
-            if (sensorReading == null)
+            if (sensorReadingModel == null)
             {
                 return BadRequest();
             }
-
-            sensorReading.InsertDate = DateTime.UtcNow.ToLocalTime();
 
             if (ModelState.IsValid == false)
             {
                 return BadRequest();
             }
+
+            var sensor = sensorRep.GetSensorById(sensorReadingModel.SensorId);
+
+            if(sensor == null)
+            {
+                return NotFound();
+            }
+
+            var sensorReading = modelToEntityMap
+                .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
+
             var reading = readingRep.AddSensorReading(sensorReading);
 
             return CreatedAtRoute("GetSensorReadingsBySensorIdRoute", new { id = reading.SensorId }, reading);
         }
+
+        [Route("~/api/readings/address")]
+        [HttpPost]
+        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingsModel)
+        {
+            if (sensorReadingsModel == null)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                var sensorId = sensorRep.
+                    GetSensorByAddress(sensorReadingsModel.SensorGatewayAddress,
+                    sensorReadingsModel.SensorClientAddress).Id;
+
+                var sensorReading = modelToEntityMap
+                    .MapSensorReadingModelToSensorReadingEntity(sensorReadingsModel, sensorId);
+
+
+                if (ModelState.IsValid == false)
+                {
+                    return BadRequest();
+                }
+                var reading = readingRep.AddSensorReading(sensorReading);
+
+                return CreatedAtRoute("GetSensorReadingsBySensorAddressRoute", 
+                    new { gatewayAddress = sensorReadingsModel.SensorGatewayAddress,
+                    clientAddress = sensorReadingsModel.SensorClientAddress}, sensorReadingsModel);
+
+            }
+            catch (System.NullReferenceException)
+            {
+                return NotFound();
+            }
+          
+
+        }
+
 
         [Route("~/api/sensors/{id:int}/readings", Name = "GetSensorReadingsBySensorIdRoute")]
         [HttpGet]
@@ -51,6 +101,7 @@ namespace SensorsManager.Web.Api.Controllers
 
 
             var senorReadings = readingRep.GetSensorReadingBySensorId(id)
+                                .OrderByDescending(p => p.Id)
                                 .Skip(pageSize * page)
                                 .Take(pageSize)
                                 .Select(p => modelFactory.CreateSensorReadingModel(p))
@@ -58,7 +109,7 @@ namespace SensorsManager.Web.Api.Controllers
 
            if(totalCount == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
             var response = Request.CreateResponse(HttpStatusCode.OK, senorReadings);
@@ -73,32 +124,17 @@ namespace SensorsManager.Web.Api.Controllers
             return response;
         }
 
-        [Route("~/api/sensors/adress/{gatewayAdress}/{clientAdress}/readings", Name = "GetSensorReadingsBySensorAdressRoute")]
+        [Route("~/api/sensors/address/{gatewayAddress}/{clientAddress}/readings", Name = "GetSensorReadingsBySensorAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorReadingsBySensorAdressId(string gatewayAdress, string clientAdress, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorReadingsBySensorAddress(string gatewayAddress, string clientAddress, int page = 0, int pageSize = 30)
         {
-
-            var totalCount = readingRep.GetSensorReadingBySensorAdress(gatewayAdress, clientAdress).Count();
-            var totalPages = Math.Ceiling((float)totalCount / pageSize);
-
-            var sensorReadings = readingRep.GetSensorReadingBySensorAdress(gatewayAdress, clientAdress)
-                                .Skip(pageSize * page)
-                                .Take(pageSize)
-                                .Select(p => modelFactory.CreateSensorReadingModel(p))
-                                .ToList();
-
-            if (totalCount == 0)
+            var id = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress).Id;
+            if(id == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
-
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensorReadings);
-            response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageCount", totalPages.ToString());
-            response.Headers.Add("X-Tracker-Pagination-SensorReadingsCount", totalCount.ToString());
-
-            return response;
+            return GetSensorReadingsBySensorId(id, page, pageSize);
+           
         }
     }
 }
