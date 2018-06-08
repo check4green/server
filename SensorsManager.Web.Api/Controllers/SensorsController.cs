@@ -97,9 +97,9 @@ namespace SensorsManager.Web.Api.Controllers
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
             var sensorModels = sensorRep.GetSensosByGatewayAddress(gatewayAddress)
+               .OrderByDescending(p => p.Id)
                .Skip(pageSize * page)
                .Take(pageSize)
-               .OrderByDescending(p => p.Id)
                .Select(p => modelFactory.CreateSensorModel(p))
                .ToList();
 
@@ -144,9 +144,9 @@ namespace SensorsManager.Web.Api.Controllers
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
             var sensorModels = sensorRep.GetAllSensors()
+                .OrderByDescending(p => p.Id)
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
@@ -174,9 +174,9 @@ namespace SensorsManager.Web.Api.Controllers
 
             var sensors = sensorRep
                 .GetAllSensors().Where(p => p.UserId == id)
+                .OrderByDescending(p => p.Id)
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
@@ -197,9 +197,9 @@ namespace SensorsManager.Web.Api.Controllers
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
             var sensors = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id)
+                .OrderByDescending(p => p.Id)
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
