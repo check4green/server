@@ -99,7 +99,7 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorModels = sensorRep.GetSensosByGatewayAddress(gatewayAddress)
                .Skip(pageSize * page)
                .Take(pageSize)
-               .OrderBy(p => p.Id)
+               .OrderByDescending(p => p.Id)
                .Select(p => modelFactory.CreateSensorModel(p))
                .ToList();
 
@@ -146,7 +146,7 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorModels = sensorRep.GetAllSensors()
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderBy(p => p.Id)
+                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
@@ -176,7 +176,7 @@ namespace SensorsManager.Web.Api.Controllers
                 .GetAllSensors().Where(p => p.UserId == id)
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderBy(p => p.Id)
+                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
@@ -199,7 +199,7 @@ namespace SensorsManager.Web.Api.Controllers
             var sensors = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id)
                 .Skip(pageSize * page)
                 .Take(pageSize)
-                .OrderBy(p => p.Id)
+                .OrderByDescending(p => p.Id)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
 
