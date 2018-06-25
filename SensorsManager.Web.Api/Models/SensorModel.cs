@@ -14,6 +14,7 @@ namespace SensorsManager.Web.Api.Models
         public int BatchSize { get; set; }
         public string GatewayAddress { get; set; }
         public string ClientAddress { get; set; }
+        public bool Activ { get; set; }
 
     }
 }

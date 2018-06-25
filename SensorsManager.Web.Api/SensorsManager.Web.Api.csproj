@@ -103,6 +103,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\ActivityCheck.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MeasurementsController.cs" />
     <Compile Include="Controllers\SensorReadingsController.cs" />

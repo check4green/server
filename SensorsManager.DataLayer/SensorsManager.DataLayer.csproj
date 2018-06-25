@@ -76,6 +76,10 @@
     <Compile Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.Designer.cs">
       <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806190828527_ActivInactive.cs" />
+    <Compile Include="Migrations\201806190828527_ActivInactive.Designer.cs">
+      <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -106,6 +110,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.resx">
       <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806190828527_ActivInactive.resx">
+      <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

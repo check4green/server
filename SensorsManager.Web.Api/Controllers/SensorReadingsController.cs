@@ -39,16 +39,21 @@ namespace SensorsManager.Web.Api.Controllers
             }
 
             var sensor = sensorRep.GetSensorById(sensorReadingModel.SensorId);
-
+         
             if(sensor == null)
             {
                 return NotFound();
             }
 
+           
             var sensorReading = modelToEntityMap
                 .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
 
             var reading = readingRep.AddSensorReading(sensorReading);
+
+            sensor.Activ = true;
+            sensorRep.UpdateSensor(sensor);
+
 
             return CreatedAtRoute("GetSensorReadingsBySensorIdRoute", new { id = reading.SensorId }, reading);
         }
@@ -63,12 +68,16 @@ namespace SensorsManager.Web.Api.Controllers
             }
             try
             {
-                var sensorId = sensorRep.
+                var sensor = sensorRep.
                     GetSensorByAddress(sensorReadingsModel.SensorGatewayAddress,
-                    sensorReadingsModel.SensorClientAddress).Id;
+                    sensorReadingsModel.SensorClientAddress);
+
+                sensor.Activ = true;
+                sensorRep.UpdateSensor(sensor);
+
 
                 var sensorReading = modelToEntityMap
-                    .MapSensorReadingModelToSensorReadingEntity(sensorReadingsModel, sensorId);
+                    .MapSensorReadingModelToSensorReadingEntity(sensorReadingsModel, sensor.Id);
 
 
                 if (ModelState.IsValid == false)

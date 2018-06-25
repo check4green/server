@@ -28,6 +28,9 @@ namespace SensorsManager.DomainClasses
         [Required,MaxLength(4)]
         public string ClientAddress { get; set; }
 
+
+        public bool Activ { get; set; }
+
         [ForeignKey("User")]
         public int UserId { get; set; }
 

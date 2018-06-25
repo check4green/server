@@ -9,7 +9,7 @@ namespace SensorsManager.Web.Api
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
-           
+            ActivityCheck.CheckSensorActivity();
         }
     }
 }
