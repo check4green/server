@@ -16,7 +16,7 @@ namespace SensorsManager.Web.Api.Models
                 UploadInterval = sensor.UploadInterval,
                 GatewayAddress = sensor.GatewayAddress,
                 ClientAddress = sensor.ClientAddress,
-                Activ = sensor.Activ
+                Active = sensor.Active
                
             };
         }

@@ -51,7 +51,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             var reading = readingRep.AddSensorReading(sensorReading);
 
-            sensor.Activ = true;
+            sensor.Active = true;
             sensorRep.UpdateSensor(sensor);
 
 
@@ -72,7 +72,7 @@ namespace SensorsManager.Web.Api.Controllers
                     GetSensorByAddress(sensorReadingsModel.SensorGatewayAddress,
                     sensorReadingsModel.SensorClientAddress);
 
-                sensor.Activ = true;
+                sensor.Active = true;
                 sensorRep.UpdateSensor(sensor);
 
 

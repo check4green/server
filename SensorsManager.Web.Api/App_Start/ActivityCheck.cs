@@ -26,7 +26,7 @@ namespace SensorsManager.Web.Api
 
             while (true)
             {
-                var sensors = sensorRep.GetAllSensors();
+                var sensors = sensorRep.GetAllSensors().Where(p => p.Active == true);
                 if(sensors == null)
                 {
                     continue;
@@ -36,8 +36,6 @@ namespace SensorsManager.Web.Api
                     Parallel.ForEach(sensors,
                         sensor =>
                         {
-                                if (sensor.Activ)
-                                {
                                     var wait = (sensor.UploadInterval + 1);
                                     var readingDate = readingRep
                                     .GetSensorReadingBySensorId(sensor.Id)
@@ -46,18 +44,12 @@ namespace SensorsManager.Web.Api
 
                                     if ((DateTime.UtcNow - readingDate).TotalMinutes > wait)
                                     {
-                                        sensor.Activ = false;
+                                        sensor.Active = false;
                                         sensorRep.UpdateSensor(sensor);
                                     }
-                                }
                         });
                     Thread.Sleep(60000);
                 }
-
-
-
-
-
             }
         }
     }

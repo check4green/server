@@ -80,6 +80,10 @@
     <Compile Include="Migrations\201806190828527_ActivInactive.Designer.cs">
       <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806260736393_FixedTypo.cs" />
+    <Compile Include="Migrations\201806260736393_FixedTypo.Designer.cs">
+      <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -113,6 +117,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201806190828527_ActivInactive.resx">
       <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806260736393_FixedTypo.resx">
+      <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
