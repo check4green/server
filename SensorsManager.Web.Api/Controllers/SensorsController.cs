@@ -36,6 +36,7 @@ namespace SensorsManager.Web.Api.Controllers
                 return BadRequest();
             }
 
+            
             if(sensorTypeRep.GetSensorTypeById(sensorModel.SensorTypeId) == null)
             {
                 return NotFound();
@@ -47,6 +48,10 @@ namespace SensorsManager.Web.Api.Controllers
                 return BadRequest();
             }
 
+            if(sensorModel.GatewayAddress == sensorModel.ClientAddress)
+            {
+                return BadRequest();
+            }
 
             var compare = sensorRep.GetAllSensors()
                 .Where(p => 

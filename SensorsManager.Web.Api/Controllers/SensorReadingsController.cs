@@ -21,6 +21,8 @@ namespace SensorsManager.Web.Api.Controllers
   
         SensorReadingRepository readingRep = new SensorReadingRepository();
         SensorRepository sensorRep = new SensorRepository();
+        SensorTypesRepository typeRep = new SensorTypesRepository();
+
         ModelFactory modelFactory = new ModelFactory();
         ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
@@ -45,7 +47,14 @@ namespace SensorsManager.Web.Api.Controllers
                 return NotFound();
             }
 
+            var sensorType = typeRep.GetSensorTypeById(sensor.SensorTypeId);
            
+            if(sensorReadingModel.Value < sensorType.MinValue 
+                || sensorReadingModel.Value > sensorType.MaxValue)
+            {
+                return BadRequest();
+            }
+
             var sensorReading = modelToEntityMap
                 .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
 
@@ -60,35 +69,44 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/readings/address")]
         [HttpPost]
-        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingsModel)
+        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingModel)
         {
-            if (sensorReadingsModel == null)
+            if (sensorReadingModel == null)
             {
                 return BadRequest();
             }
             try
             {
-                var sensor = sensorRep.
-                    GetSensorByAddress(sensorReadingsModel.SensorGatewayAddress,
-                    sensorReadingsModel.SensorClientAddress);
-
-                sensor.Active = true;
-                sensorRep.UpdateSensor(sensor);
-
-
-                var sensorReading = modelToEntityMap
-                    .MapSensorReadingModelToSensorReadingEntity(sensorReadingsModel, sensor.Id);
-
 
                 if (ModelState.IsValid == false)
                 {
                     return BadRequest();
                 }
+
+                var sensor = sensorRep.
+                    GetSensorByAddress(sensorReadingModel.SensorGatewayAddress,
+                    sensorReadingModel.SensorClientAddress);
+
+                var sensorType = typeRep.GetSensorTypeById(sensor.SensorTypeId);
+
+                if (sensorReadingModel.Value < sensorType.MinValue
+                    || sensorReadingModel.Value > sensorType.MaxValue)
+                {
+                    return BadRequest();
+                }
+
+                var sensorReading = modelToEntityMap
+                    .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel, sensor.Id);
+
+               
                 var reading = readingRep.AddSensorReading(sensorReading);
 
+                sensor.Active = true;
+                sensorRep.UpdateSensor(sensor);
+
                 return CreatedAtRoute("GetSensorReadingsBySensorAddressRoute", 
-                    new { gatewayAddress = sensorReadingsModel.SensorGatewayAddress,
-                    clientAddress = sensorReadingsModel.SensorClientAddress}, sensorReadingsModel);
+                    new { gatewayAddress = sensorReadingModel.SensorGatewayAddress,
+                    clientAddress = sensorReadingModel.SensorClientAddress}, sensorReadingModel);
 
             }
             catch (System.NullReferenceException)
