@@ -27,14 +27,26 @@ namespace SensorsManager.Web.Api.Controllers
             [HttpPost]
             public IHttpActionResult AddSensorType(SensorTypeModel sensorTypeModel)
             {
-                if (sensorTypeModel == null || ModelState.IsValid == false)
+                if (sensorTypeModel == null)
                 {
-                    return BadRequest();
+                    return BadRequest("You have sent an empty object.");
                 }
+                if (ModelState.IsValid == false)
+                {
+                    var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                    return BadRequest(message);
+            }
                 var measure = measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
                 if (measure == null)
                 {
-                    return NotFound();
+                    return Content(HttpStatusCode.NotFound,
+                       new
+                       {
+                         Message =  String.Format("There is no measurement with the id:{0}",
+                       sensorTypeModel.MeasureId)
+                       });
                 }
 
                 var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
@@ -51,7 +63,7 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorType = sensorTypeRep.GetSensorTypeById(id);
                if(sensorType == null)
                {
-                return new  HttpResponseMessage(HttpStatusCode.NotFound);
+                  return new  HttpResponseMessage(HttpStatusCode.NotFound);
                }
             var sensorTypeModel = modelFactory.CreateSensorTypeModel(sensorType);
             var response = Request.CreateResponse(HttpStatusCode.OK, sensorTypeModel);

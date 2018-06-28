@@ -11,6 +11,7 @@ namespace SensorsManager.Web.Api.Repository.Models
     {
         public Sensor MapSensorModelToSensorEntity(SensorModel2 sensorModel, Sensor sensor)
         {
+            sensor.Name = sensorModel.Name;
             sensor.UploadInterval = sensorModel.UploadInterval;
             sensor.BatchSize = sensorModel.BatchSize;
             return sensor;
@@ -20,6 +21,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         {
             return new Sensor
             {
+                Name = sensorModel.Name,
                 SensorTypeId = sensorModel.SensorTypeId,
                 ProductionDate = sensorModel.ProductionDate,
                 UploadInterval = sensorModel.UploadInterval,

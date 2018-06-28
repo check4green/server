@@ -26,9 +26,16 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
         {
-            if (newMeasureModel == null || ModelState.IsValid == false)
+            if (newMeasureModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object.");
+            }
+            if(ModelState.IsValid == false)
+            {
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                return BadRequest(message);
             }
             var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
             var addedMeasure = measureRep.AddMeasurement(newMeasure);
@@ -92,11 +99,16 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPut]
         public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measurementModel)
         {
-            if (measurementModel == null || 
-                ModelState.IsValid == false || 
-                measurementModel.Id != id)
+            if (measurementModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object.");
+            }
+            if (ModelState.IsValid == false)
+            {
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                return BadRequest(message);
             }
 
             var result = measureRep.GetMeasurementById(id);

@@ -84,6 +84,10 @@
     <Compile Include="Migrations\201806260736393_FixedTypo.Designer.cs">
       <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806260953548_AddedNameFieldsToSensor.cs" />
+    <Compile Include="Migrations\201806260953548_AddedNameFieldsToSensor.Designer.cs">
+      <DependentUpon>201806260953548_AddedNameFieldsToSensor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -120,6 +124,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201806260736393_FixedTypo.resx">
       <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806260953548_AddedNameFieldsToSensor.resx">
+      <DependentUpon>201806260953548_AddedNameFieldsToSensor.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

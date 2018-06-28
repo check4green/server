@@ -127,6 +127,7 @@
     <Compile Include="Repository\SensorReadingRepository.cs" />
     <Compile Include="Repository\SensorRepository.cs" />
     <Compile Include="Repository\SensorTypesRepository.cs" />
+    <Compile Include="Validations\SensorValidation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

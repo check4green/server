@@ -32,19 +32,27 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (sensorReadingModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object.");
             }
 
             if (ModelState.IsValid == false)
             {
-                return BadRequest();
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                    .SingleOrDefault().ErrorMessage
+                    .ToString();
+                return BadRequest(message);
             }
 
             var sensor = sensorRep.GetSensorById(sensorReadingModel.SensorId);
          
             if(sensor == null)
             {
-                return NotFound();
+                return Content(HttpStatusCode.NotFound,
+                   new
+                   {
+                     Message =  String.Format("There is no sensor with the id:{0}",
+                    sensorReadingModel.SensorId)
+                   });
             }
 
             var sensorType = typeRep.GetSensorTypeById(sensor.SensorTypeId);
@@ -52,7 +60,8 @@ namespace SensorsManager.Web.Api.Controllers
             if(sensorReadingModel.Value < sensorType.MinValue 
                 || sensorReadingModel.Value > sensorType.MaxValue)
             {
-                return BadRequest();
+                return BadRequest(String.Format("Reading must be between {0} and {1}",
+                    sensorType.MinValue, sensorType.MinValue));
             }
 
             var sensorReading = modelToEntityMap
@@ -73,14 +82,17 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (sensorReadingModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object");
             }
             try
             {
 
                 if (ModelState.IsValid == false)
                 {
-                    return BadRequest();
+                    var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                    return BadRequest(message);
                 }
 
                 var sensor = sensorRep.
@@ -92,7 +104,8 @@ namespace SensorsManager.Web.Api.Controllers
                 if (sensorReadingModel.Value < sensorType.MinValue
                     || sensorReadingModel.Value > sensorType.MaxValue)
                 {
-                    return BadRequest();
+                    return BadRequest(String.Format("Reading must be between {0} and {1}",
+                    sensorType.MinValue, sensorType.MinValue));
                 }
 
                 var sensorReading = modelToEntityMap
@@ -111,7 +124,9 @@ namespace SensorsManager.Web.Api.Controllers
             }
             catch (System.NullReferenceException)
             {
-                return NotFound();
+                return Content(HttpStatusCode.NotFound,
+                    String.Format("There is no sensor with the address:{0}/{1}",
+                    sensorReadingModel.SensorGatewayAddress, sensorReadingModel.SensorClientAddress));
             }
           
 

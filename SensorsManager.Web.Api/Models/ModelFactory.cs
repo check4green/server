@@ -10,6 +10,7 @@ namespace SensorsManager.Web.Api.Models
             return new SensorModel
             {
                 Id = sensor.Id,
+                Name = sensor.Name,
                 BatchSize = sensor.BatchSize,
                 ProductionDate = sensor.ProductionDate,
                 SensorTypeId = sensor.SensorTypeId,

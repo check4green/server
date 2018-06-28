@@ -8,6 +8,9 @@ using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System.Net.Http;
 using SensorsManager.Web.Api.Repository.Models;
+using System.Collections.Generic;
+using System.Web.Http.ModelBinding;
+using System.Web.Http.Results;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -28,42 +31,54 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (sensorModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object.");
             }
 
             if (ModelState.IsValid == false)
             {
-                return BadRequest();
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                    .SingleOrDefault().ErrorMessage
+                    .ToString();
+                return BadRequest(message);
             }
 
             
             if(sensorTypeRep.GetSensorTypeById(sensorModel.SensorTypeId) == null)
             {
-                return NotFound();
+                return Content(HttpStatusCode.NotFound,
+                    new { Message = String.Format("There is no sensor type with the id:{0}",
+                   sensorModel.SensorTypeId)});
             }
 
-            if(!sensorModel.AddressValidation(sensorModel.GatewayAddress)
-                || !sensorModel.AddressValidation(sensorModel.ClientAddress))
+
+            if (sensorModel.GatewayAddress == sensorModel.ClientAddress)
             {
-                return BadRequest();
+                return BadRequest("The gateway and sensor addresses must be distinct.");
             }
 
-            if(sensorModel.GatewayAddress == sensorModel.ClientAddress)
-            {
-                return BadRequest();
-            }
-
-            var compare = sensorRep.GetAllSensors()
+            var compareAddress = sensorRep.GetAllSensors()
                 .Where(p => 
                 p.ClientAddress == sensorModel.ClientAddress 
                 || p.GatewayAddress == sensorModel.ClientAddress
                 || p.ClientAddress == sensorModel.GatewayAddress).Count();
 
-            
+            var compareName = sensorRep.GetAllSensors()
+                .Where(p =>
+                p.Name == sensorModel.Name).Count();        
 
-            if (compare != 0)
+            if (compareAddress != 0)
             {
-                return Content(HttpStatusCode.Conflict,compare.ToString());
+                return Content(HttpStatusCode.Conflict,
+                  new { Message = String.Format("There already is a sensor with that address",
+                 sensorModel.SensorTypeId)});
+            }
+
+            if (compareName != 0)
+            {
+                // return BadRequest("There already is a sensor with that name.");
+                return Content(HttpStatusCode.Conflict,
+                    new { Message = String.Format("There already is a sensor with that name.",
+                   sensorModel.SensorTypeId)});
             }
 
 
@@ -222,15 +237,39 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPut]
         public IHttpActionResult UpdateSensor(int id, SensorModel2 sensorModel)
         {
-            if (sensorModel == null || ModelState.IsValid == false)
+            if (sensorModel == null)
             {
-                return BadRequest();
+                return BadRequest("You have sent an empty object");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                return BadRequest(message);
             }
             
+
             var sensor = sensorRep.GetSensorById(id);
             if (sensor == null)
             {
                 return NotFound();
+            }
+
+
+            var compareName = sensorRep.GetAllSensors()
+                .Where(p =>
+                p.Name == sensorModel.Name
+                && p.Id != id).Count();
+
+            if(compareName != 0)
+            {
+                return Content(HttpStatusCode.Conflict,
+                   new
+                   {
+                       Message = String.Format("There already is a sensor with that name")
+                   });
             }
 
             var result = modelToEntityMap
@@ -253,9 +292,32 @@ namespace SensorsManager.Web.Api.Controllers
                 return NotFound();
             }
 
+            if (!ModelState.IsValid)
+            {
+                var message = ModelState.SelectMany(m => m.Value.Errors)
+                   .SingleOrDefault().ErrorMessage
+                   .ToString();
+                return BadRequest(message);
+            }
+
+            var compareName = sensorRep.GetAllSensors()
+               .Where(p =>
+               p.Name == sensorModel.Name
+               && !String.Equals(p.GatewayAddress + p.ClientAddress
+               , gatewayAddress + clientAddress)).Count();
+
+            if (compareName != 0)
+            {
+                return Content(HttpStatusCode.Conflict,
+                   new
+                   {
+                       Message = String.Format("There already is a sensor with that name.")
+                   });
+            }
+
             var rezult = modelToEntityMap
                 .MapSensorModelToSensorEntity(sensorModel, sensor);
-            sensorRep.UpdateSensor(sensor);
+            sensorRep.UpdateSensor(rezult);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
