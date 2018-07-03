@@ -33,7 +33,7 @@ namespace SensorsManager.Web.Api.Controllers
             if(ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                 return BadRequest(message);
             }
@@ -61,14 +61,17 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("", Name = "GetAllMeasurementsRoute")]
         [HttpGet]
-        public HttpResponseMessage GetAllMeasurements(int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetAllMeasurements(int page = 1, int pageSize = 30)
         {
 
             var totalCount = measureRep.GetAllMeasurements().Count();
             var totalPages = Math.Ceiling((float)totalCount / pageSize);
 
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
             var measurements = measureRep.GetAllMeasurements()
-                .Skip(pageSize * page)
+                .Skip(pageSize * (page - 1))
                 .Take(pageSize).Select(p => modelFactory.CreateMeasurementModel(p))
                 .OrderBy(p => p.Id).ToList();
 
@@ -106,7 +109,7 @@ namespace SensorsManager.Web.Api.Controllers
             if (ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                 return BadRequest(message);
             }

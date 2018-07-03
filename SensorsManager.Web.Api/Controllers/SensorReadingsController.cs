@@ -38,7 +38,7 @@ namespace SensorsManager.Web.Api.Controllers
             if (ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                    .SingleOrDefault().ErrorMessage
+                    .FirstOrDefault().ErrorMessage
                     .ToString();
                 return BadRequest(message);
             }
@@ -55,17 +55,21 @@ namespace SensorsManager.Web.Api.Controllers
                    });
             }
 
-            var sensorType = typeRep.GetSensorTypeById(sensor.SensorTypeId);
-           
-            if(sensorReadingModel.Value < sensorType.MinValue 
-                || sensorReadingModel.Value > sensorType.MaxValue)
-            {
-                return BadRequest(String.Format("Reading must be between {0} and {1}",
-                    sensorType.MinValue, sensorType.MinValue));
-            }
+   
 
             var sensorReading = modelToEntityMap
                 .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
+
+            var lastReading = readingRep
+                .GetSensorReadingBySensorId(sensor.Id)
+                .OrderByDescending(p => p.InsertDate).FirstOrDefault().InsertDate;
+            
+
+            if ((sensorReading.InsertDate - lastReading).Seconds < 1)
+            {
+                return Content(HttpStatusCode.Conflict,
+                    new { Message = "Reading sent from multiple gateways." });
+            }
 
             var reading = readingRep.AddSensorReading(sensorReading);
 
@@ -90,7 +94,7 @@ namespace SensorsManager.Web.Api.Controllers
                 if (ModelState.IsValid == false)
                 {
                     var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                     return BadRequest(message);
                 }
@@ -99,19 +103,20 @@ namespace SensorsManager.Web.Api.Controllers
                     GetSensorByAddress(sensorReadingModel.SensorGatewayAddress,
                     sensorReadingModel.SensorClientAddress);
 
-                var sensorType = typeRep.GetSensorTypeById(sensor.SensorTypeId);
-
-                if (sensorReadingModel.Value < sensorType.MinValue
-                    || sensorReadingModel.Value > sensorType.MaxValue)
-                {
-                    return BadRequest(String.Format("Reading must be between {0} and {1}",
-                    sensorType.MinValue, sensorType.MinValue));
-                }
+                
 
                 var sensorReading = modelToEntityMap
                     .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel, sensor.Id);
 
-               
+                var lastReading = readingRep
+                .GetSensorReadingBySensorId(sensor.Id)
+                .OrderByDescending(p => p.InsertDate).FirstOrDefault().InsertDate;
+                if ((sensorReading.InsertDate - lastReading).Seconds < 1)
+                {
+                    return Content(HttpStatusCode.Conflict,
+                        new { Message = "Reading sent from multiple gateways." });
+                }
+
                 var reading = readingRep.AddSensorReading(sensorReading);
 
                 sensor.Active = true;
@@ -135,16 +140,17 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/sensors/{id:int}/readings", Name = "GetSensorReadingsBySensorIdRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorReadingsBySensorId(int id, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorReadingsBySensorId(int id, int page = 1, int pageSize = 30)
         {
             var totalCount = readingRep.GetSensorReadingBySensorId(id).Count();
             var totalPages = Math.Ceiling((float)totalCount / pageSize);
 
-
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
 
             var senorReadings = readingRep.GetSensorReadingBySensorId(id)
                                 .OrderByDescending(p => p.Id)
-                                .Skip(pageSize * page)
+                                .Skip(pageSize * (page - 1))
                                 .Take(pageSize)
                                 .Select(p => modelFactory.CreateSensorReadingModel(p))
                                 .ToList();
@@ -168,7 +174,7 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/sensors/address/{gatewayAddress}/{clientAddress}/readings", Name = "GetSensorReadingsBySensorAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorReadingsBySensorAddress(string gatewayAddress, string clientAddress, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorReadingsBySensorAddress(string gatewayAddress, string clientAddress, int page = 1, int pageSize = 30)
         {
             var id = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress).Id;
             if(id == 0)

@@ -34,7 +34,7 @@ namespace SensorsManager.Web.Api.Controllers
                 if (ModelState.IsValid == false)
                 {
                     var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                     return BadRequest(message);
             }
@@ -73,13 +73,16 @@ namespace SensorsManager.Web.Api.Controllers
 
             [Route("", Name = "GetAllSensorsTypeRoute")]
             [HttpGet]
-            public HttpResponseMessage GetAllSensorTypes(int page = 0, int pageSize = 30)
+            public HttpResponseMessage GetAllSensorTypes(int page = 1, int pageSize = 30)
             {
             var totalCount = sensorTypeRep.GetAllSensorTypes().Count();
             var totalPages = Math.Ceiling((float)totalCount / pageSize);
 
+            if(page < 1) { page = 1; }
+            if(pageSize < 1) { pageSize = 30; }
+
             var sensorTypes = sensorTypeRep.GetAllSensorTypes()
-                    .Skip(pageSize * page)
+                    .Skip(pageSize * (page - 1))
                     .Take(pageSize)
                     .OrderBy(p => p.Id)
                     .Select(p => modelFactory.CreateSensorTypeModel(p)).ToList();

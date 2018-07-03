@@ -37,7 +37,7 @@ namespace SensorsManager.Web.Api.Controllers
             if (ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                    .SingleOrDefault().ErrorMessage
+                    .FirstOrDefault().ErrorMessage
                     .ToString();
                 return BadRequest(message);
             }
@@ -111,14 +111,17 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("address/{gatewayAddress}", Name = "GetSensorByGatewayAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorsBygatewayAddress(string gatewayAddress, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorsBygatewayAddress(string gatewayAddress, int page = 1, int pageSize = 30)
         {
             var totalCount = sensorRep.GetSensosByGatewayAddress(gatewayAddress).Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
             var sensorModels = sensorRep.GetSensosByGatewayAddress(gatewayAddress)
                .OrderByDescending(p => p.Id)
-               .Skip(pageSize * page)
+               .Skip(pageSize * (page - 1))
                .Take(pageSize)
                .Select(p => modelFactory.CreateSensorModel(p))
                .ToList();
@@ -157,15 +160,18 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("", Name = "GetAllSensorsRoute")]
         [HttpGet]
-        public HttpResponseMessage GetAllSensors(int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetAllSensors(int page = 1, int pageSize = 30)
         {
 
             var totalCount = sensorRep.GetAllSensors().Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
             var sensorModels = sensorRep.GetAllSensors()
                 .OrderByDescending(p => p.Id)
-                .Skip(pageSize * page)
+                .Skip(pageSize * (page - 1))
                 .Take(pageSize)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
@@ -186,19 +192,27 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/users/{id}/sensors", Name = "GetSensorsByUser")]
         [HttpGet]
-        public HttpResponseMessage GetSensorsByUser(int id, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorsByUser(int id, int page = 1, int pageSize = 30)
         {
 
             var totalCount = sensorRep.GetAllSensors().Where(p => p.UserId == id).Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
             var sensors = sensorRep
                 .GetAllSensors().Where(p => p.UserId == id)
                 .OrderByDescending(p => p.Id)
-                .Skip(pageSize * page)
+                .Skip(pageSize * (page - 1))
                 .Take(pageSize)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
+
+            if (sensors.Count() == 0)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
 
             var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
             response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
@@ -211,17 +225,25 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/sensor-types/{id}/sensors", Name = "GetSensorsBySensorType")]
         [HttpGet]
-        public HttpResponseMessage GetSensorsBySensorType(int id, int page = 0, int pageSize = 30)
+        public HttpResponseMessage GetSensorsBySensorType(int id, int page = 1, int pageSize = 30)
         {
             var totalCount = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id).Count();
             var pageCount = Math.Ceiling((float)totalCount / pageSize);
 
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
             var sensors = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id)
                 .OrderByDescending(p => p.Id)
-                .Skip(pageSize * page)
+                .Skip(pageSize * (page - 1))
                 .Take(pageSize)
                 .Select(p => modelFactory.CreateSensorModel(p))
                 .ToList();
+
+            if (sensors.Count() == 0)
+            {
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }
 
             var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
             response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
@@ -245,7 +267,7 @@ namespace SensorsManager.Web.Api.Controllers
             if (!ModelState.IsValid)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                 return BadRequest(message);
             }
@@ -295,7 +317,7 @@ namespace SensorsManager.Web.Api.Controllers
             if (!ModelState.IsValid)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .SingleOrDefault().ErrorMessage
+                   .FirstOrDefault().ErrorMessage
                    .ToString();
                 return BadRequest(message);
             }

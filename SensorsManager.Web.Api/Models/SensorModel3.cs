@@ -9,8 +9,8 @@ namespace SensorsManager.Web.Api.Repository.Models
 {
     public class SensorModel3
     {
-        [Required, MaxLength(50)]
-        [RegularExpression("^[a-zA-Z0-9_-]*$",
+        
+        [Required, MaxLength(50),RegularExpression("^[a-zA-Z0-9_-]*$",
             ErrorMessage = "Only alphabets, numbers and the simbols: - or _ are allowed."),
             CustomValidation(typeof(SensorValidation), "NameValidation")]
         public string Name { get; set; }
