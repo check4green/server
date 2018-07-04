@@ -306,7 +306,11 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult UpdateSensorByAddress(string gatewayAddress, 
             string clientAddress, SensorModel2 sensorModel)
         {
-            
+            if (sensorModel == null)
+            {
+                return BadRequest("You have sent an empty object");
+            }
+
             var sensor = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
 
             if (sensor == null)

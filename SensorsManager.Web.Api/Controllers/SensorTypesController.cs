@@ -89,7 +89,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             if(totalCount == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
             }
 
             var response = Request.CreateResponse(HttpStatusCode.OK, sensorTypes);
