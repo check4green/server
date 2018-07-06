@@ -108,14 +108,8 @@ namespace SensorsManager.Web.Api.Controllers
                 var sensorReading = modelToEntityMap
                     .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel, sensor.Id);
 
-                var lastReading = readingRep
-                .GetSensorReadingBySensorId(sensor.Id)
-                .OrderByDescending(p => p.InsertDate).FirstOrDefault().InsertDate;
-                if ((sensorReading.InsertDate - lastReading).Seconds < 1)
-                {
-                    return Content(HttpStatusCode.Conflict,
-                        new { Message = "Reading sent from multiple gateways." });
-                }
+                
+            
 
                 var reading = readingRep.AddSensorReading(sensorReading);
 
@@ -127,7 +121,7 @@ namespace SensorsManager.Web.Api.Controllers
                     clientAddress = sensorReadingModel.SensorClientAddress}, sensorReadingModel);
 
             }
-            catch (System.NullReferenceException)
+            catch (NullReferenceException)
             {
                 return Content(HttpStatusCode.NotFound,
                     String.Format("There is no sensor with the address:{0}/{1}",

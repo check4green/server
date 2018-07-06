@@ -37,8 +37,9 @@ namespace SensorsManager.Web.Api.Controllers
             if (ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                    .FirstOrDefault().ErrorMessage
-                    .ToString();
+                   .FirstOrDefault().ErrorMessage
+                   .ToString();
+       
                 return BadRequest(message);
             }
 

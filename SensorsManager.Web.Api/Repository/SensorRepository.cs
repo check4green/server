@@ -13,7 +13,6 @@ namespace SensorsManager.Web.Api.Repository
         {
             using (DataContext db = new DataContext())
             {
-             
                 var res = db.Sensors.Add(sensor);
                 db.SaveChanges();
                 return res;
