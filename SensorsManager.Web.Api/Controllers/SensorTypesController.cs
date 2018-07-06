@@ -34,10 +34,9 @@ namespace SensorsManager.Web.Api.Controllers
                 if (ModelState.IsValid == false)
                 {
                     var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .FirstOrDefault().ErrorMessage
-                   .ToString();
-                    return BadRequest(message);
-            }
+                    .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+                return BadRequest(message);
+                 }
                 var measure = measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
                 if (measure == null)
                 {
@@ -115,9 +114,21 @@ namespace SensorsManager.Web.Api.Controllers
             [HttpPut]
             public IHttpActionResult UpdateSensorType(int id,SensorTypeModel sensorTypeModel)
             {
-                if (sensorTypeModel == null || ModelState.IsValid == false || id != sensorTypeModel.Id)
+                if (sensorTypeModel == null)
                 {
-                    return BadRequest();
+                    return BadRequest("You have sent an empty object.");
+                }
+
+                if (ModelState.IsValid == false)
+                {
+                    var message = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+
+                    return BadRequest(message);
+                }
+                if(id != sensorTypeModel.Id)
+                {
+                return BadRequest("The SensorTypeId and the address id do not match.");
                 }
 
                 var result = sensorTypeRep.GetSensorTypeById(id);

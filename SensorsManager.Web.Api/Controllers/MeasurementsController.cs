@@ -33,8 +33,8 @@ namespace SensorsManager.Web.Api.Controllers
             if(ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .FirstOrDefault().ErrorMessage
-                   .ToString();
+                   .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+
                 return BadRequest(message);
             }
             var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
@@ -109,8 +109,8 @@ namespace SensorsManager.Web.Api.Controllers
             if (ModelState.IsValid == false)
             {
                 var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .FirstOrDefault().ErrorMessage
-                   .ToString();
+                   .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+
                 return BadRequest(message);
             }
 

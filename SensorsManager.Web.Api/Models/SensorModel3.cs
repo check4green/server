@@ -17,7 +17,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         [Required]
         public int SensorTypeId { get; set; }
         [Required]
-        [Range(typeof(DateTime), "1/2/2004", "1/2/9999", ErrorMessage = "Value for {0} must be greater than {1}")]
+        [Range(typeof(DateTime), "1/2/2018", "1/2/9999", ErrorMessage = "Value for {0} must be greater than {1}")]
         public DateTime ProductionDate { get; set; }
         [Required]
         [Range(1, Double.PositiveInfinity)]

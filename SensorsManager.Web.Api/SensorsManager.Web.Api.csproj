@@ -135,6 +135,9 @@
     </None>
     <None Include="Properties\PublishProfiles\swiss-iot - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\swiss-iot - Web Deploy.pubxml" />
+    <Content Include="swiss-iot.PublishSettings">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
