@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Repository.Models;
+using SensorsManager.Web.Api.Validations;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -60,17 +62,17 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorReading = modelToEntityMap
                 .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
 
-            var lastReading = readingRep
-                .GetSensorReadingBySensorId(sensor.Id)
-                .OrderByDescending(p => p.InsertDate).FirstOrDefault().InsertDate;
+            //var lastReading = readingRep
+            //    .GetSensorReadingBySensorId(sensor.Id)
+            //    .OrderByDescending(p => p.InsertDate).FirstOrDefault().ReadingDate;
+
+         
+            //if ((sensorReading.ReadingDate - lastReading).TotalSeconds < 30)
+            //{
+            //    return Content(HttpStatusCode.Conflict,
+            //        new { Message = "Reading sent from multiple gateways." });
+            //}
             
-
-            if ((sensorReading.InsertDate - lastReading).Seconds < 1)
-            {
-                return Content(HttpStatusCode.Conflict,
-                    new { Message = "Reading sent from multiple gateways." });
-            }
-
             var reading = readingRep.AddSensorReading(sensorReading);
 
             sensor.Active = true;
@@ -84,6 +86,15 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingModel)
         {
+            var throttler = new Throttler("newreading");
+
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("To many requests"))
+                    );
+            }
             if (sensorReadingModel == null)
             {
                 return BadRequest("You have sent an empty object");
@@ -108,8 +119,9 @@ namespace SensorsManager.Web.Api.Controllers
                 var sensorReading = modelToEntityMap
                     .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel, sensor.Id);
 
+
                 
-            
+
 
                 var reading = readingRep.AddSensorReading(sensorReading);
 

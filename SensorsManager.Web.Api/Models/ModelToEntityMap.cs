@@ -65,7 +65,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         public Measurement MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel, Measurement measurement)
         {
             measurement.Description = measurementModel.Description;
-            measurement.UnitOfMeasure = measurement.UnitOfMeasure;
+            measurement.UnitOfMeasure = measurementModel.UnitOfMeasure;
 
             return measurement;
         }

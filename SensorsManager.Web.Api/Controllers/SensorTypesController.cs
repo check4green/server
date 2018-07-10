@@ -1,5 +1,4 @@
-﻿using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.Repository;
+﻿using SensorsManager.Web.Api.Repository;
 using System.Net;
 using System.Web.Http;
 using System.Linq;
