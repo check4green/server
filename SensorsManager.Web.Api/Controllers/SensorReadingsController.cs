@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Repository.Models;
+using SensorsManager.Web.Api.Validations;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -30,6 +30,16 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddSensorReadings(SensorReadingModel3 sensorReadingModel)
         {
+            var throttler = new Throttler("newreading", 1, 3);
+
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("To many requests"))
+                    );
+            }
+
             if (sensorReadingModel == null)
             {
                 return BadRequest("You have sent an empty object.");
@@ -59,23 +69,16 @@ namespace SensorsManager.Web.Api.Controllers
 
             var sensorReading = modelToEntityMap
                 .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel);
-
-            var lastReading = readingRep
-                .GetSensorReadingBySensorId(sensor.Id)
-                .OrderByDescending(p => p.InsertDate).FirstOrDefault().InsertDate;
             
-
-            if ((sensorReading.InsertDate - lastReading).Seconds < 1)
-            {
-                return Content(HttpStatusCode.Conflict,
-                    new { Message = "Reading sent from multiple gateways." });
-            }
-
             var reading = readingRep.AddSensorReading(sensorReading);
 
             sensor.Active = true;
             sensorRep.UpdateSensor(sensor);
 
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Limit",
+                    throttler.RequestLimit.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Timeout",
+                throttler.TimeoutInSeconds.ToString());
 
             return CreatedAtRoute("GetSensorReadingsBySensorIdRoute", new { id = reading.SensorId }, reading);
         }
@@ -84,6 +87,15 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingModel)
         {
+            var throttler = new Throttler("newreading",1,3);
+
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("To many requests"))
+                    );
+            }
             if (sensorReadingModel == null)
             {
                 return BadRequest("You have sent an empty object");
@@ -108,13 +120,19 @@ namespace SensorsManager.Web.Api.Controllers
                 var sensorReading = modelToEntityMap
                     .MapSensorReadingModelToSensorReadingEntity(sensorReadingModel, sensor.Id);
 
+
                 
-            
+
 
                 var reading = readingRep.AddSensorReading(sensorReading);
 
                 sensor.Active = true;
                 sensorRep.UpdateSensor(sensor);
+
+                HttpContext.Current.Response.AppendHeader("X-RateLimit-Limit", 
+                    throttler.RequestLimit.ToString());
+                HttpContext.Current.Response.AppendHeader("X-RateLimit-Timeout",
+                    throttler.TimeoutInSeconds.ToString());
 
                 return CreatedAtRoute("GetSensorReadingsBySensorAddressRoute", 
                     new { gatewayAddress = sensorReadingModel.SensorGatewayAddress,
@@ -134,15 +152,26 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("~/api/sensors/{id:int}/readings", Name = "GetSensorReadingsBySensorIdRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorReadingsBySensorId(int id, int page = 1, int pageSize = 30)
+        public IHttpActionResult GetSensorReadingsBySensorId(int id, int page = 1, int pageSize = 30)
         {
+            var throttler = new Throttler("getReadings",1, 2);
+
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("To many requests"))
+                    );
+            }
+
+
             var totalCount = readingRep.GetSensorReadingBySensorId(id).Count();
             var totalPages = Math.Ceiling((float)totalCount / pageSize);
 
             if (page < 1) { page = 1; }
             if (pageSize < 1) { pageSize = 30; }
 
-            var senorReadings = readingRep.GetSensorReadingBySensorId(id)
+            var sensorReadings = readingRep.GetSensorReadingBySensorId(id)
                                 .OrderByDescending(p => p.Id)
                                 .Skip(pageSize * (page - 1))
                                 .Take(pageSize)
@@ -151,32 +180,70 @@ namespace SensorsManager.Web.Api.Controllers
 
            if(totalCount == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return NotFound();
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, senorReadings);
-            
-            response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageCount", totalPages.ToString());
-            response.Headers.Add("X-Tracker-Pagination-SensorReadingsCount", totalCount.ToString());
 
-            
 
-            return response;
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", totalPages.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorReadingsCount", totalCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Limit", throttler.RequestLimit.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Timeout", throttler.TimeoutInSeconds.ToString());
+
+
+            return Ok(sensorReadings);
         }
 
         [Route("~/api/sensors/address/{gatewayAddress}/{clientAddress}/readings", Name = "GetSensorReadingsBySensorAddressRoute")]
         [HttpGet]
-        public HttpResponseMessage GetSensorReadingsBySensorAddress(string gatewayAddress, string clientAddress, int page = 1, int pageSize = 30)
+        public IHttpActionResult GetSensorReadingsBySensorAddress(string gatewayAddress, string clientAddress, int page = 1, int pageSize = 30)
         {
+
+            var throttler = new Throttler("getReadings", 1, 2);
+
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("To many requests"))
+                    );
+            }
+
             var id = sensorRep.GetSensorByAddress(gatewayAddress, clientAddress).Id;
             if(id == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return NotFound();
             }
-            return GetSensorReadingsBySensorId(id, page, pageSize);
-           
+
+            var totalCount = readingRep.GetSensorReadingBySensorId(id).Count();
+            var totalPages = Math.Ceiling((float)totalCount / pageSize);
+
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
+            var sensorReadings = readingRep.GetSensorReadingBySensorId(id)
+                                .OrderByDescending(p => p.Id)
+                                .Skip(pageSize * (page - 1))
+                                .Take(pageSize)
+                                .Select(p => modelFactory.CreateSensorReadingModel(p))
+                                .ToList();
+
+            if (totalCount == 0)
+            {
+                return NotFound();
+            }
+
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", totalPages.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorReadingsCount", totalCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Limit", throttler.RequestLimit.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-Timeout", throttler.TimeoutInSeconds.ToString());
+
+            return Ok(sensorReadings);
+
         }
     }
 }

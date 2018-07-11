@@ -16,8 +16,10 @@ namespace SensorsManager.Web.Api.Repository.Models
             CustomValidation(typeof(SensorValidation), "NameValidation")]
         public string Name { get; set; }
         [Required]
+        [Range(1, Double.PositiveInfinity)]
         public int UploadInterval { get; set; }
         [Required]
+        [Range(1, Double.PositiveInfinity)]
         public int BatchSize { get; set; }
     }
 }
