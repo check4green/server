@@ -92,17 +92,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public void DeleteSensorByAdress(string gatewayAdress, string clientAdress)
-        {
-            using (DataContext db = new DataContext())
-            {
-                var id = db.Sensors.Where(p =>
-                p.GatewayAddress == gatewayAdress && p.ClientAddress == clientAdress)
-                .SingleOrDefault().Id;
-
-                DeleteSensor(id);
-            }
-        }
+      
 
 
         public void UpdateSensor(Sensor sensor)

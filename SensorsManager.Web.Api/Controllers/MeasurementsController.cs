@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using SensorsManager.DataLayer;
-using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository.Models;
+using SensorsManager.Web.Api.Validations;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -26,43 +26,65 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
         {
+            var throttler = new Throttler("newreading", 1, 2);
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("Too many requests."))
+                    );
+            }
+
+
             if (newMeasureModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
             if(ModelState.IsValid == false)
             {
-                var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
 
-                return BadRequest(message);
+                if (error == null)
+                {
+                    return BadRequest();
+                }
+
+                return BadRequest(error.ErrorMessage);
             }
             var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
             var addedMeasure = measureRep.AddMeasurement(newMeasure);
+
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
+                    throttler.RequestCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
+                               throttler.ExpiresAt.ToString());
             return CreatedAtRoute("GetMeasurementByIdRoute", new { id = addedMeasure.Id }, addedMeasure);
         }
 
-
         [Route("{id:int}", Name = "GetMeasurementByIdRoute")]
         [HttpGet]
-        public HttpResponseMessage GetMeasurementById(int id)
+        public IHttpActionResult GetMeasurementById(int id)
         {
-
+       
             var measurement = measureRep.GetMeasurementById(id);
             if (measurement == null)
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return NotFound();
             }
 
             var measurementModel = modelFactory.CreateMeasurementModel(measurement);
-            var response = Request.CreateResponse(HttpStatusCode.OK, measurementModel);
-            return response;
+
+           
+            return Ok(measurementModel);
         }
 
         [Route("", Name = "GetAllMeasurementsRoute")]
         [HttpGet]
-        public HttpResponseMessage GetAllMeasurements(int page = 1, int pageSize = 30)
+        public IHttpActionResult GetAllMeasurements(int page = 1, int pageSize = 30)
         {
+    
 
             var totalCount = measureRep.GetAllMeasurements().Count();
             var totalPages = Math.Ceiling((float)totalCount / pageSize);
@@ -77,41 +99,49 @@ namespace SensorsManager.Web.Api.Controllers
 
             if(totalCount == 0)
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound);
+                return Ok(measurements);
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, measurements);
-            response.Headers.Add("X-Tracker-Pagination-Page", page.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageSize", pageSize.ToString());
-            response.Headers.Add("X-Tracker-Pagination-PageCount", totalPages.ToString());
-            response.Headers.Add("X-Tracker-Pagination-SensorMeasurementCount", totalCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", totalPages.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorMeasurementCount", totalCount.ToString());
+           
 
-            return response;
+            return Ok(measurements);
 
-        }
-
-        [Route("{id:int}", Name = "DeleteMeasurementRoute")]
-        [HttpDelete]
-        public HttpResponseMessage DeleteMeasurement(int id)
-        {
-            measureRep.DeleteMeasurement(id);
-            return new HttpResponseMessage(HttpStatusCode.NoContent);
         }
 
         [Route("{id:int}")]
         [HttpPut]
         public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measurementModel)
         {
+
+            var throttler = new Throttler("updateMeasurement", 1, 2);
+            if (throttler.RequestShouldBeThrottled())
+            {
+                return new System.Web.Http.Results.ResponseMessageResult(
+                        Request.CreateResponse((HttpStatusCode)429,
+                        new HttpError("Too many requests."))
+                    );
+            }
+
             if (measurementModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
             if (ModelState.IsValid == false)
             {
-                var message = ModelState.SelectMany(m => m.Value.Errors)
-                   .Where(m => m.ErrorMessage != "").FirstOrDefault().ErrorMessage.ToString();
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
 
-                return BadRequest(message);
+                if (error == null)
+                {
+                    return BadRequest();
+                }
+
+                return BadRequest(error.ErrorMessage);
             }
 
             var result = measureRep.GetMeasurementById(id);
@@ -122,7 +152,19 @@ namespace SensorsManager.Web.Api.Controllers
 
             var measurement = modelToEntityMap.MapMeasurementModelToMeasurementEntity(measurementModel, result);
             measureRep.UpdateMeasurement(measurement);
+
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
+                     throttler.RequestCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
+                               throttler.ExpiresAt.ToString());
             return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [Route("{id:int}", Name = "DeleteMeasurementRoute")]
+        [HttpDelete]
+        public void DeleteMeasurement(int id)
+        {
+            measureRep.DeleteMeasurement(id);
         }
 
     }

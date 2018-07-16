@@ -128,6 +128,8 @@
     <Compile Include="Repository\SensorRepository.cs" />
     <Compile Include="Repository\SensorTypesRepository.cs" />
     <Compile Include="Validations\SensorValidation.cs" />
+    <Compile Include="Throttling\ThrottleFilter.cs" />
+    <Compile Include="Throttling\Throttler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -175,7 +177,9 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59508</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:32333/</IISUrl>
+          <IISUrl>http://localhost:32332/</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost:32332/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
