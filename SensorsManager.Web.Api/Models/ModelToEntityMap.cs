@@ -17,7 +17,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             return sensor;
         }
 
-        public Sensor MapSensorModelToSensorEntity(SensorModel3 sensorModel)
+        public Sensor MapSensorModelToSensorEntity(SensorModel3 sensorModel, int userId)
         {
             return new Sensor
             {
@@ -28,7 +28,7 @@ namespace SensorsManager.Web.Api.Repository.Models
                 BatchSize = sensorModel.BatchSize,
                 GatewayAddress = sensorModel.GatewayAddress.ToLower(),
                 ClientAddress = sensorModel.ClientAddress.ToLower(),
-                UserId = 1
+                UserId = userId
             };
         }
        public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModel2 sensorReadingModel,int sensorId)
@@ -65,7 +65,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         public Measurement MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel, Measurement measurement)
         {
             measurement.Description = measurementModel.Description;
-            measurement.UnitOfMeasure = measurement.UnitOfMeasure;
+            measurement.UnitOfMeasure = measurementModel.UnitOfMeasure;
 
             return measurement;
         }
@@ -93,6 +93,34 @@ namespace SensorsManager.Web.Api.Repository.Models
             sensorType.Multiplier = sensorTypeModel.Multiplier;
 
             return sensorType;
+        }
+
+    
+        public User MapUserModel2ToUserEntity(UserModel2 userModel)
+        {
+            return new User
+            {
+                FirstName = userModel.FirstName,
+                LastName = userModel.LastName,
+                Email = userModel.Email,
+                Password = userModel.Password,
+                CompanyName = userModel.CompanyName,
+                Country = userModel.Country,
+                PhoneNumber = userModel.PhoneNumber
+            };
+        }
+
+        public User MapUserModel2ToUserEntity(UserModel2 userModel, User result)
+        {
+            result.FirstName = userModel.FirstName;
+            result.LastName = userModel.LastName;
+            result.Email = userModel.Email;
+            result.Password = userModel.Password;
+            result.CompanyName = userModel.CompanyName;
+            result.Country = userModel.Country;
+            result.PhoneNumber = userModel.PhoneNumber;
+
+            return result;
         }
     }
 }

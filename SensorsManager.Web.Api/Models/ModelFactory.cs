@@ -54,5 +54,17 @@ namespace SensorsManager.Web.Api.Models
             };
         }
 
+        public UserModel CreateUserModel(User user)
+        {
+            return new UserModel
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                CompanyName = user.CompanyName,
+                Country = user.Country,
+                PhoneNumber = user.PhoneNumber
+            };
+        }
     }
 }

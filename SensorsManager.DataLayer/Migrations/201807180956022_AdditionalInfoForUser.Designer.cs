@@ -7,13 +7,13 @@ namespace SensorsManager.DataLayer.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class AddedNameFieldsToSensor : IMigrationMetadata
+    public sealed partial class AdditionalInfoForUser : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AddedNameFieldsToSensor));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(AdditionalInfoForUser));
         
         string IMigrationMetadata.Id
         {
-            get { return "201806260953548_AddedNameFieldsToSensor"; }
+            get { return "201807180956022_AdditionalInfoForUser"; }
         }
         
         string IMigrationMetadata.Source
