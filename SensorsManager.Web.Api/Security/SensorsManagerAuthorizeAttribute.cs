@@ -21,7 +21,7 @@ namespace SensorsManager.Web.Api.Security
             if(authHeader != null)
             {
                 if (authHeader.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase)
-                    && !string.IsNullOrWhiteSpace(authHeader.Parameter))
+                    && !string.IsNullOrWhiteSpace(authHeader.Parameter) && (authHeader.Parameter.Length % 4 == 0))
                 {
                     var credentials = new Credentials(authHeader.Parameter);
 
@@ -40,9 +40,9 @@ namespace SensorsManager.Web.Api.Security
 
         private void HandleUnauthorized(HttpActionContext actionContext)
         {
-            actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized);
+            actionContext.Response = actionContext.Request
+                .CreateResponse(HttpStatusCode.Unauthorized, new { Message = "Authentification failed!" });
             actionContext.Response.Headers.Add("WWW-Authenticate", "Basic Scheme='SensorsManager' location='.../api/users'");
-
         }
     }
 }

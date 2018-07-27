@@ -68,7 +68,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-       public void UpdateMeasurement(User user)
+       public void UpdateUser(User user)
         {
             using (DataContext db = new DataContext())
             {

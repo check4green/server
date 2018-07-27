@@ -270,7 +270,6 @@ namespace SensorsManager.Web.Api.Controllers
                 return NotFound();
             }
 
-            var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
             HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
             HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
             HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", pageCount.ToString());
@@ -279,6 +278,44 @@ namespace SensorsManager.Web.Api.Controllers
 
             return Ok(sensors);
         }
+
+        [SensorsManagerAuthorize]
+        [Route("~/api/sensor-types/{id}/users/sensors")]
+        [HttpGet]
+        public IHttpActionResult GetSensorsSensorTypeAndUser(int id, int page = 1, int pageSize = 30)
+        {
+            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
+            var userId = userRep.GetUser(credentials.Email, credentials.Password).Id;
+            var totalCount = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id &&
+            p.UserId == userId).Count();
+
+            var pageCount = Math.Ceiling((float)totalCount / pageSize);
+
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
+            var sensors = sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id && p.UserId == userId)
+                .OrderByDescending(p => p.Id)
+                .Skip(pageSize * (page - 1))
+                .Take(pageSize)
+                .Select(p => modelFactory.CreateSensorModel(p))
+                .ToList();
+
+            if (sensors.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            var response = Request.CreateResponse(HttpStatusCode.OK, sensors);
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", pageCount.ToString());
+            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorCount", totalCount.ToString());
+
+            return Ok(sensors);
+
+        }
+  
 
         [SensorsManagerAuthorize]
         [Route("{id:int}")]

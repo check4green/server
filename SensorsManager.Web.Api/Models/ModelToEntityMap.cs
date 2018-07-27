@@ -104,7 +104,7 @@ namespace SensorsManager.Web.Api.Repository.Models
                 LastName = userModel.LastName,
                 Email = userModel.Email,
                 Password = userModel.Password,
-                CompanyName = userModel.CompanyName,
+                CompanyName = userModel.CompanyName != null? userModel.CompanyName: "",
                 Country = userModel.Country,
                 PhoneNumber = userModel.PhoneNumber
             };
@@ -116,7 +116,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             result.LastName = userModel.LastName;
             result.Email = userModel.Email;
             result.Password = userModel.Password;
-            result.CompanyName = userModel.CompanyName;
+            result.CompanyName = userModel.CompanyName != null? userModel.CompanyName: "";
             result.Country = userModel.Country;
             result.PhoneNumber = userModel.PhoneNumber;
 

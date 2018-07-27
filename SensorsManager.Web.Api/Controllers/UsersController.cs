@@ -5,6 +5,8 @@ using SensorsManager.Web.Api.Security;
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
+using System.Runtime.Caching;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -19,6 +21,7 @@ namespace SensorsManager.Web.Api.Controllers
         UserRepository userRep = new UserRepository();
         ModelFactory modelFactory = new ModelFactory();
         ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        MemoryCache memCache = MemoryCache.Default;
 
         [Route("", Name = "AddUserRoute")]
         [HttpPost]
@@ -63,6 +66,8 @@ namespace SensorsManager.Web.Api.Controllers
 
         }
 
+       
+
         [SensorsManagerAuthorize]
         [Route("", Name = "GetUser")]
         [HttpGet]
@@ -81,9 +86,17 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [SensorsManagerAuthorize]
+        [Route("logIn", Name = "LogIn")]
+        [HttpGet]
+        public IHttpActionResult LogIn()
+        {
+            return Ok(new { Message = "Authorization succeded!" });
+        }
+
+        [SensorsManagerAuthorize]
         [Route("")]
         [HttpPut]
-        public IHttpActionResult UpdateMeasurement(UserModel2 userModel)
+        public IHttpActionResult UpdateUser(UserModel2 userModel)
         {
             if (userModel == null)
             {
@@ -124,15 +137,82 @@ namespace SensorsManager.Web.Api.Controllers
             }
 
             var user = modelToEntityMap.MapUserModel2ToUserEntity(userModel, result);
-            userRep.UpdateMeasurement(user);
+            userRep.UpdateUser(user);
 
             return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [Route("getCode")]
+        [HttpPut]
+        public IHttpActionResult SendResetPasswordCode(UserModel_Email userModel)
+        {
+
+            if (userModel == null)
+            {
+                return BadRequest("You have sent an empty object.");
+            }
+            if (ModelState.IsValid == false)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
+
+                if (error == null)
+                {
+                    return BadRequest();
+                }
+
+                return BadRequest(error.ErrorMessage);
+            }
+            var user = userRep.GetAllUsers().Where(u => u.Email == userModel.Email).SingleOrDefault();
+            if (user == null)
+            {
+                return Content(HttpStatusCode.NotFound,
+                    new { Message = $"There is no user with the email {userModel.Email} ." });
+            }
+            try
+            {
+                Random random = new Random();
+                var code = random.Next(1000, 9999).ToString();
+                memCache.Add(code, code, DateTimeOffset.UtcNow.AddMinutes(5));
+                var mailSender = new MailSender();
+                mailSender.SendMail(userModel.Email, "Reset password",
+                    $"Here is your password reset code: {code}");
+                return Ok(new { Message = "Check your mail, you have been sent a reset code." });
+            }
+            catch
+            {
+                return Content(HttpStatusCode.ExpectationFailed,
+                    new { Message = "Failed to send mail. Please try again." });
+            }
+        }
+
+        [Route("resetPassword")]
+        [HttpPut]
+        public IHttpActionResult ResetPassowrd(UserModel_Code userModel)
+        {
+            var code = memCache.Get(userModel.Code);
+            if(code == null)
+            {
+                return Content(HttpStatusCode.Unauthorized,
+                    new { Message = "Invalid reset code!" });
+            }
+            var user = userRep.GetAllUsers()
+                .Where(u => u.Email == userModel.Email).SingleOrDefault();
+            if(user == null)
+            {
+                return Content(HttpStatusCode.NotFound,
+                    new { Message = $"There is no user with the email {userModel.Email}" });
+            }
+            user.Password = userModel.Password;
+            userRep.UpdateUser(user);
+            return Ok(new { Message = "Password has been reset." });
         }
 
         [SensorsManagerAuthorize]
         [Route("")]
         [HttpDelete]
-        public void DeleteMeasurement()
+        public void DeleteUser()
         {
             var credentials = new Credentials(Request.Headers.Authorization.Parameter);
             userRep.DeleteUser(credentials.Email, credentials.Password);

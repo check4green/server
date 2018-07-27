@@ -12,8 +12,12 @@ namespace SensorsManager.Web.Api.Security
         {
             var encoding = Encoding.GetEncoding("iso-8859-1");
             var credentials = encoding.GetString(Convert.FromBase64String(rawCredentials));
-            var split = credentials.Split(':');
+            SetCredentials(credentials);
+        }
 
+        private void SetCredentials(string credentials)
+        {
+            var split = credentials.Split(':');
             Email = split[0];
             Password = split[1];
         }

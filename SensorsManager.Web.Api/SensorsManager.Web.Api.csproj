@@ -67,6 +67,7 @@
     <Reference Include="System.Net.Http.Formatting, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.6\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web.Cors, Version=5.2.6.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.6\lib\net45\System.Web.Cors.dll</HintPath>
     </Reference>
@@ -125,6 +126,8 @@
     <Compile Include="Models\SensorTypeModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Models\UserModel2.cs" />
+    <Compile Include="Models\UserModel_Code.cs" />
+    <Compile Include="Models\UserModel_Email.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\MeasurementRepository.cs" />
     <Compile Include="Repository\SensorReadingRepository.cs" />
@@ -132,6 +135,7 @@
     <Compile Include="Repository\SensorTypesRepository.cs" />
     <Compile Include="Repository\UserRepository.cs" />
     <Compile Include="Security\Credentials.cs" />
+    <Compile Include="Security\MailSender.cs" />
     <Compile Include="Security\SensorsManagerAuthorizeAttribute.cs" />
     <Compile Include="Security\UserLogIn.cs" />
     <Compile Include="Validations\SensorValidation.cs" />
