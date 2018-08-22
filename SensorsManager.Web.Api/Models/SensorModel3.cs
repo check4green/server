@@ -17,10 +17,10 @@ namespace SensorsManager.Web.Api.Repository.Models
         [Range(typeof(DateTime), "1/2/2018", "1/2/9999", ErrorMessage = "Value for {0} must be greater than {1}")]
         public DateTime ProductionDate { get; set; }
         [Required]
-        [Range(1, Double.PositiveInfinity)]
+        [Range(1, 262975)]
         public int UploadInterval { get; set; }
         [Required]
-        [Range(1, Double.PositiveInfinity)]
+        [Range(1, 1000)]
         public int BatchSize { get; set; }
         [Required, MaxLength(4)]
         [RegularExpression("0x+[a-fA-F0-9]+[a-fA-F0-9]", 

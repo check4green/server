@@ -62,23 +62,33 @@ namespace SensorsManager.Web.Api.Controllers
                    sensorModel.SensorTypeId)});
             }
 
-
             if (sensorModel.GatewayAddress == sensorModel.ClientAddress)
             {
                 return BadRequest("The gateway and client addresses must be distinct.");
             }
 
-            var compareAddress = sensorRep.GetAllSensors()
-                .Where(p => 
-                p.ClientAddress == sensorModel.ClientAddress 
-                || p.GatewayAddress == sensorModel.ClientAddress
-                || p.ClientAddress == sensorModel.GatewayAddress).Count();
-
-            if (compareAddress != 0)
+            if(sensorRep.GetAllSensors().Where(p => p.ClientAddress == sensorModel.ClientAddress).Count()
+                != 0)
             {
                 return Content(HttpStatusCode.Conflict,
-                  new { Message = String.Format("There already is a sensor with that address.",
+                  new { Message = String.Format("There already is a sensor with that client address.",
                  sensorModel.SensorTypeId)});
+            }
+
+            if(sensorRep.GetAllSensors().Where(p => p.GatewayAddress == sensorModel.ClientAddress).Count()
+                != 0)
+            {
+                return Content(HttpStatusCode.Conflict,
+                  new{ Message = String.Format("Your client address matches an existing gateway address.",
+                 sensorModel.SensorTypeId)});
+            }
+
+            if(sensorRep.GetAllSensors().Where(p => p.ClientAddress== sensorModel.GatewayAddress).Count()
+                != 0)
+            {
+                return Content(HttpStatusCode.Conflict,
+                  new{ Message = String.Format("Your gateway address matches an existing client address.",
+                 sensorModel.SensorTypeId) });
             }
 
             var compareName = sensorRep.GetAllSensors()
