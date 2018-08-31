@@ -2,34 +2,35 @@
 using System.Collections.Concurrent;
 
 namespace SensorsManager.Web.Api.Throttling
-{ 
+{
     public class Throttler
     {
-        private int _requestLimit;
-        private int _timeoutInSeconds;
-       
+        public int RequestLimit { get; private set; }
+        public int RequestsRemaining { get; private set; }
+        public int ExpiresAt
+        {
+            get
+            {
+                return (_cache[_key].ExpiresAt - DateTime.UtcNow).Seconds;
+            }
+        }
+        public DateTime WindowResetDate { get; private set; }
         private static ConcurrentDictionary<string, ThrottleInfo> _cache =
             new ConcurrentDictionary<string, ThrottleInfo>();
 
-        public string ThrottleGroup { get; set; }
-        public int RequestLimit { get => _requestLimit; }
-        public int RequestCount { get => _cache[ThrottleGroup].RequestCount; }
-        public int ExpiresAt { get
-            {
-                return (_cache[ThrottleGroup].ExpiresAt - DateTime.UtcNow).Seconds;
-            } }
-       
+        private string _key;
+        private int _timeoutInSeconds;
 
-        public Throttler(string key, int requestLimit = 1, int timeoutInSeconds = 2)
+        public Throttler(string key, int requestLimit = 5, int timeoutInSeconds = 10)
         {
-            _requestLimit = requestLimit;
+            RequestLimit = requestLimit;
             _timeoutInSeconds = timeoutInSeconds;
-            ThrottleGroup  = key;
+            _key = key;
         }
 
         public bool RequestShouldBeThrottled()
         {
-            ThrottleInfo throttleInfo = _cache.ContainsKey(ThrottleGroup ) ? _cache[ThrottleGroup ] : null;
+            ThrottleInfo throttleInfo = _cache.ContainsKey(_key) ? _cache[_key] : null;
 
             if (throttleInfo == null || throttleInfo.ExpiresAt <= DateTime.Now)
             {
@@ -40,24 +41,21 @@ namespace SensorsManager.Web.Api.Throttling
                 };
             };
 
+            WindowResetDate = throttleInfo.ExpiresAt;
 
-            if (!(throttleInfo.RequestCount >= _requestLimit))
-            {
-                throttleInfo.RequestCount++;
-            }
-     
-            _cache[ThrottleGroup] = throttleInfo;
+            throttleInfo.RequestCount++;
 
-            return (throttleInfo.RequestCount > _requestLimit);
+            _cache[_key] = throttleInfo;
+
+            RequestsRemaining = Math.Max(RequestLimit - throttleInfo.RequestCount, 0);
+
+            return (throttleInfo.RequestCount > RequestLimit);
         }
-
-
 
         private class ThrottleInfo
         {
             public DateTime ExpiresAt { get; set; }
             public int RequestCount { get; set; }
         }
-
     }
 }

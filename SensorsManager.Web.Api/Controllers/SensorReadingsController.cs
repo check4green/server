@@ -25,7 +25,7 @@ namespace SensorsManager.Web.Api.Controllers
         ModelFactory modelFactory = new ModelFactory();
         ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
-        [ThrottleFilter(1,5,"readings")]
+   
         [Route("~/api/readings")]
         [HttpPost]
         public IHttpActionResult AddSensorReadings(SensorReadingModel3 sensorReadingModel)
@@ -79,7 +79,7 @@ namespace SensorsManager.Web.Api.Controllers
             return CreatedAtRoute("GetSensorReadingsBySensorIdRoute", new { id = reading.SensorId }, reading);
         }
         
-        [ThrottleFilter(1,3,"newReadings")]
+        
         [Route("~/api/readings/address")]
         [HttpPost]
         public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingModel)
@@ -131,8 +131,12 @@ namespace SensorsManager.Web.Api.Controllers
                 sensor.Active = true;
                 sensorRep.UpdateSensor(sensor);
 
-                HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                   throttler.RequestCount.ToString());
+                HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestLimit",
+                   throttler.RequestLimit.ToString());
+
+                HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestsRemaining",
+                  throttler.RequestsRemaining.ToString());
+
                 HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
                                    throttler.ExpiresAt.ToString());
 

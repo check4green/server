@@ -139,7 +139,6 @@
     <Compile Include="Security\SensorsManagerAuthorizeAttribute.cs" />
     <Compile Include="Security\UserLogIn.cs" />
     <Compile Include="Validations\SensorValidation.cs" />
-    <Compile Include="Throttling\ThrottleFilter.cs" />
     <Compile Include="Throttling\Throttler.cs" />
   </ItemGroup>
   <ItemGroup>

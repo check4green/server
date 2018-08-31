@@ -28,15 +28,8 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddSensorType(SensorTypeModel sensorTypeModel)
         {
-            var throttler = new Throttler("newSensorType", 1, 3);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new System.Web.Http.Results.ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
-
+          
+        
             if (sensorTypeModel == null)
             {
                 return BadRequest("You have sent an empty object.");
@@ -64,10 +57,7 @@ namespace SensorsManager.Web.Api.Controllers
                    sensorTypeModel.MeasureId)
                    });
             }
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                    throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
+       
             var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
             var addedSensorType = sensorTypeRep.AddSensorType(sensorType);
 
@@ -125,14 +115,7 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPut]
         public IHttpActionResult UpdateSensorType(int id, SensorTypeModel sensorTypeModel)
         {
-            var throttler = new Throttler("updateSensorType", 1, 2);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new System.Web.Http.Results.ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
+         
 
             if (sensorTypeModel == null)
             {
@@ -167,10 +150,6 @@ namespace SensorsManager.Web.Api.Controllers
 
             sensorTypeRep.UpdateSensorType(sensorType);
 
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                    throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
             return StatusCode(HttpStatusCode.NoContent);
         }
 

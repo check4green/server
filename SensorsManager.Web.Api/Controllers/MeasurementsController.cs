@@ -27,14 +27,7 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPost]
         public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
         {
-            var throttler = new Throttler("newreading", 1, 2);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new System.Web.Http.Results.ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
+     
 
 
             if (newMeasureModel == null)
@@ -57,10 +50,7 @@ namespace SensorsManager.Web.Api.Controllers
             var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
             var addedMeasure = measureRep.AddMeasurement(newMeasure);
 
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                    throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
+           
             return CreatedAtRoute("GetMeasurementByIdRoute", new { id = addedMeasure.Id }, addedMeasure);
         }
 
@@ -118,14 +108,7 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measurementModel)
         {
 
-            var throttler = new Throttler("updateMeasurement", 1, 2);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new System.Web.Http.Results.ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
+           
 
             if (measurementModel == null)
             {
@@ -154,10 +137,7 @@ namespace SensorsManager.Web.Api.Controllers
             var measurement = modelToEntityMap.MapMeasurementModelToMeasurementEntity(measurementModel, result);
             measureRep.UpdateMeasurement(measurement);
 
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                     throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
+           
             return StatusCode(HttpStatusCode.NoContent);
         }
 

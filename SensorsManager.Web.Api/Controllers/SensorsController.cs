@@ -28,7 +28,6 @@ namespace SensorsManager.Web.Api.Controllers
       
 
         [SensorsManagerAuthorize]
-        [ThrottleFilter(1,1,"AddSensor")]
         [Route("", Name = "AddSensorRoute")]
         [HttpPost]
         public IHttpActionResult AddSensor(SensorModel3 sensorModel)
@@ -332,14 +331,7 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpPut]
         public IHttpActionResult UpdateSensor(int id, SensorModel2 sensorModel)
         {
-            var throttler = new Throttler("updateSensor", 1, 3);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
+         
 
             if (sensorModel == null)
             {
@@ -386,10 +378,7 @@ namespace SensorsManager.Web.Api.Controllers
                 .MapSensorModelToSensorEntity(sensorModel, sensor);
 
             sensorRep.UpdateSensor(result);
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                    throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
+        
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -399,14 +388,7 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult UpdateSensorByAddress(string gatewayAddress, 
             string clientAddress, SensorModel2 sensorModel)
         {
-            var throttler = new Throttler("updateSensor", 1, 3);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return new ResponseMessageResult(
-                        Request.CreateResponse((HttpStatusCode)429,
-                        new HttpError("Too many requests."))
-                    );
-            }
+           
 
             if (sensorModel == null)
             {
@@ -453,10 +435,6 @@ namespace SensorsManager.Web.Api.Controllers
                 .MapSensorModelToSensorEntity(sensorModel, sensor);
             sensorRep.UpdateSensor(rezult);
 
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestCount",
-                    throttler.RequestCount.ToString());
-            HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                               throttler.ExpiresAt.ToString());
             return StatusCode(HttpStatusCode.NoContent);
         }
 
