@@ -5,7 +5,7 @@ using System.Web;
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class SensorReadingModel
+    public class SensorReadingModelGet
     {
         public int Id { get; set; }
         public decimal Value { get; set; }

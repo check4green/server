@@ -9,15 +9,17 @@ namespace SensorsManager.Web.Api.Repository.Models
 {
     public class ModelToEntityMap
     {
-        public Sensor MapSensorModelToSensorEntity(SensorModel2 sensorModel, Sensor sensor)
+        public Sensor MapSensorModelToSensorEntity(SensorModelPut sensorModel, Sensor sensor)
         {
             sensor.Name = sensorModel.Name;
             sensor.UploadInterval = sensorModel.UploadInterval;
             sensor.BatchSize = sensorModel.BatchSize;
+            sensor.Latitude = sensorModel.Latitude;
+            sensor.Longitude = sensorModel.Longitude;
             return sensor;
         }
 
-        public Sensor MapSensorModelToSensorEntity(SensorModel3 sensorModel, int userId)
+        public Sensor MapSensorModelToSensorEntity(SensorModelPost sensorModel, int userId)
         {
             return new Sensor
             {
@@ -28,10 +30,12 @@ namespace SensorsManager.Web.Api.Repository.Models
                 BatchSize = sensorModel.BatchSize,
                 GatewayAddress = sensorModel.GatewayAddress.ToLower(),
                 ClientAddress = sensorModel.ClientAddress.ToLower(),
+                Latitude = sensorModel.Latitude,
+                Longitude = sensorModel.Longitude,
                 UserId = userId
             };
         }
-       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModel2 sensorReadingModel,int sensorId)
+       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPostAddres sensorReadingModel,int sensorId)
         {
             return new SensorReading
             {
@@ -42,7 +46,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             };
         }
 
-       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModel3 sensorReadingModel)
+       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPostId sensorReadingModel)
         {
             return new SensorReading
             {
@@ -96,7 +100,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         }
 
     
-        public User MapUserModel2ToUserEntity(UserModel2 userModel)
+        public User MapUserModel2ToUserEntity(UserModelPost userModel)
         {
             return new User
             {
@@ -110,7 +114,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             };
         }
 
-        public User MapUserModel2ToUserEntity(UserModel2 userModel, User result)
+        public User MapUserModel2ToUserEntity(UserModelPost userModel, User result)
         {
             result.FirstName = userModel.FirstName;
             result.LastName = userModel.LastName;

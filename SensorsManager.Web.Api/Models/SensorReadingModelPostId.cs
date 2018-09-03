@@ -6,7 +6,7 @@ using System.Web;
 
 namespace SensorsManager.Web.Api.Repository.Models
 {
-    public class SensorReadingModel3
+    public class SensorReadingModelPostId
     {
         [Required]
         public int SensorId { get; set; }

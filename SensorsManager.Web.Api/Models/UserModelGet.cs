@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class UserModel
+    public class UserModelGet
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

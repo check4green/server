@@ -7,13 +7,13 @@ namespace SensorsManager.DataLayer.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class UserValidations : IMigrationMetadata
+    public sealed partial class Coordinates : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(UserValidations));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Coordinates));
         
         string IMigrationMetadata.Id
         {
-            get { return "201807191127529_UserValidations"; }
+            get { return "201809030852209_Coordinates"; }
         }
         
         string IMigrationMetadata.Source

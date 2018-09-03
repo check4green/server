@@ -7,7 +7,7 @@ using System.Web;
 
 namespace SensorsManager.Web.Api.Repository.Models
 {
-    public class SensorModel2
+    public class SensorModelPut
     {
 
         [Required, MaxLength(50)]
@@ -21,5 +21,9 @@ namespace SensorsManager.Web.Api.Repository.Models
         [Required]
         [Range(1, Double.PositiveInfinity)]
         public int BatchSize { get; set; }
+        [Required]
+        public double Latitude { get; set; }
+        [Required]
+        public double Longitude { get; set; }
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SensorsManager.Web.Api.Repository.Models
 {
-    public class SensorModel3
+    public class SensorModelPost
     {
 
         [Required, MaxLength(50), RegularExpression("^[a-zA-Z0-9_-]*$",
@@ -30,9 +30,14 @@ namespace SensorsManager.Web.Api.Repository.Models
         [RegularExpression("0x+[a-fA-F0-9]+[a-fA-F0-9]",
             ErrorMessage = "Address must match the hexadecimal format: 0x__; [a-f or 0-9].")]
         public string ClientAddress { get; set; }
+        [Required]
+        public double Latitude { get; set; }
+        [Required]
+        public double Longitude { get; set; }
 
-       
 
-      
+
+
+
     }
 }

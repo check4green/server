@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SensorsManager.Web.Api.Repository.Models
 {
-    public class SensorReadingModel2
+    public class SensorReadingModelPostAddres
     {
         [Required, MaxLength(4)]
         [RegularExpression("0x+[a-fA-F0-9]+[a-fA-F0-9]",

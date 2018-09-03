@@ -25,7 +25,7 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("", Name = "AddUserRoute")]
         [HttpPost]
-        public IHttpActionResult AddUser(UserModel2 userModel)
+        public IHttpActionResult AddUser(UserModelPost userModel)
         {
 
             if (userModel == null)
@@ -96,7 +96,7 @@ namespace SensorsManager.Web.Api.Controllers
         [SensorsManagerAuthorize]
         [Route("")]
         [HttpPut]
-        public IHttpActionResult UpdateUser(UserModel2 userModel)
+        public IHttpActionResult UpdateUser(UserModelPost userModel)
         {
             if (userModel == null)
             {

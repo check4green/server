@@ -5,9 +5,9 @@ namespace SensorsManager.Web.Api.Models
 {
     public class ModelFactory
     {
-       public SensorModel CreateSensorModel(Sensor sensor)
+       public SensorModelGet CreateSensorModel(Sensor sensor)
         {
-            return new SensorModel
+            return new SensorModelGet
             {
                 Id = sensor.Id,
                 Name = sensor.Name,
@@ -17,8 +17,9 @@ namespace SensorsManager.Web.Api.Models
                 UploadInterval = sensor.UploadInterval,
                 GatewayAddress = sensor.GatewayAddress,
                 ClientAddress = sensor.ClientAddress,
+                Latitude = sensor.Latitude,
+                Longitude = sensor.Longitude,
                 Active = sensor.Active
-               
             };
         }
        public SensorTypeModel CreateSensorTypeModel(SensorType sensorType)
@@ -44,9 +45,9 @@ namespace SensorsManager.Web.Api.Models
             };
         }
 
-        public SensorReadingModel CreateSensorReadingModel(SensorReading sensorReading)
+        public SensorReadingModelGet CreateSensorReadingModel(SensorReading sensorReading)
         {
-            return new SensorReadingModel
+            return new SensorReadingModelGet
             {
                 Id = sensorReading.Id,
                 Value = sensorReading.Value,
@@ -54,9 +55,9 @@ namespace SensorsManager.Web.Api.Models
             };
         }
 
-        public UserModel CreateUserModel(User user)
+        public UserModelGet CreateUserModel(User user)
         {
-            return new UserModel
+            return new UserModelGet
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,

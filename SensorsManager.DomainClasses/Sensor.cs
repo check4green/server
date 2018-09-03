@@ -31,6 +31,13 @@ namespace SensorsManager.DomainClasses
         [Required,MaxLength(4)]
         public string ClientAddress { get; set; }
 
+        [Required]
+        public double Latitude { get; set; }
+
+        [Required]
+        public double Longitude { get; set; }
+
+
 
         public bool Active { get; set; }
 

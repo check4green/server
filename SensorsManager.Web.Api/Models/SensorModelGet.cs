@@ -2,7 +2,7 @@
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class SensorModel
+    public class SensorModelGet
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -12,6 +12,8 @@ namespace SensorsManager.Web.Api.Models
         public int BatchSize { get; set; }
         public string GatewayAddress { get; set; }
         public string ClientAddress { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public bool Active { get; set; }
     }
 }

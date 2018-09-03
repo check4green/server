@@ -30,7 +30,7 @@ namespace SensorsManager.Web.Api.Controllers
         [SensorsManagerAuthorize]
         [Route("", Name = "AddSensorRoute")]
         [HttpPost]
-        public IHttpActionResult AddSensor(SensorModel3 sensorModel)
+        public IHttpActionResult AddSensor(SensorModelPost sensorModel)
         {
          
             if (sensorModel == null)
@@ -329,7 +329,7 @@ namespace SensorsManager.Web.Api.Controllers
         [SensorsManagerAuthorize]
         [Route("{id:int}")]
         [HttpPut]
-        public IHttpActionResult UpdateSensor(int id, SensorModel2 sensorModel)
+        public IHttpActionResult UpdateSensor(int id, SensorModelPut sensorModel)
         {
          
 
@@ -386,7 +386,7 @@ namespace SensorsManager.Web.Api.Controllers
         [Route("address/{gatewayAddress}/{clientAddress}")]
         [HttpPut]
         public IHttpActionResult UpdateSensorByAddress(string gatewayAddress, 
-            string clientAddress, SensorModel2 sensorModel)
+            string clientAddress, SensorModelPut sensorModel)
         {
            
 

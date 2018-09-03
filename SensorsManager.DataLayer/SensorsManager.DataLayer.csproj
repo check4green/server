@@ -88,21 +88,13 @@
     <Compile Include="Migrations\201807161043592_UserPassword.Designer.cs">
       <DependentUpon>201807161043592_UserPassword.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807170907221_FixEveryThing.cs" />
-    <Compile Include="Migrations\201807170907221_FixEveryThing.Designer.cs">
-      <DependentUpon>201807170907221_FixEveryThing.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\201807180956022_AdditionalInfoForUser.cs" />
     <Compile Include="Migrations\201807180956022_AdditionalInfoForUser.Designer.cs">
       <DependentUpon>201807180956022_AdditionalInfoForUser.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807191058166_FixIt.cs" />
-    <Compile Include="Migrations\201807191058166_FixIt.Designer.cs">
-      <DependentUpon>201807191058166_FixIt.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201807191127529_UserValidations.cs" />
-    <Compile Include="Migrations\201807191127529_UserValidations.Designer.cs">
-      <DependentUpon>201807191127529_UserValidations.cs</DependentUpon>
+    <Compile Include="Migrations\201809030852209_Coordinates.cs" />
+    <Compile Include="Migrations\201809030852209_Coordinates.Designer.cs">
+      <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -144,17 +136,11 @@
     <EmbeddedResource Include="Migrations\201807161043592_UserPassword.resx">
       <DependentUpon>201807161043592_UserPassword.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807170907221_FixEveryThing.resx">
-      <DependentUpon>201807170907221_FixEveryThing.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201807180956022_AdditionalInfoForUser.resx">
       <DependentUpon>201807180956022_AdditionalInfoForUser.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807191058166_FixIt.resx">
-      <DependentUpon>201807191058166_FixIt.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807191127529_UserValidations.resx">
-      <DependentUpon>201807191127529_UserValidations.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201809030852209_Coordinates.resx">
+      <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

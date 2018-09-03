@@ -28,7 +28,7 @@ namespace SensorsManager.Web.Api.Controllers
    
         [Route("~/api/readings")]
         [HttpPost]
-        public IHttpActionResult AddSensorReadings(SensorReadingModel3 sensorReadingModel)
+        public IHttpActionResult AddSensorReadings(SensorReadingModelPostId sensorReadingModel)
         {
      
 
@@ -82,7 +82,7 @@ namespace SensorsManager.Web.Api.Controllers
         
         [Route("~/api/readings/address")]
         [HttpPost]
-        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModel2 sensorReadingModel)
+        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModelPostAddres sensorReadingModel)
         {
             var throttler = new Throttler("newSensorType", 1, 3);
             if (throttler.RequestShouldBeThrottled())
