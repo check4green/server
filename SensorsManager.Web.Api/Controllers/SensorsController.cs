@@ -7,9 +7,7 @@ using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System.Net.Http;
 using SensorsManager.Web.Api.Repository.Models;
-using System.Web.Http.Results;
 using System.Web;
-using SensorsManager.Web.Api.Throttling;
 using SensorsManager.Web.Api.Security;
 
 namespace SensorsManager.Web.Api.Controllers
@@ -23,8 +21,8 @@ namespace SensorsManager.Web.Api.Controllers
         SensorRepository sensorRep = new SensorRepository();
         SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
         UserRepository userRep = new UserRepository();
-        ModelFactory modelFactory = new ModelFactory();
-        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        IModelFactory modelFactory = new ModelFactory();
+        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
       
 
         [SensorsManagerAuthorize]

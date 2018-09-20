@@ -2,7 +2,7 @@
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class UserModelPost
+    public class UserModel
     {
 
         [Required,MaxLength(50)]

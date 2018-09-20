@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace SensorsManager.Web.Api.Repository.Models
+namespace SensorsManager.Web.Api.Models
 {
     public class SensorReadingModelPostAddres
     {

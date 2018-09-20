@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using SensorsManager.DataLayer;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository.Models;
-using SensorsManager.Web.Api.Throttling;
-using SensorsManager.Web.Api.Validations;
+
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -20,16 +18,13 @@ namespace SensorsManager.Web.Api.Controllers
     public class MeasurementsController : ApiController
     {
         MeasurementRepository measureRep = new MeasurementRepository();
-        ModelFactory modelFactory = new ModelFactory();
-        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        IModelFactory modelFactory = new ModelFactory();
+        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
         [Route("", Name = "AddMeasurementRoute")]
         [HttpPost]
         public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
         {
-     
-
-
             if (newMeasureModel == null)
             {
                 return BadRequest("You have sent an empty object.");

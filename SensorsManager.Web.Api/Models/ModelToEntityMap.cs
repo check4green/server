@@ -1,13 +1,11 @@
 ﻿using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+
 
 namespace SensorsManager.Web.Api.Repository.Models
 {
-    public class ModelToEntityMap
+    public class ModelToEntityMap : IModelToEntityMap
     {
         public Sensor MapSensorModelToSensorEntity(SensorModelPut sensorModel, Sensor sensor)
         {
@@ -100,7 +98,7 @@ namespace SensorsManager.Web.Api.Repository.Models
         }
 
     
-        public User MapUserModel2ToUserEntity(UserModelPost userModel)
+        public User MapUserModelToUserEntity(UserModel userModel)
         {
             return new User
             {
@@ -114,7 +112,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             };
         }
 
-        public User MapUserModel2ToUserEntity(UserModelPost userModel, User result)
+        public User MapUserModelToUserEntity(UserModel userModel, User result)
         {
             result.FirstName = userModel.FirstName;
             result.LastName = userModel.LastName;

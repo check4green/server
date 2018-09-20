@@ -114,6 +114,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\IModelFactory.cs" />
+    <Compile Include="Models\IModelToEntityMap.cs" />
     <Compile Include="Models\MeasurementModel.cs" />
     <Compile Include="Models\ModelFactory.cs" />
     <Compile Include="Models\ModelToEntityMap.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="Models\UserModelPost.cs" />
     <Compile Include="Models\UserModel_Code.cs" />
     <Compile Include="Models\UserModel_Email.cs" />
+    <Compile Include="Models\UserModel_Registration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\MeasurementRepository.cs" />
     <Compile Include="Repository\SensorReadingRepository.cs" />

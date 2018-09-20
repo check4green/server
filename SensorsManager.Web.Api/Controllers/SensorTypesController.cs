@@ -4,12 +4,11 @@ using System.Web.Http;
 using System.Linq;
 using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
-using System.Net.Http;
 using System;
 using SensorsManager.Web.Api.Repository.Models;
 using SensorsManager.DataLayer;
 using System.Web;
-using SensorsManager.Web.Api.Throttling;
+
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -21,8 +20,8 @@ namespace SensorsManager.Web.Api.Controllers
     {
         SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
         MeasurementRepository measureRep = new MeasurementRepository();
-        ModelFactory modelFactory = new ModelFactory();
-        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        IModelFactory modelFactory = new ModelFactory();
+        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
         [Route("", Name = "AddSensorTypeRoute")]
         [HttpPost]

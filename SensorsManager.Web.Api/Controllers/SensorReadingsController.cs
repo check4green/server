@@ -21,9 +21,8 @@ namespace SensorsManager.Web.Api.Controllers
   
         SensorReadingRepository readingRep = new SensorReadingRepository();
         SensorRepository sensorRep = new SensorRepository();
-        SensorTypesRepository typeRep = new SensorTypesRepository();
-        ModelFactory modelFactory = new ModelFactory();
-        ModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        IModelFactory modelFactory = new ModelFactory();
+        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
 
    
         [Route("~/api/readings")]

@@ -96,6 +96,14 @@
     <Compile Include="Migrations\201809030852209_Coordinates.Designer.cs">
       <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201809180916161_UserRegister.cs" />
+    <Compile Include="Migrations\201809180916161_UserRegister.Designer.cs">
+      <DependentUpon>201809180916161_UserRegister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201809190909097_RemoveRegistration.cs" />
+    <Compile Include="Migrations\201809190909097_RemoveRegistration.Designer.cs">
+      <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -141,6 +149,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201809030852209_Coordinates.resx">
       <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201809180916161_UserRegister.resx">
+      <DependentUpon>201809180916161_UserRegister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201809190909097_RemoveRegistration.resx">
+      <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

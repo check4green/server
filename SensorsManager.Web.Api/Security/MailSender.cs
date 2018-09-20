@@ -9,17 +9,21 @@ namespace SensorsManager.Web.Api.Security
         {
             var data = new { Email = "wearegreenlegion@gmail.com", Password = "weAreGreenLegion4" };
 
-            var mailMessage = new MailMessage(data.Email, receiver);
-            mailMessage.Subject = subject;
-            mailMessage.Body = body;
-
-            var smptClient = new SmtpClient("smtp.gmail.com", 587);
-            smptClient.Credentials = new NetworkCredential()
+            var mailMessage = new MailMessage(data.Email, receiver)
             {
-                UserName = data.Email,
-                Password = data.Password
+                Subject = subject,
+                Body = body
             };
-            smptClient.EnableSsl = true;
+
+            var smptClient = new SmtpClient("smtp.gmail.com", 587)
+            {
+                Credentials = new NetworkCredential()
+                {
+                    UserName = data.Email,
+                    Password = data.Password
+                },
+                EnableSsl = true
+            };
             smptClient.Send(mailMessage);
         }
     }

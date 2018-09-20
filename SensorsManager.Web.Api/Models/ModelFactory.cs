@@ -1,11 +1,11 @@
 ﻿using SensorsManager.DomainClasses;
-using System;
+
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class ModelFactory
+    public class ModelFactory : IModelFactory
     {
-       public SensorModelGet CreateSensorModel(Sensor sensor)
+       public SensorModelGet CreateSensorModel(Sensor sensor) 
         {
             return new SensorModelGet
             {

@@ -81,7 +81,7 @@ namespace SensorsManager.Web.Api.Repository
                "Password = @password," +
                "CompanyName = @companyName," +
                "Country = @country," +
-               "PhoneNumber = @phoneNumber " +
+               "PhoneNumber = @phoneNumber," +
                " WHERE Id = @id",
                new SqlParameter("firstName", user.FirstName),
                new SqlParameter("lastName", user.LastName),

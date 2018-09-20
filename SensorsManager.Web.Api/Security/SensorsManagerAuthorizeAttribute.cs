@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http.Controllers;
@@ -18,7 +17,7 @@ namespace SensorsManager.Web.Api.Security
                 return;
             }
             var authHeader = actionContext.Request.Headers.Authorization;
-            if(authHeader != null)
+            if (authHeader != null)
             {
                 if (authHeader.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase)
                     && !string.IsNullOrWhiteSpace(authHeader.Parameter) && (authHeader.Parameter.Length % 4 == 0))
@@ -27,22 +26,25 @@ namespace SensorsManager.Web.Api.Security
 
                     if (UserLogIn.LogIn(credentials.Email, credentials.Password))
                     {
-                        var principal = new GenericPrincipal(new GenericIdentity(credentials.Email), null);
-                        Thread.CurrentPrincipal = principal;
-                        return;
+                      
+                            var principal = new GenericPrincipal(new GenericIdentity(credentials.Email), null);
+                            Thread.CurrentPrincipal = principal;
+                            return;
+
+                       
                     }
                 }
-                     
-            }
 
-            HandleUnauthorized(actionContext);
+            }
+                HandleUnauthorized(actionContext);
+
         }
 
         private void HandleUnauthorized(HttpActionContext actionContext)
         {
             actionContext.Response = actionContext.Request
                 .CreateResponse(HttpStatusCode.Unauthorized, new { Message = "Authentification failed!" });
-            actionContext.Response.Headers.Add("WWW-Authenticate", "Basic Scheme='SensorsManager' location='.../api/users'");
+            actionContext.Response.Headers.Add("WWW-Reg", "Basic Scheme='SensorsManager' location='.../api/users'");
         }
     }
 }
