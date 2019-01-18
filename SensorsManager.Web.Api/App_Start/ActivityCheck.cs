@@ -1,6 +1,5 @@
 ﻿using SensorsManager.Web.Api.Repository;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -27,7 +26,7 @@ namespace SensorsManager.Web.Api
             while (true)
             {
                 var sensors = sensorRep.GetAllSensors().Where(p => p.Active == true);
-                if(sensors == null)
+                if (sensors == null)
                 {
                     continue;
                 }
@@ -36,17 +35,17 @@ namespace SensorsManager.Web.Api
                     Parallel.ForEach(sensors,
                         sensor =>
                         {
-                                    var wait = (sensor.UploadInterval + 1);
-                                    var readingDate = readingRep
-                                    .GetSensorReadingBySensorId(sensor.Id)
-                                    .OrderByDescending(s => s.InsertDate)
-                                    .FirstOrDefault().InsertDate;
+                            var wait = (sensor.UploadInterval + 1);
+                            var readingDate = readingRep
+                            .GetSensorReadingBySensorId(sensor.Id)
+                            .OrderByDescending(s => s.InsertDate)
+                            .FirstOrDefault().InsertDate;
 
-                                    if ((DateTime.UtcNow - readingDate).TotalMinutes > wait)
-                                    {
-                                        sensor.Active = false;
-                                        sensorRep.UpdateSensor(sensor);
-                                    }
+                            if (Math.Ceiling((DateTime.UtcNow - readingDate).TotalMinutes) > wait)
+                            {
+                                sensor.Active = false;
+                                sensorRep.UpdateSensor(sensor);
+                            }
                         });
                     Thread.Sleep(60000);
                 }

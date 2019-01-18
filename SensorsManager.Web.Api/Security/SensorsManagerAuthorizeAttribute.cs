@@ -30,8 +30,6 @@ namespace SensorsManager.Web.Api.Security
                             var principal = new GenericPrincipal(new GenericIdentity(credentials.Email), null);
                             Thread.CurrentPrincipal = principal;
                             return;
-
-                       
                     }
                 }
 

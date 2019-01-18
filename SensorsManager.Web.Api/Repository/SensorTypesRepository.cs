@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace SensorsManager.Web.Api.Repository
 {
-    public class SensorTypesRepository
+    public class SensorTypesRepository : ISensorTypesRepository
     {
         public SensorType AddSensorType(SensorType sensorType)
         {

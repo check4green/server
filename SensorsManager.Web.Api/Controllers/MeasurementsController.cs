@@ -1,34 +1,36 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using SensorsManager.DataLayer;
 using SensorsManager.Web.Api.Models;
-using SensorsManager.Web.Api.Repository.Models;
-
+using SensorsManager.Web.Api.Repository;
 
 namespace SensorsManager.Web.Api.Controllers
 {
     [EnableCors("*", "*", "*", 
         exposedHeaders: "X-Tracker-Pagination-Page,X-Tracker-Pagination-PageSize," +
-        "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-SensorMeasurementCount")]
+        "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-TotalCount," +
+        "X-Tracker-Pagination-PrevPage,X-Tracker-Pagination-NextPage")]
     [RoutePrefix("api/measurements")]
-    public class MeasurementsController : ApiController
+    public class MeasurementsController : BaseApiController
     {
-        MeasurementRepository measureRep = new MeasurementRepository();
-        IModelFactory modelFactory = new ModelFactory();
-        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        IMeasurementRepository _measureRep;
+       
+        public MeasurementsController(IMeasurementRepository measureRep)
+        {
+            _measureRep = measureRep;
+        }
 
         [Route("", Name = "AddMeasurementRoute")]
         [HttpPost]
-        public IHttpActionResult AddMeasurement(MeasurementModel newMeasureModel)
+        public IHttpActionResult AddMeasurement(MeasurementModel measureModel)
         {
-            if (newMeasureModel == null)
+            if (measureModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
+
             if(ModelState.IsValid == false)
             {
                 var error = ModelState.SelectMany(m => m.Value.Errors)
@@ -42,11 +44,23 @@ namespace SensorsManager.Web.Api.Controllers
 
                 return BadRequest(error.ErrorMessage);
             }
-            var newMeasure = modelToEntityMap.MapMeasurementModelToMeasurementEntity(newMeasureModel);
-            var addedMeasure = measureRep.AddMeasurement(newMeasure);
 
-           
-            return CreatedAtRoute("GetMeasurementByIdRoute", new { id = addedMeasure.Id }, addedMeasure);
+            var measure = _measureRep
+                .GetAllMeasurements()
+                .Where(m => m.UnitOfMeasure == measureModel.UnitOfMeasure)
+                .SingleOrDefault();
+
+            if(measure != null)
+            {
+                return Conflict("This unit of measure already exists!");
+            }
+
+            var newMeasure = TheModelToEntityMap
+                .MapMeasurementModelToMeasurementEntity(measureModel);
+            _measureRep.AddMeasurement(newMeasure);
+
+            return CreatedAtRoute("GetMeasurementByIdRoute",
+                new { id = newMeasure.Id }, newMeasure);
         }
 
         [Route("{id:int}", Name = "GetMeasurementByIdRoute")]
@@ -54,14 +68,14 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult GetMeasurementById(int id)
         {
        
-            var measurement = measureRep.GetMeasurementById(id);
+            var measurement = _measureRep.GetMeasurementById(id);
+
             if (measurement == null)
             {
                 return NotFound();
             }
 
-            var measurementModel = modelFactory.CreateMeasurementModel(measurement);
-
+            var measurementModel = TheModelFactory.CreateMeasurementModel(measurement);
            
             return Ok(measurementModel);
         }
@@ -70,42 +84,38 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public IHttpActionResult GetAllMeasurements(int page = 1, int pageSize = 30)
         {
-    
+            var totalCount = _measureRep.GetAllMeasurements().Count();
 
-            var totalCount = measureRep.GetAllMeasurements().Count();
-            var totalPages = Math.Ceiling((float)totalCount / pageSize);
+            if (totalCount == 0)
+            {
+                return NotFound();
+            }
 
             if (page < 1) { page = 1; }
             if (pageSize < 1) { pageSize = 30; }
 
-            var measurements = measureRep.GetAllMeasurements()
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize).Select(p => modelFactory.CreateMeasurementModel(p))
-                .OrderBy(p => p.Id).ToList();
+            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
 
-            if(totalCount == 0)
+            var results = _measureRep.GetAllMeasurements()
+                 .Skip(pageSize * (page - 1))
+                 .Take(pageSize).Select(m => TheModelFactory.CreateMeasurementModel(m))
+                 .OrderBy(m => m.Id).ToList();
+
+            if (results.Count == 0)
             {
-                return Ok(measurements);
+                return NotFound();
             }
 
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", totalPages.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorMeasurementCount", totalCount.ToString());
-           
-
-            return Ok(measurements);
+            return Ok("GetAllMeasurementsRoute", page, pageSize, pageCount, totalCount, results);
 
         }
 
         [Route("{id:int}")]
         [HttpPut]
-        public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measurementModel)
+        public IHttpActionResult UpdateMeasurement(int id, MeasurementModel measureModel)
         {
 
-           
-
-            if (measurementModel == null)
+            if (measureModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
@@ -123,16 +133,26 @@ namespace SensorsManager.Web.Api.Controllers
                 return BadRequest(error.ErrorMessage);
             }
 
-            var result = measureRep.GetMeasurementById(id);
-            if (result == null)
+            var checkedMeasure = _measureRep.GetAllMeasurements()
+                .Where(m =>
+                m.UnitOfMeasure == measureModel.UnitOfMeasure
+                && m.Id != id)
+                .SingleOrDefault();
+
+            if(checkedMeasure != null)
+            {
+                return Conflict("This unit of measure already exists!");
+            }
+
+            var measurement = _measureRep.GetMeasurementById(id);
+            if (measurement == null)
             {
                 return NotFound();
             }
 
-            var measurement = modelToEntityMap.MapMeasurementModelToMeasurementEntity(measurementModel, result);
-            measureRep.UpdateMeasurement(measurement);
+            TheModelToEntityMap.MapMeasurementModelToMeasurementEntity(measureModel, measurement);
+            _measureRep.UpdateMeasurement(measurement);
 
-           
             return StatusCode(HttpStatusCode.NoContent);
         }
 
@@ -140,7 +160,10 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete]
         public void DeleteMeasurement(int id)
         {
-            measureRep.DeleteMeasurement(id);
+            if (_measureRep.GetMeasurementById(id) != null)
+            {
+                _measureRep.DeleteMeasurement(id);
+            }
         }
 
     }

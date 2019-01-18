@@ -1,13 +1,17 @@
-﻿using System.Net;
+﻿
+
+
+
+using System.Net;
 using System.Net.Mail;
 
 namespace SensorsManager.Web.Api.Security
 {
-    public class MailSender
+    public class MailSender : IMailSender
     {
         public void SendMail(string receiver, string subject = "", string body = "")
         {
-            var data = new { Email = "wearegreenlegion@gmail.com", Password = "weAreGreenLegion4" };
+            var data = new { Email = "info@check4green.com", Password = "C6theo^AntU[" };
 
             var mailMessage = new MailMessage(data.Email, receiver)
             {
@@ -15,14 +19,14 @@ namespace SensorsManager.Web.Api.Security
                 Body = body
             };
 
-            var smptClient = new SmtpClient("smtp.gmail.com", 587)
+            var smptClient = new SmtpClient("mail.check4green.com", 587)
             {
                 Credentials = new NetworkCredential()
                 {
                     UserName = data.Email,
                     Password = data.Password
                 },
-                EnableSsl = true
+                EnableSsl = false,
             };
             smptClient.Send(mailMessage);
         }

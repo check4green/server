@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SensorsManager.Web.Api.Repository
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
        public User GetUser(string email, string password)
         {
@@ -81,8 +81,8 @@ namespace SensorsManager.Web.Api.Repository
                "Password = @password," +
                "CompanyName = @companyName," +
                "Country = @country," +
-               "PhoneNumber = @phoneNumber," +
-               " WHERE Id = @id",
+               "PhoneNumber = @phoneNumber" +
+               " WHERE Id = @id ",
                new SqlParameter("firstName", user.FirstName),
                new SqlParameter("lastName", user.LastName),
                new SqlParameter("email", user.Email),

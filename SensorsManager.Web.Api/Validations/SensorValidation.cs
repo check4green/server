@@ -14,11 +14,11 @@ namespace SensorsManager.Web.Api.Validations
                 {
                     if (name.Any(c => Char.IsWhiteSpace(c)))
                     {
-                        return new ValidationResult("Name cannot contain whitespace");
+                        return new ValidationResult("The name cannot contain whitespace.");
                     }
                     else if (!CheckSimbols(name))
                     {
-                        return new ValidationResult("Name cannot start or end with a simbol." +
+                        return new ValidationResult("The name cannot start or end with a simbol." +
                             "There also cannot be two consecutive simbols.");
                     }
                     else
@@ -28,12 +28,12 @@ namespace SensorsManager.Web.Api.Validations
                 }
                 else
                 {
-                    return new ValidationResult("Name must contain at least a letter.");
+                    return new ValidationResult("The name must contain at least a letter.");
                 }
             }
             else
             {
-                return new ValidationResult("Name field is required.");
+                return new ValidationResult("The name field is required.");
             }
         }
 

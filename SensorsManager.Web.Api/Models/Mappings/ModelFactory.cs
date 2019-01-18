@@ -1,17 +1,30 @@
 ﻿using SensorsManager.DomainClasses;
+using SensorsManager.Web.Api.Pending;
+using System.Net.Http;
+using System.Web.Http.Routing;
 
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class ModelFactory : IModelFactory
+    public class ModelFactory
     {
-       public SensorModelGet CreateSensorModel(Sensor sensor) 
+        UrlHelper urlHelper;
+
+        public ModelFactory(HttpRequestMessage httpRequestMessage)
+        {
+            urlHelper = new UrlHelper(httpRequestMessage);
+        }
+        public SensorModelGet CreateSensorModel(Sensor sensor)
         {
             return new SensorModelGet
             {
-                Id = sensor.Id,
+                Url = urlHelper.Link("GetSensorByAddressRoute",
+                new
+                {
+                    gatewayAddress = sensor.GatewayAddress,
+                    clientAddress = sensor.ClientAddress
+                }),
                 Name = sensor.Name,
-                BatchSize = sensor.BatchSize,
                 ProductionDate = sensor.ProductionDate,
                 SensorTypeId = sensor.SensorTypeId,
                 UploadInterval = sensor.UploadInterval,
@@ -22,10 +35,21 @@ namespace SensorsManager.Web.Api.Models
                 Active = sensor.Active
             };
         }
-       public SensorTypeModel CreateSensorTypeModel(SensorType sensorType)
+
+        public SensorPendingModel CreateSensorModel(
+            int id, int uploadInterval)
+        {
+            return new SensorPendingModel
+            {
+                Id = id,
+                UploadInterval = uploadInterval,
+            };
+        }
+        public SensorTypeModel CreateSensorTypeModel(SensorType sensorType)
         {
             return new SensorTypeModel
             {
+                Url = urlHelper.Link("GetSensorTypeByIdRoute", new { id = sensorType.Id }),
                 Id = sensorType.Id,
                 Code = sensorType.Code,
                 Description = sensorType.Description,
@@ -39,6 +63,7 @@ namespace SensorsManager.Web.Api.Models
         {
             return new MeasurementModel
             {
+                Url = urlHelper.Link("GetMeasurementByIdRoute", new { id = measurement.Id }),
                 Id = measurement.Id,
                 UnitOfMeasure = measurement.UnitOfMeasure,
                 Description = measurement.Description
@@ -67,5 +92,7 @@ namespace SensorsManager.Web.Api.Models
                 PhoneNumber = user.PhoneNumber
             };
         }
+
+
     }
 }

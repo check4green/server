@@ -19,9 +19,6 @@ namespace SensorsManager.Web.Api.Models
         [Required]
         [Range(1, 262975)]
         public int UploadInterval { get; set; }
-        [Required]
-        [Range(1, 1000)]
-        public int BatchSize { get; set; }
         [Required, MaxLength(4)]
         [RegularExpression("0x+[a-fA-F0-9]+[a-fA-F0-9]", 
             ErrorMessage ="Address must match the hexadecimal format: 0x__; [a-f or 0-9].")]

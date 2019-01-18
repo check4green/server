@@ -1,14 +1,11 @@
 ﻿using SensorsManager.DataLayer;
 using SensorsManager.DomainClasses;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 
 
 namespace SensorsManager.Web.Api.Repository
 {
-    public class SensorReadingRepository
+    public class SensorReadingRepository : ISensorReadingRepository
     {
         public SensorReading AddSensorReading(SensorReading sensorReading)
         {

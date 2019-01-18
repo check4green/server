@@ -104,6 +104,10 @@
     <Compile Include="Migrations\201809190909097_RemoveRegistration.Designer.cs">
       <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201811201319274_GoodbyeBatchSize.cs" />
+    <Compile Include="Migrations\201811201319274_GoodbyeBatchSize.Designer.cs">
+      <DependentUpon>201811201319274_GoodbyeBatchSize.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -155,6 +159,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201809190909097_RemoveRegistration.resx">
       <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201811201319274_GoodbyeBatchSize.resx">
+      <DependentUpon>201811201319274_GoodbyeBatchSize.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

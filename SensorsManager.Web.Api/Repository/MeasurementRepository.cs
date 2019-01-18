@@ -1,11 +1,12 @@
-﻿using SensorsManager.DomainClasses;
+﻿using SensorsManager.DataLayer;
+using SensorsManager.DomainClasses;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 
-namespace SensorsManager.DataLayer
+namespace SensorsManager.Web.Api.Repository
 {
-    public class MeasurementRepository
+    public class MeasurementRepository : IMeasurementRepository
     {
         public Measurement AddMeasurement(Measurement measurement)
         {

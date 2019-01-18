@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SensorsManager.Web.Api.Models
 {
     public class SensorTypeModel
     {
+        public string Url { get; set; }
         public int Id { get; set; }
         [Required]
         [MaxLength(50)]

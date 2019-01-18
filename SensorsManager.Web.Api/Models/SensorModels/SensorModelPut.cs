@@ -16,9 +16,6 @@ namespace SensorsManager.Web.Api.Models
         [Range(1, Double.PositiveInfinity)]
         public int UploadInterval { get; set; }
         [Required]
-        [Range(1, Double.PositiveInfinity)]
-        public int BatchSize { get; set; }
-        [Required]
         public double Latitude { get; set; }
         [Required]
         public double Longitude { get; set; }

@@ -1,20 +1,24 @@
 ﻿using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.Models;
+using SensorsManager.Web.Api.Pending;
 using System;
 
 
-namespace SensorsManager.Web.Api.Repository.Models
+namespace SensorsManager.Web.Api.Models
 {
-    public class ModelToEntityMap : IModelToEntityMap
+    public class ModelToEntityMap
     {
-        public Sensor MapSensorModelToSensorEntity(SensorModelPut sensorModel, Sensor sensor)
+        public void MapSensorModelToSensorEntity(
+          SensorPendingModel sensorPendingModel, Sensor sensor)
+        {
+            sensor.UploadInterval = sensorPendingModel.UploadInterval;
+        }
+
+        public void MapSensorModelToSensorEntity(SensorModelPut sensorModel, Sensor sensor)
         {
             sensor.Name = sensorModel.Name;
             sensor.UploadInterval = sensorModel.UploadInterval;
-            sensor.BatchSize = sensorModel.BatchSize;
             sensor.Latitude = sensorModel.Latitude;
             sensor.Longitude = sensorModel.Longitude;
-            return sensor;
         }
 
         public Sensor MapSensorModelToSensorEntity(SensorModelPost sensorModel, int userId)
@@ -25,7 +29,6 @@ namespace SensorsManager.Web.Api.Repository.Models
                 SensorTypeId = sensorModel.SensorTypeId,
                 ProductionDate = sensorModel.ProductionDate,
                 UploadInterval = sensorModel.UploadInterval,
-                BatchSize = sensorModel.BatchSize,
                 GatewayAddress = sensorModel.GatewayAddress.ToLower(),
                 ClientAddress = sensorModel.ClientAddress.ToLower(),
                 Latitude = sensorModel.Latitude,
@@ -33,22 +36,12 @@ namespace SensorsManager.Web.Api.Repository.Models
                 UserId = userId
             };
         }
+
        public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPostAddres sensorReadingModel,int sensorId)
         {
             return new SensorReading
             {
                 SensorId = sensorId,
-                Value = sensorReadingModel.Value,
-                ReadingDate = sensorReadingModel.ReadingDate,
-                InsertDate = DateTime.UtcNow
-            };
-        }
-
-       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPostId sensorReadingModel)
-        {
-            return new SensorReading
-            {
-                SensorId = sensorReadingModel.SensorId,
                 Value = sensorReadingModel.Value,
                 ReadingDate = sensorReadingModel.ReadingDate,
                 InsertDate = DateTime.UtcNow
@@ -64,12 +57,10 @@ namespace SensorsManager.Web.Api.Repository.Models
 
             };
         }
-        public Measurement MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel, Measurement measurement)
+        public void MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel, Measurement measurement)
         {
             measurement.Description = measurementModel.Description;
             measurement.UnitOfMeasure = measurementModel.UnitOfMeasure;
-
-            return measurement;
         }
 
         public SensorType MapSensorTypeModelToSensorTypeEnrity(SensorTypeModel sensorTypeModel)
@@ -85,7 +76,7 @@ namespace SensorsManager.Web.Api.Repository.Models
             };
         }
 
-        public SensorType MapSensorTypeModelToSensorTypeEntity(SensorTypeModel sensorTypeModel, SensorType sensorType)
+        public void MapSensorTypeModelToSensorTypeEntity(SensorTypeModel sensorTypeModel, SensorType sensorType)
         {
             sensorType.Code = sensorTypeModel.Code;
             sensorType.Description = sensorTypeModel.Description;
@@ -93,11 +84,8 @@ namespace SensorsManager.Web.Api.Repository.Models
             sensorType.MaxValue = sensorTypeModel.MaxValue;
             sensorType.MeasureId = sensorTypeModel.MeasureId;
             sensorType.Multiplier = sensorTypeModel.Multiplier;
-
-            return sensorType;
         }
 
-    
         public User MapUserModelToUserEntity(UserModel userModel)
         {
             return new User
@@ -106,23 +94,21 @@ namespace SensorsManager.Web.Api.Repository.Models
                 LastName = userModel.LastName,
                 Email = userModel.Email,
                 Password = userModel.Password,
-                CompanyName = userModel.CompanyName != null? userModel.CompanyName: "",
+                CompanyName = userModel.CompanyName ?? "",
                 Country = userModel.Country,
                 PhoneNumber = userModel.PhoneNumber
             };
         }
 
-        public User MapUserModelToUserEntity(UserModel userModel, User result)
+        public void MapUserModelToUserEntity(UserModel userModel, User result)
         {
             result.FirstName = userModel.FirstName;
             result.LastName = userModel.LastName;
             result.Email = userModel.Email;
             result.Password = userModel.Password;
-            result.CompanyName = userModel.CompanyName != null? userModel.CompanyName: "";
+            result.CompanyName = userModel.CompanyName ?? "";
             result.Country = userModel.Country;
             result.PhoneNumber = userModel.PhoneNumber;
-
-            return result;
         }
     }
 }

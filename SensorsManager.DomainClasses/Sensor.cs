@@ -22,9 +22,6 @@ namespace SensorsManager.DomainClasses
         [Required]
         public int UploadInterval { get; set; }
 
-        [Required]
-        public int BatchSize { get; set; }
-
         [Required,MaxLength(4)]
         public string GatewayAddress { get; set; }
 

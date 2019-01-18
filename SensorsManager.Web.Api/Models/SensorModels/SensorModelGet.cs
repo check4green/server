@@ -4,12 +4,11 @@ namespace SensorsManager.Web.Api.Models
 {
     public class SensorModelGet
     {
-        public int Id { get; set; }
+        public string Url { get; set; }
         public string Name { get; set; }
         public int SensorTypeId { get; set; }
         public DateTime ProductionDate { get; set; }
         public int UploadInterval { get; set; }
-        public int BatchSize { get; set; }
         public string GatewayAddress { get; set; }
         public string ClientAddress { get; set; }
         public double Latitude { get; set; }

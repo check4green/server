@@ -5,30 +5,34 @@ using System.Linq;
 using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System;
-using SensorsManager.Web.Api.Repository.Models;
-using SensorsManager.DataLayer;
-using System.Web;
 
 
 namespace SensorsManager.Web.Api.Controllers
 {
     [EnableCors("*", "*", "*",
         exposedHeaders: "X-Tracker-Pagination-Page,X-Tracker-Pagination-PageSize," +
-        "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-SensorTypeCount")]
+        "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-TotalCount," +
+        "X-Tracker-Pagination-PrevPage,X-Tracker-Pagination-NextPage")]
     [RoutePrefix("api/sensor-types")]
-    public class SensorTypesController : ApiController
+    public class SensorTypesController : BaseApiController
     {
-        SensorTypesRepository sensorTypeRep = new SensorTypesRepository();
-        MeasurementRepository measureRep = new MeasurementRepository();
-        IModelFactory modelFactory = new ModelFactory();
-        IModelToEntityMap modelToEntityMap = new ModelToEntityMap();
+        ISensorTypesRepository _sensorTypeRep;
+        IMeasurementRepository _measureRep;
+
+        public SensorTypesController(
+            ISensorTypesRepository sensorTypeRep,
+            IMeasurementRepository measureRep
+            )
+        {
+            _sensorTypeRep = sensorTypeRep;
+            _measureRep = measureRep;
+        }
 
         [Route("", Name = "AddSensorTypeRoute")]
         [HttpPost]
         public IHttpActionResult AddSensorType(SensorTypeModel sensorTypeModel)
         {
           
-        
             if (sensorTypeModel == null)
             {
                 return BadRequest("You have sent an empty object.");
@@ -46,19 +50,24 @@ namespace SensorsManager.Web.Api.Controllers
 
                 return BadRequest(error.ErrorMessage);
             }
-            var measure = measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
+            var measure = _measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
             if (measure == null)
             {
-                return Content(HttpStatusCode.NotFound,
-                   new
-                   {
-                       Message = String.Format("There is no measurement with the id:{0}",
-                   sensorTypeModel.MeasureId)
-                   });
+                return NotFound($"There is no measurement with the id {sensorTypeModel.MeasureId}");
+            }
+
+            var checkedSensorType =
+                _sensorTypeRep.GetAllSensorTypes()
+                .Where(st => st.Code == sensorTypeModel.Code)
+                .SingleOrDefault();
+
+            if(checkedSensorType != null)
+            {
+                return Conflict("The code filed must be unique");
             }
        
-            var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
-            var addedSensorType = sensorTypeRep.AddSensorType(sensorType);
+            var sensorType = TheModelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
+            var addedSensorType = _sensorTypeRep.AddSensorType(sensorType);
 
 
 
@@ -69,12 +78,12 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public IHttpActionResult GetSensorTypeById(int id)
         {
-            var sensorType = sensorTypeRep.GetSensorTypeById(id);
+            var sensorType = _sensorTypeRep.GetSensorTypeById(id);
             if (sensorType == null)
             {
                 return NotFound();
             }
-            var sensorTypeModel = modelFactory.CreateSensorTypeModel(sensorType);
+            var sensorTypeModel = TheModelFactory.CreateSensorTypeModel(sensorType);
 
             return Ok(sensorTypeModel);
         }
@@ -85,29 +94,34 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult GetAllSensorTypes(int page = 1, int pageSize = 30)
         {
 
-            var totalCount = sensorTypeRep.GetAllSensorTypes().Count();
-            var totalPages = Math.Ceiling((float)totalCount / pageSize);
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var sensorTypes = sensorTypeRep.GetAllSensorTypes()
-                    .Skip(pageSize * (page - 1))
-                    .Take(pageSize)
-                    .OrderBy(p => p.Id)
-                    .Select(p => modelFactory.CreateSensorTypeModel(p)).ToList();
+            var totalCount = _sensorTypeRep.GetAllSensorTypes().Count();
 
             if (totalCount == 0)
             {
                 return NotFound();
             }
 
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-Page", page.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageSize", pageSize.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-PageCount", totalPages.ToString());
-            HttpContext.Current.Response.AppendHeader("X-Tracker-Pagination-SensorTypeCount", totalCount.ToString());
-            
-            return Ok(sensorTypes);
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
+            var totalPages = Math.Ceiling((float)totalCount / pageSize);
+
+
+            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
+
+            var results = _sensorTypeRep.GetAllSensorTypes()
+                    .Skip(pageSize * (page - 1))
+                    .Take(pageSize)
+                    .OrderBy(st => st.Id)
+                    .Select(st => TheModelFactory.CreateSensorTypeModel(st)).ToList();
+
+
+            if (results.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok("GetAllSensorsTypeRoute", page, pageSize, pageCount, totalCount, results);
         }
 
         [Route("{id:int}")]
@@ -115,7 +129,6 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult UpdateSensorType(int id, SensorTypeModel sensorTypeModel)
         {
          
-
             if (sensorTypeModel == null)
             {
                 return BadRequest("You have sent an empty object.");
@@ -136,18 +149,29 @@ namespace SensorsManager.Web.Api.Controllers
             }
             if (id != sensorTypeModel.Id)
             {
-                return BadRequest("The SensorTypeId and the address id do not match.");
+                return BadRequest("The id of the sensor-type and the address id do not match.");
             }
-
-            var result = sensorTypeRep.GetSensorTypeById(id);
-
-            if (result == null)
+            var sensorType = _sensorTypeRep.GetSensorTypeById(id);
+            if (sensorType== null)
             {
                 return NotFound();
             }
-            var sensorType = modelToEntityMap.MapSensorTypeModelToSensorTypeEntity(sensorTypeModel, result);
 
-            sensorTypeRep.UpdateSensorType(sensorType);
+            var checkedSensorType = _sensorTypeRep
+                .GetAllSensorTypes()
+                .Where(
+                st => st.Code == sensorTypeModel.Code
+                && st.Id != id).SingleOrDefault();
+
+            if(checkedSensorType != null)
+            {
+                return Conflict("There already exists a sensor-type with that code.");
+            }
+
+            TheModelToEntityMap
+                .MapSensorTypeModelToSensorTypeEntity(sensorTypeModel, sensorType);
+
+            _sensorTypeRep.UpdateSensorType(sensorType);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
@@ -156,7 +180,10 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete]
         public void DeleteSensorType(int id)
         {
-            sensorTypeRep.DeleteSensorType(id);
+            if (_sensorTypeRep.GetSensorTypeById(id) != null)
+            {
+                _sensorTypeRep.DeleteSensorType(id);
+            }
         }
     }
 }
