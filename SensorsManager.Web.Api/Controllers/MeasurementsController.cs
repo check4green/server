@@ -31,7 +31,7 @@ namespace SensorsManager.Web.Api.Controllers
                 return BadRequest("You have sent an empty object.");
             }
 
-            if(ModelState.IsValid == false)
+            if (ModelState.IsValid == false)
             {
                 var error = ModelState.SelectMany(m => m.Value.Errors)
                     .Where(m => m.ErrorMessage != "")

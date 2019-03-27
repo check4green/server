@@ -1,44 +1,43 @@
 ﻿using System;
 using System.Linq;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using Microsoft.Owin.Cors;
+using SensorsManager.Web.Api.Hubs;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
-using SensorsManager.Web.Api.Throttling;
 using SensorsManager.Web.Api.Security;
+using SensorsManager.Web.Api.ServiceInterfaces;
 
 namespace SensorsManager.Web.Api.Controllers
 {
-    [EnableCors("*", "*", "*",
+    [EnableCors("*","*","*",
         exposedHeaders: "X-Tracker-Pagination-Page,X-Tracker-Pagination-PageSize," +
         "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-TotalCount," +
         "X-Tracker-Pagination-PrevPage,X-Tracker-Pagination-NextPage")]
 
-    public class ReadingsController : BaseApiController
+
+    public class ReadingsController : ApiControllerWithHub<ReadingsHub>
     {
         ISensorRepository _sensorRep;
         ISensorReadingRepository _readingRep;
+        IThrottlerService _throttler;
 
         public ReadingsController(
             ISensorReadingRepository readingRep,
-            ISensorRepository sensorRep
+            ISensorRepository sensorRep,
+            IThrottlerService throttler
             )
         {
             _readingRep = readingRep;
             _sensorRep = sensorRep;
+            _throttler = throttler;
         }
 
         [Route("~/api/readings/address")]
         [HttpPost]
-        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModelPostAddres sensorReadingModel)
+        public IHttpActionResult AddSensorReadingsByAddress(SensorReadingModelPost sensorReadingModel)
         {
-            var throttler = new Throttler(sensorReadingModel.SensorClientAddress, 1, 3);
-            if (throttler.RequestShouldBeThrottled())
-            {
-                return TooManyRequests(throttler);
-            }
-
             if (sensorReadingModel == null)
             {
                 return BadRequest("You have sent an empty object");
@@ -57,6 +56,13 @@ namespace SensorsManager.Web.Api.Controllers
 
                 return BadRequest(error.ErrorMessage);
             }
+
+            _throttler.ThrottlerSetup(sensorReadingModel.SensorClientAddress, 1, 3);
+            if (_throttler.RequestShouldBeThrottled())
+            {
+                return TooManyRequests(_throttler);
+            }
+
             var sensor = _sensorRep.
                     GetSensorByAddress(sensorReadingModel.SensorGatewayAddress,
                     sensorReadingModel.SensorClientAddress);
@@ -85,16 +91,11 @@ namespace SensorsManager.Web.Api.Controllers
 
                 sensor.Active = true;
                 _sensorRep.UpdateSensor(sensor);
-
-
-                HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestLimit",
-                   throttler.RequestLimit.ToString());
-
-                HttpContext.Current.Response.AppendHeader("X-RateLimit-RequestsRemaining",
-                  throttler.RequestsRemaining.ToString());
-
-                HttpContext.Current.Response.AppendHeader("X-RateLimit-ExpiresAt",
-                                   throttler.ExpiresAt.ToString());
+             
+                var address = sensorReadingModel.SensorGatewayAddress
+                    + "/" + sensorReadingModel.SensorClientAddress;
+                Hub.Clients.Group(address).refreshReadings();
+               
 
 
                 return CreatedAtRoute("GetSensorReadingsBySensorAddressRoute",

@@ -20,6 +20,7 @@ namespace SensorsManager.Web.Api
 
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.EnableCors();
+            
           
 
         }

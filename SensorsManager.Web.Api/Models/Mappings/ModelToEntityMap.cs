@@ -37,7 +37,7 @@ namespace SensorsManager.Web.Api.Models
             };
         }
 
-       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPostAddres sensorReadingModel,int sensorId)
+       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPost sensorReadingModel,int sensorId)
         {
             return new SensorReading
             {

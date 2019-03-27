@@ -67,11 +67,11 @@ namespace SensorsManager.Web.Api.Controllers
             }
        
             var sensorType = TheModelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
-            var addedSensorType = _sensorTypeRep.AddSensorType(sensorType);
+            _sensorTypeRep.AddSensorType(sensorType);
 
 
 
-            return CreatedAtRoute("GetSensorTypeByIdRoute", new { id = addedSensorType.Id }, addedSensorType);
+            return CreatedAtRoute("GetSensorTypeByIdRoute", new { id = sensorType.Id }, sensorType);
         }
 
         [Route("{id:int}", Name = "GetSensorTypeByIdRoute")]
@@ -147,10 +147,7 @@ namespace SensorsManager.Web.Api.Controllers
 
                 return BadRequest(error.ErrorMessage);
             }
-            if (id != sensorTypeModel.Id)
-            {
-                return BadRequest("The id of the sensor-type and the address id do not match.");
-            }
+
             var sensorType = _sensorTypeRep.GetSensorTypeById(id);
             if (sensorType== null)
             {

@@ -2,10 +2,10 @@
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
+using SensorsManager.Web.Api.ServiceInterfaces;
 using System;
 using System.Linq;
 using System.Net;
-using System.Runtime.Caching;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -16,18 +16,27 @@ namespace SensorsManager.Web.Api.Controllers
     public class UsersController : BaseApiController
     {
         IUserRepository _userRep;
-        IMemCache _memCache;
-        IMailSender _mailSender;
+        IMemCacheService _memCache;
+        IMailSenderService _mailSender;
+        IRandomService _random;
+        IDateTimeService _dateTime;
+        ICredentialService _credentials;
 
         public UsersController(
              IUserRepository userRep,
-             IMemCache memCache,
-             IMailSender mailSender
+             IMemCacheService memCache,
+             IMailSenderService mailSender,
+             IRandomService random,
+             IDateTimeService dateTime,
+             ICredentialService credentials
              )
         {
             _userRep = userRep;
             _memCache = memCache;
             _mailSender = mailSender;
+            _random = random;
+            _dateTime = dateTime;
+            _credentials = credentials;
         }
 
         [Route("", Name = "AddUserRoute")]
@@ -62,20 +71,19 @@ namespace SensorsManager.Web.Api.Controllers
                 return Conflict("There already is a user with that email.");
             }
 
-#if !DEBUG
             var email = _memCache.Get(userModel.Email);
             if (email == null)
             {
                 return Unauthorized("Your email has not been validated!");
             }
-#endif
+
 
             var user = TheModelToEntityMap.MapUserModelToUserEntity(userModel);
-            var addedUser = _userRep.AddUser(user);
+            _userRep.AddUser(user);
 
             _memCache.Remove(user.Email);
 
-            return CreatedAtRoute("GetUser", new { email = addedUser.Email }, addedUser);
+            return CreatedAtRoute("GetUser", new { email = user.Email }, user);
         }
 
         [Route("~/api/demoRequest")]
@@ -102,7 +110,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             try
             {
-                MailSender mailSender = new MailSender();
+                
                 string body = $"Name: {requestModel.FullName}\n" +
                     $"Buisness email address: {requestModel.Email}\n" +
                     $"Company: {requestModel.Company}\n";
@@ -124,7 +132,7 @@ namespace SensorsManager.Web.Api.Controllers
                     body += $"Message: {requestModel.Message}";
                 }
 
-                mailSender.SendMail("info@check4green.com", "Request demo", body);
+                _mailSender.SendMail("info@check4green.com", "Request demo", body);
                 return Ok("Mail has been sent.");
             }
             catch (Exception e)
@@ -156,13 +164,13 @@ namespace SensorsManager.Web.Api.Controllers
             }
             try
             {
-                MailSender mailSender = new MailSender();
+                
                 string body = $"Name: {contactInfoModel.FullName}\n" +
                     $"Email address: {contactInfoModel.Email}\n" +
                     $"Phone: {contactInfoModel.Phone}\n" +
                     $"Message: {contactInfoModel.Message}";
 
-                mailSender.SendMail("info@check4green.com", "Contact info", body);
+                _mailSender.SendMail("info@check4green.com", "Contact info", body);
                 return Ok("Mail has been sent.");
             }
             catch (Exception e)
@@ -176,8 +184,8 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public IHttpActionResult GetUser()
         {
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            var user = _userRep.GetUser(credentials.Email, credentials.Password);
+             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var user = _userRep.GetUser(_credentials.Email, _credentials.Password);
             if (user == null)
             {
                 return NotFound();
@@ -218,8 +226,9 @@ namespace SensorsManager.Web.Api.Controllers
 
                 return BadRequest(error.ErrorMessage);
             }
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            var user = _userRep.GetUser(credentials.Email, credentials.Password);
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<---Remove
+
+            var user = _userRep.GetUser(_credentials.Email, _credentials.Password);
 
             if (user == null)
             {
@@ -269,9 +278,9 @@ namespace SensorsManager.Web.Api.Controllers
             }
             try
             {
-                Random random = new Random();
-                var code = random.Next(1000, 9999).ToString();
-                _memCache.Add(code, code, DateTimeOffset.UtcNow.AddMinutes(5));
+                
+                var code = _random.Next(1000, 9999).ToString();
+                _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
 
                 _mailSender.SendMail(userModel.Email, "Reset password",
                     $"Here is your password reset code: {code}");
@@ -285,7 +294,7 @@ namespace SensorsManager.Web.Api.Controllers
 
         [Route("resetPassword")]
         [HttpPut]
-        public IHttpActionResult ResetPassowrd(UserModel_Code userModel)
+        public IHttpActionResult ResetPassword(UserModel_Code userModel)
         {
             var code = _memCache.Get(userModel.Code);
             if (code == null)
@@ -334,11 +343,10 @@ namespace SensorsManager.Web.Api.Controllers
 
             try
             {
-                Random random = new Random();
-                var code = random.Next(1000, 9999).ToString();
-                _memCache.Add(code, code, DateTimeOffset.UtcNow.AddMinutes(5));
-                var mailSender = new MailSender();
-                mailSender.SendMail(userModel.Email, "Validation code",
+                var code = _random.Next(1000, 9999).ToString();
+                _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
+                
+                _mailSender.SendMail(userModel.Email, "Validation code",
                     $"Here is your validation code: {code}");
                 return Ok("Check your mail, you have been sent a validation code.");
             }
@@ -368,8 +376,8 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete]
         public void DeleteUser()
         {
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            _userRep.DeleteUser(credentials.Email, credentials.Password);
+             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            _userRep.DeleteUser(_credentials.Email, _credentials.Password);
         }
 
     }

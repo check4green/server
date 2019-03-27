@@ -6,6 +6,7 @@ using System;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Security;
 using System.Web.Http.Cors;
+using SensorsManager.Web.Api.ServiceInterfaces;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -21,19 +22,25 @@ namespace SensorsManager.Web.Api.Controllers
         ISensorTypesRepository _sensorTypeRep;
         ISensorReadingRepository _readingRep;
         IUserRepository _userRep;
+        IDateTimeService _dateTime;
+        ICredentialService _credentials;
 
 
         public SensorsController(
             ISensorRepository sensorRep,
             ISensorTypesRepository sensorTypeRep,
             ISensorReadingRepository readingRep,
-            IUserRepository userRep
+            IUserRepository userRep,
+            IDateTimeService dateTime,
+            ICredentialService credentials
             )
         {
             _sensorRep = sensorRep;
             _sensorTypeRep = sensorTypeRep;
             _readingRep = readingRep;
             _userRep = userRep;
+            _dateTime = dateTime;
+            _credentials = credentials;
         }
 
 
@@ -101,20 +108,20 @@ namespace SensorsManager.Web.Api.Controllers
                 return Conflict("There already is a sensor with that name.");
             }
 
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.GetUser(credentials.Email, credentials.Password).Id;
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
 
             var sensor = TheModelToEntityMap.MapSensorModelToSensorEntity(sensorModel, userId);
-            var addedSensor = _sensorRep.AddSensor(sensor);
+            _sensorRep.AddSensor(sensor);
 
 
             return CreatedAtRoute("GetSensorByAddressRoute",
                 new
                 {
-                    gatewayAddress = addedSensor.GatewayAddress,
-                    clientAddress = addedSensor.ClientAddress
+                    gatewayAddress = sensor.GatewayAddress,
+                    clientAddress = sensor.ClientAddress
                 },
-                addedSensor);
+                sensor);
 
         }
 
@@ -209,8 +216,8 @@ namespace SensorsManager.Web.Api.Controllers
         public IHttpActionResult GetSensorsByUser(int page = 1, int pageSize = 30)
         {
 
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.GetUser(credentials.Email, credentials.Password).Id;
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
             var query = _sensorRep.GetAllSensors().Where(s => s.UserId == userId);
             var totalCount = query.Count();
 
@@ -277,8 +284,8 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpGet]
         public IHttpActionResult GetSensorsBySensorTypeAndUser(int id, int page = 1, int pageSize = 30)
         {
-            var credentials = new Credentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.GetUser(credentials.Email, credentials.Password).Id;
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<----
+            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
 
             var query = _sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id &&
                             p.UserId == userId);
@@ -348,7 +355,7 @@ namespace SensorsManager.Web.Api.Controllers
             var compareName = _sensorRep.GetAllSensors()
                .Where(p =>
                p.Name == sensorModel.Name
-               && !String.Equals(p.GatewayAddress + p.ClientAddress
+               && !string.Equals(p.GatewayAddress + p.ClientAddress
                , gatewayAddress + clientAddress))
                .SingleOrDefault();
 
@@ -367,11 +374,11 @@ namespace SensorsManager.Web.Api.Controllers
                     .GetSensorReadingBySensorId(sensor.Id)
                     .OrderByDescending(r => r.InsertDate)
                     .FirstOrDefault();
-                //Calculate the wait time
+                //Calculates the wait time
                 uint waitTime = (uint)(
                    (lastReading.InsertDate
                    .AddMinutes(sensor.UploadInterval)
-                   - DateTime.UtcNow
+                   - _dateTime.GetDateTime() 
                    ).TotalMinutes);
                 if (waitTime == 0)
                 {

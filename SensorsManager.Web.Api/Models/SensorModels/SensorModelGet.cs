@@ -4,7 +4,6 @@ namespace SensorsManager.Web.Api.Models
 {
     public class SensorModelGet
     {
-        public string Url { get; set; }
         public string Name { get; set; }
         public int SensorTypeId { get; set; }
         public DateTime ProductionDate { get; set; }

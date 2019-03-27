@@ -1,29 +1,15 @@
 ﻿using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Pending;
-using System.Net.Http;
-using System.Web.Http.Routing;
 
 
 namespace SensorsManager.Web.Api.Models
 {
     public class ModelFactory
     {
-        UrlHelper urlHelper;
-
-        public ModelFactory(HttpRequestMessage httpRequestMessage)
-        {
-            urlHelper = new UrlHelper(httpRequestMessage);
-        }
         public SensorModelGet CreateSensorModel(Sensor sensor)
         {
             return new SensorModelGet
             {
-                Url = urlHelper.Link("GetSensorByAddressRoute",
-                new
-                {
-                    gatewayAddress = sensor.GatewayAddress,
-                    clientAddress = sensor.ClientAddress
-                }),
                 Name = sensor.Name,
                 ProductionDate = sensor.ProductionDate,
                 SensorTypeId = sensor.SensorTypeId,
@@ -49,7 +35,7 @@ namespace SensorsManager.Web.Api.Models
         {
             return new SensorTypeModel
             {
-                Url = urlHelper.Link("GetSensorTypeByIdRoute", new { id = sensorType.Id }),
+  
                 Id = sensorType.Id,
                 Code = sensorType.Code,
                 Description = sensorType.Description,
@@ -63,7 +49,6 @@ namespace SensorsManager.Web.Api.Models
         {
             return new MeasurementModel
             {
-                Url = urlHelper.Link("GetMeasurementByIdRoute", new { id = measurement.Id }),
                 Id = measurement.Id,
                 UnitOfMeasure = measurement.UnitOfMeasure,
                 Description = measurement.Description

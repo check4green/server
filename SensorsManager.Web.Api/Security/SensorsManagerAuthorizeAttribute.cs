@@ -22,7 +22,8 @@ namespace SensorsManager.Web.Api.Security
                 if (authHeader.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase)
                     && !string.IsNullOrWhiteSpace(authHeader.Parameter) && (authHeader.Parameter.Length % 4 == 0))
                 {
-                    var credentials = new Credentials(authHeader.Parameter);
+                    var credentials = new CredentialService();
+                    credentials.SetCredentials(authHeader.Parameter);
 
                     if (UserLogIn.LogIn(credentials.Email, credentials.Password))
                     {

@@ -41,6 +41,7 @@ namespace SensorsManager.Web.Api.ActionResults
             msg.Headers.Add("X-Tracker-Pagination-PageSize", _pageSize.ToString());
             msg.Headers.Add("X-Tracker-Pagination-PageCount", _pageCount.ToString());
             msg.Headers.Add("X-Tracker-Pagination-TotalCount", _totalCount.ToString());
+        
 
             return Task.FromResult(msg);
 

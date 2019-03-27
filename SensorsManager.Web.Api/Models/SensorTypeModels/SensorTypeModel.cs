@@ -4,7 +4,6 @@ namespace SensorsManager.Web.Api.Models
 {
     public class SensorTypeModel
     {
-        public string Url { get; set; }
         public int Id { get; set; }
         [Required]
         [MaxLength(50)]

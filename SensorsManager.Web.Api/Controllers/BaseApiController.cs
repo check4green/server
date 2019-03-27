@@ -1,7 +1,7 @@
 ﻿using SensorsManager.Web.Api.ActionResults;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Pending;
-using SensorsManager.Web.Api.Throttling;
+using SensorsManager.Web.Api.ServiceInterfaces;
 using System.Web.Http;
 
 namespace SensorsManager.Web.Api.Controllers
@@ -18,7 +18,7 @@ namespace SensorsManager.Web.Api.Controllers
             {
                 if (modelFactory == null)
                 {
-                    modelFactory = new ModelFactory(Request);
+                    modelFactory = new ModelFactory();
                 }
                 return modelFactory;
             }
@@ -71,9 +71,9 @@ namespace SensorsManager.Web.Api.Controllers
             return new NotFoundActionResult(Request, message);
         }
 
-        protected IHttpActionResult TooManyRequests(Throttler throttler ,string message = "Too many requests.")
+        protected IHttpActionResult TooManyRequests(IThrottlerService throttler)
         {
-            return new TooManyRequestsActionResult(Request, message, throttler);
+            return new TooManyRequestsActionResult(Request, throttler);
         }
 
         protected IHttpActionResult Unauthorized(string message)

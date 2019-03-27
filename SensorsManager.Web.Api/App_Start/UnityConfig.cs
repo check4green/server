@@ -1,6 +1,9 @@
 using SensorsManager.DataLayer;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
+using SensorsManager.Web.Api.Security.ServiceInterfaces;
+using SensorsManager.Web.Api.ServiceInterfaces;
+using SensorsManager.Web.Api.Services;
 using System.Web.Http;
 using Unity;
 using Unity.WebApi;
@@ -18,8 +21,12 @@ namespace SensorsManager.Web.Api
 
             // e.g. container.RegisterType<ITestService, TestService>();
 
-            container.RegisterType<IMemCache, MemCache>();
-            container.RegisterType<IMailSender, MailSender>();
+            container.RegisterType<IMemCacheService, MemCacheService>();
+            container.RegisterType<IMailSenderService, MailSenderService>();
+            container.RegisterType<IDateTimeService, DateTimeService>();
+            container.RegisterType<IRandomService, RandomService>();
+            container.RegisterType<IThrottlerService, ThrottlerService>();
+            container.RegisterType<ICredentialService, CredentialService>();
             container.RegisterType<DataContext,DataContext>();
 
             container.RegisterType<IUserRepository, UserRepository>();
