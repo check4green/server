@@ -5,7 +5,8 @@ using System.Linq;
 using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System;
-
+using SensorsManager.Web.Api.Validations;
+using SensorsManager.Web.Api.DependencyBlocks;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -16,90 +17,64 @@ namespace SensorsManager.Web.Api.Controllers
     [RoutePrefix("api/sensor-types")]
     public class SensorTypesController : BaseApiController
     {
-        ISensorTypesRepository _sensorTypeRep;
         IMeasurementRepository _measureRep;
-
-        public SensorTypesController(
-            ISensorTypesRepository sensorTypeRep,
-            IMeasurementRepository measureRep
-            )
+        ISensorTypesRepository _typeRep;
+        
+        public SensorTypesController(ISensorTypesControllerDependencyBlock dependencyBlock)
         {
-            _sensorTypeRep = sensorTypeRep;
-            _measureRep = measureRep;
+            _measureRep = dependencyBlock.MeasurementRepository;
+            _typeRep = dependencyBlock.TypesRepository;
         }
 
-        [Route("", Name = "AddSensorTypeRoute")]
-        [HttpPost]
-        public IHttpActionResult AddSensorType(SensorTypeModel sensorTypeModel)
+        [HttpPost,Route(""),ValidateModel]
+        public IHttpActionResult Add(SensorTypeModel sensorTypeModel)
         {
-          
             if (sensorTypeModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
-            var measure = _measureRep.GetMeasurementById(sensorTypeModel.MeasureId);
+            var measure = _measureRep.Get(sensorTypeModel.MeasureId);
             if (measure == null)
             {
                 return NotFound($"There is no measurement with the id {sensorTypeModel.MeasureId}");
             }
 
             var checkedSensorType =
-                _sensorTypeRep.GetAllSensorTypes()
-                .Where(st => st.Code == sensorTypeModel.Code)
+                _typeRep.GetAll()
+                .Where(st => st.Name == sensorTypeModel.Name)
                 .SingleOrDefault();
 
-            if(checkedSensorType != null)
+            if (checkedSensorType != null)
             {
                 return Conflict("The code filed must be unique");
             }
-       
-            var sensorType = TheModelToEntityMap.MapSensorTypeModelToSensorTypeEnrity(sensorTypeModel);
-            _sensorTypeRep.AddSensorType(sensorType);
+
+            var sensorType = ModelToEntityMap.MapToEntity(sensorTypeModel);
+            _typeRep.Add(sensorType);
 
 
 
-            return CreatedAtRoute("GetSensorTypeByIdRoute", new { id = sensorType.Id }, sensorType);
+            return CreatedAtRoute("GetSensorType", new { id = sensorType.Id }, sensorType);
         }
 
-        [Route("{id:int}", Name = "GetSensorTypeByIdRoute")]
-        [HttpGet]
-        public IHttpActionResult GetSensorTypeById(int id)
+        [HttpGet,Route("{id:int}", Name = "GetSensorType")]
+        public IHttpActionResult Get(int id)
         {
-            var sensorType = _sensorTypeRep.GetSensorTypeById(id);
+            var sensorType = _typeRep.Get(id);
             if (sensorType == null)
             {
                 return NotFound();
             }
-            var sensorTypeModel = TheModelFactory.CreateSensorTypeModel(sensorType);
+            var sensorTypeModel = ModelFactory.CreateModel(sensorType);
 
             return Ok(sensorTypeModel);
         }
 
-
-        [Route("", Name = "GetAllSensorsTypeRoute")]
-        [HttpGet]
-        public IHttpActionResult GetAllSensorTypes(int page = 1, int pageSize = 30)
+        [HttpGet,Route("", Name = "GetAllSensorTypes")]
+        public IHttpActionResult GetAll(int page = 1, int pageSize = 30)
         {
 
-            var totalCount = _sensorTypeRep.GetAllSensorTypes().Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
+            var totalCount = _typeRep.GetAll().Count();
 
             if (page < 1) { page = 1; }
             if (pageSize < 1) { pageSize = 30; }
@@ -109,78 +84,52 @@ namespace SensorsManager.Web.Api.Controllers
 
             var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
 
-            var results = _sensorTypeRep.GetAllSensorTypes()
+            var results = _typeRep.GetAll()
                     .Skip(pageSize * (page - 1))
                     .Take(pageSize)
                     .OrderBy(st => st.Id)
-                    .Select(st => TheModelFactory.CreateSensorTypeModel(st)).ToList();
+                    .Select(st => ModelFactory.CreateModel(st)).ToList();
 
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetAllSensorsTypeRoute", page, pageSize, pageCount, totalCount, results);
+            return Ok("GetAllSensorTypes", page, pageSize, pageCount, totalCount, results);
         }
 
-        [Route("{id:int}")]
-        [HttpPut]
-        public IHttpActionResult UpdateSensorType(int id, SensorTypeModel sensorTypeModel)
+        [HttpPut,Route("{id:int}"),ValidateModel]
+        public IHttpActionResult Update(int id, SensorTypeModel sensorTypeModel)
         {
-         
             if (sensorTypeModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
 
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
-
-            var sensorType = _sensorTypeRep.GetSensorTypeById(id);
-            if (sensorType== null)
+            var sensorType = _typeRep.Get(id);
+            if (sensorType == null)
             {
                 return NotFound();
             }
 
-            var checkedSensorType = _sensorTypeRep
-                .GetAllSensorTypes()
+            var checkedSensorType = _typeRep
+                .GetAll()
                 .Where(
-                st => st.Code == sensorTypeModel.Code
+                st => st.Name == sensorTypeModel.Name
                 && st.Id != id).SingleOrDefault();
 
-            if(checkedSensorType != null)
+            if (checkedSensorType != null)
             {
                 return Conflict("There already exists a sensor-type with that code.");
             }
 
-            TheModelToEntityMap
-                .MapSensorTypeModelToSensorTypeEntity(sensorTypeModel, sensorType);
+            ModelToEntityMap
+                .MapToEntity(sensorTypeModel, sensorType);
 
-            _sensorTypeRep.UpdateSensorType(sensorType);
+            _typeRep.Update(sensorType);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [Route("{id:int}", Name = "DeleteSensorTypeRoute")]
-        [HttpDelete]
-        public void DeleteSensorType(int id)
+        [HttpDelete,Route("{id:int}")]
+        public void Delete(int id)
         {
-            if (_sensorTypeRep.GetSensorTypeById(id) != null)
-            {
-                _sensorTypeRep.DeleteSensorType(id);
-            }
+           _typeRep.Delete(id);
         }
     }
 }

@@ -1,8 +1,9 @@
 ﻿
+using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
-using SensorsManager.Web.Api.ServiceInterfaces;
+using SensorsManager.Web.Api.Services;
 using System;
 using System.Linq;
 using System.Net;
@@ -16,55 +17,33 @@ namespace SensorsManager.Web.Api.Controllers
     public class UsersController : BaseApiController
     {
         IUserRepository _userRep;
-        IMemCacheService _memCache;
-        IMailSenderService _mailSender;
-        IRandomService _random;
-        IDateTimeService _dateTime;
         ICredentialService _credentials;
+        IDateTimeService _dateTime;
+        IMemCacheService _memCache;
+        IRandomService _random;
+        IMailSenderService _mailSender;
 
-        public UsersController(
-             IUserRepository userRep,
-             IMemCacheService memCache,
-             IMailSenderService mailSender,
-             IRandomService random,
-             IDateTimeService dateTime,
-             ICredentialService credentials
-             )
+
+        public UsersController(IUsersControllerDependencyBlock dependencyBlock)
         {
-            _userRep = userRep;
-            _memCache = memCache;
-            _mailSender = mailSender;
-            _random = random;
-            _dateTime = dateTime;
-            _credentials = credentials;
+            _userRep = dependencyBlock.UserRepository;
+            _credentials = dependencyBlock.CredentialService;
+            _dateTime = dependencyBlock.DateTimeService;
+            _memCache = dependencyBlock.MemCacheService;
+            _random = dependencyBlock.RandomService;
+            _mailSender = dependencyBlock.MailSenderService;
         }
 
-        [Route("", Name = "AddUserRoute")]
-        [HttpPost]
-        public IHttpActionResult AddUser(UserModel userModel)
+        [HttpPost,Route("")]
+        public IHttpActionResult Add(UserModel userModel)
         {
             if (userModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
 
-                if (error == null)
-                {
-                    return BadRequest();
-                }
+            var checkedUser = _userRep.Get(userModel.Email, userModel.Password);
 
-                return BadRequest(error.ErrorMessage);
-            }
-
-            var checkedUser = _userRep.GetAllUsers()
-               .Where(u =>
-               u.Email == userModel.Email)
-               .SingleOrDefault();
 
             if (checkedUser != null)
             {
@@ -78,39 +57,25 @@ namespace SensorsManager.Web.Api.Controllers
             }
 
 
-            var user = TheModelToEntityMap.MapUserModelToUserEntity(userModel);
-            _userRep.AddUser(user);
+            var user = ModelToEntityMap.MapToEntity(userModel);
+            _userRep.Add(user);
 
             _memCache.Remove(user.Email);
 
             return CreatedAtRoute("GetUser", new { email = user.Email }, user);
         }
 
-        [Route("~/api/demoRequest")]
-        [HttpPost]
+        [HttpPost,Route("~/api/demoRequest")]
         public IHttpActionResult RequestDemo(DemoRequestModel requestModel)
         {
             if (requestModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
 
             try
             {
-                
+
                 string body = $"Name: {requestModel.FullName}\n" +
                     $"Buisness email address: {requestModel.Email}\n" +
                     $"Company: {requestModel.Company}\n";
@@ -141,30 +106,17 @@ namespace SensorsManager.Web.Api.Controllers
             }
         }
 
-        [Route("~/api/contact")]
-        [HttpPost]
+        [HttpPost,Route("~/api/contact")]
         public IHttpActionResult SendContactInfo(ContactInfoModel contactInfoModel)
         {
             if (contactInfoModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
 
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
             try
             {
-                
+
                 string body = $"Name: {contactInfoModel.FullName}\n" +
                     $"Email address: {contactInfoModel.Email}\n" +
                     $"Phone: {contactInfoModel.Phone}\n" +
@@ -180,62 +132,47 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [SensorsManagerAuthorize]
-        [Route("", Name = "GetUser")]
-        [HttpGet]
-        public IHttpActionResult GetUser()
+        [HttpGet,Route("", Name = "GetUser")]
+        public IHttpActionResult Get()
         {
-             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            var user = _userRep.GetUser(_credentials.Email, _credentials.Password);
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var user = _userRep.Get(_credentials.Email, _credentials.Password);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var userModel = TheModelFactory.CreateUserModel(user);
+            var userModel = ModelFactory.CreateModel(user);
 
             return Ok(userModel);
         }
 
         [SensorsManagerAuthorize]
-        [Route("logIn", Name = "LogIn")]
-        [HttpPost]
+        [HttpPost,Route("logIn", Name = "LogIn")]
         public IHttpActionResult LogIn()
         {
             return Ok("Authorization succeded!");
         }
 
         [SensorsManagerAuthorize]
-        [Route("")]
-        [HttpPut]
-        public IHttpActionResult UpdateUser(UserModel userModel)
+        [HttpPut,Route("")]
+        public IHttpActionResult Update(UserModel userModel)
         {
             if (userModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
 
-                if (error == null)
-                {
-                    return BadRequest();
-                }
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<---Remov
 
-                return BadRequest(error.ErrorMessage);
-            }
-            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<---Remove
-
-            var user = _userRep.GetUser(_credentials.Email, _credentials.Password);
+            var user = _userRep.Get(_credentials.Email, _credentials.Password);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            var compareName = _userRep.GetAllUsers()
+            var compareName = _userRep.GetAll()
               .Where(u =>
               u.Email == userModel.Email
               && u.Id != user.Id).Count();
@@ -244,41 +181,27 @@ namespace SensorsManager.Web.Api.Controllers
                 return Conflict("There already is a user with that email.");
             }
 
-            TheModelToEntityMap.MapUserModelToUserEntity(userModel, user);
-            _userRep.UpdateUser(user);
+            ModelToEntityMap.MapToEntity(userModel, user);
+            _userRep.Update(user);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [Route("getResetCode")]
-        [HttpPut]
+        [HttpPut,Route("getResetCode")]
         public IHttpActionResult SendResetPasswordCode(UserModel_Email userModel)
         {
             if (userModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
-            var user = _userRep.GetAllUsers().Where(u => u.Email == userModel.Email).SingleOrDefault();
+            var user = _userRep.GetAll().Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user == null)
             {
                 return NotFound($"There is no user with the email {userModel.Email}.");
             }
             try
             {
-                
+
                 var code = _random.Next(1000, 9999).ToString();
                 _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
 
@@ -292,8 +215,7 @@ namespace SensorsManager.Web.Api.Controllers
             }
         }
 
-        [Route("resetPassword")]
-        [HttpPut]
+        [HttpPut,Route("resetPassword")]
         public IHttpActionResult ResetPassword(UserModel_Code userModel)
         {
             var code = _memCache.Get(userModel.Code);
@@ -301,20 +223,19 @@ namespace SensorsManager.Web.Api.Controllers
             {
                 return Unauthorized("Invalid reset code!");
             }
-            var user = _userRep.GetAllUsers()
+            var user = _userRep.GetAll()
                 .Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user == null)
             {
                 return NotFound($"There is no user with the email {userModel.Email}");
             }
             user.Password = userModel.Password;
-            _userRep.UpdateUser(user);
+            _userRep.Update(user);
             _memCache.Remove(code.ToString());
             return Ok("Password has been reset.");
         }
 
-        [Route("getValidationCode")]
-        [HttpPut]
+        [HttpPut,Route("getValidationCode")]
         public IHttpActionResult SendValidationCode(UserModel_Email userModel)
         {
 
@@ -322,20 +243,7 @@ namespace SensorsManager.Web.Api.Controllers
             {
                 return BadRequest("You have sent an empty object.");
             }
-            if (ModelState.IsValid == false)
-            {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
-            var user = _userRep.GetAllUsers().Where(u => u.Email == userModel.Email).SingleOrDefault();
+            var user = _userRep.GetAll().Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user != null)
             {
                 return Conflict($"There already exists an user with the mail {userModel.Email}.");
@@ -345,7 +253,7 @@ namespace SensorsManager.Web.Api.Controllers
             {
                 var code = _random.Next(1000, 9999).ToString();
                 _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
-                
+
                 _mailSender.SendMail(userModel.Email, "Validation code",
                     $"Here is your validation code: {code}");
                 return Ok("Check your mail, you have been sent a validation code.");
@@ -356,8 +264,7 @@ namespace SensorsManager.Web.Api.Controllers
             }
         }
 
-        [Route("validation")]
-        [HttpPut]
+        [HttpPut,Route("validation")]
         public IHttpActionResult ValidateUser(UserModel_Validation userModel)
         {
             var code = _memCache.Get(userModel.Code);
@@ -370,15 +277,5 @@ namespace SensorsManager.Web.Api.Controllers
             _memCache.Remove(code.ToString());
             return Ok("Your email has been validated, you have 10 minutes to create your account.");
         }
-
-        [SensorsManagerAuthorize]
-        [Route("")]
-        [HttpDelete]
-        public void DeleteUser()
-        {
-             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            _userRep.DeleteUser(_credentials.Email, _credentials.Password);
-        }
-
     }
 }

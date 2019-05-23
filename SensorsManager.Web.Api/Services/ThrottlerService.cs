@@ -1,8 +1,7 @@
-﻿using SensorsManager.Web.Api.ServiceInterfaces;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 
-namespace SensorsManager.Web.Api.Security.ServiceInterfaces
+namespace SensorsManager.Web.Api.Services
 {
     public class ThrottlerService : IThrottlerService
     {

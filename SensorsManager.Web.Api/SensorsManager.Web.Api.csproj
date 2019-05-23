@@ -188,25 +188,51 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ApiControllerWithHub.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
+    <Compile Include="Controllers\ConnectionsController.cs" />
+    <Compile Include="Controllers\GatewaysController.cs" />
     <Compile Include="Controllers\MeasurementsController.cs" />
+    <Compile Include="Controllers\NetworksController.cs" />
     <Compile Include="Controllers\ReadingsController.cs" />
     <Compile Include="Controllers\SensorsController.cs" />
     <Compile Include="Controllers\SensorTypesController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
+    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IConnectionsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IGatewaysControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IMeasurementsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\INetworksControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IReadingsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\ISensorTypesControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IUsersControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\ISensorsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock .cs" />
+    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Hubs\ReadingsHub.cs" />
+    <Compile Include="Models\GatewayModels\GatewayModelGet.cs" />
+    <Compile Include="Models\GatewayModels\GatewayModelPost.cs" />
+    <Compile Include="Models\GatewayModels\GatewayModelPut.cs" />
+    <Compile Include="Models\NetworkModels\NetworkModelGet.cs" />
+    <Compile Include="Models\NetworkModels\NetworkModelPost.cs" />
+    <Compile Include="Models\NetworkModels\NetworkModelPut.cs" />
+    <Compile Include="Models\NetworkModels\NetworkWithSensorsModel.cs" />
     <Compile Include="Models\Other\ContactInfoModel.cs" />
     <Compile Include="Models\Other\DemoRequestModel.cs" />
     <Compile Include="Models\MeasurementModels\MeasurementModel.cs" />
     <Compile Include="Models\Mappings\ModelFactory.cs" />
-    <Compile Include="Models\Mappings\ModelToEntityMap.cs" />
+    <Compile Include="Models\Mappings\ModelMapper.cs" />
     <Compile Include="Models\SensorModels\SensorModelGet.cs" />
     <Compile Include="Models\SensorModels\SensorModelPut.cs" />
     <Compile Include="Models\SensorModels\SensorModelPost.cs" />
     <Compile Include="Models\SensorReadingModels\SensorReadingModelGet.cs" />
-    <Compile Include="Models\SensorReadingModels\SensorReadingModelPostAddres.cs" />
+    <Compile Include="Models\SensorReadingModels\SensorReadingModelPost.cs" />
     <Compile Include="Models\SensorTypeModels\SensorTypeModel.cs" />
     <Compile Include="Models\UserModels\UserModelGet.cs" />
     <Compile Include="Models\UserModels\UserModelPost.cs" />
@@ -215,8 +241,14 @@
     <Compile Include="Models\UserModels\UserModel_Registration.cs" />
     <Compile Include="Pending\SensorPendingModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\GatewayConnectionRepository.cs" />
+    <Compile Include="Repository\GatewayRepository.cs" />
     <Compile Include="Repository\MeasurementRepository.cs" />
+    <Compile Include="Repository\NetworkRepository.cs" />
+    <Compile Include="Repository\RepositoryInterfaces\IGatewayConnectionRepository.cs" />
+    <Compile Include="Repository\RepositoryInterfaces\IGatewayRepository.cs" />
     <Compile Include="Repository\RepositoryInterfaces\IMeasurementRepository.cs" />
+    <Compile Include="Repository\RepositoryInterfaces\INetworkRepository.cs" />
     <Compile Include="Repository\RepositoryInterfaces\ISensorReadingRepository.cs" />
     <Compile Include="Repository\RepositoryInterfaces\ISensorRepository.cs" />
     <Compile Include="Repository\RepositoryInterfaces\ISensorTypesRepository.cs" />
@@ -228,10 +260,14 @@
     <Compile Include="Security\CredentialService.cs" />
     <Compile Include="Security\ICredentialService.cs" />
     <Compile Include="Services\DateTimeService.cs" />
+    <Compile Include="Services\GatewayConnectionService.cs" />
+    <Compile Include="Services\GuidService.cs" />
     <Compile Include="Services\MailSenderService.cs" />
     <Compile Include="Services\MemCacheService.cs" />
     <Compile Include="Services\RandomService.cs" />
     <Compile Include="Services\ServiceInterfaces\IDateTimeService.cs" />
+    <Compile Include="Services\ServiceInterfaces\IGatewayConnectionService.cs" />
+    <Compile Include="Services\ServiceInterfaces\IGuidService.cs" />
     <Compile Include="Services\ServiceInterfaces\IMailSenderService.cs" />
     <Compile Include="Services\ServiceInterfaces\IMemCacheService.cs" />
     <Compile Include="Security\SensorsManagerAuthorizeAttribute.cs" />
@@ -240,8 +276,9 @@
     <Compile Include="Services\ServiceInterfaces\IRandomService.cs" />
     <Compile Include="Services\ServiceInterfaces\IThrottlerService.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="Validations\SensorValidation.cs" />
+    <Compile Include="Validations\NameValidation.cs" />
     <Compile Include="Services\ThrottlerService.cs" />
+    <Compile Include="Validations\ValidateModelAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -289,9 +326,9 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>59508</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:32332/</IISUrl>
+          <IISUrl>http://localhost:32331/</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
-          <IISAppRootUrl>http://localhost:32332/</IISAppRootUrl>
+          <IISAppRootUrl>http://localhost:32331/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

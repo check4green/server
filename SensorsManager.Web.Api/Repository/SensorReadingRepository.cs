@@ -7,27 +7,27 @@ namespace SensorsManager.Web.Api.Repository
 {
     public class SensorReadingRepository : ISensorReadingRepository
     {
-        public SensorReading AddSensorReading(SensorReading sensorReading)
+        public SensorReading Add(SensorReading sensorReading)
         {
-            using(DataContext db = new DataContext())
+            using (DataContext db = new DataContext())
             {
                 var res = db.SensorReadings.Add(sensorReading);
                 db.SaveChanges();
                 return res;
             }
-      
+
         }
 
-        public IQueryable<SensorReading> GetSensorReadingBySensorId(int id)
+        public IQueryable<SensorReading> Get(int id)
         {
-            using(DataContext db = new DataContext())
+            using (DataContext db = new DataContext())
             {
-                var readings = db.SensorReadings.Where(p => p.SensorId == id)
+                var readings = db.SensorReadings.Where(p => p.Sensor_Id == id)
                     .ToList().AsQueryable();
                 return readings;
             }
         }
 
-        
+
     }
 }

@@ -8,12 +8,9 @@ namespace SensorsManager.Web.Api.Models
     {
 
         [Required, MaxLength(50)]
-        [RegularExpression("^[a-zA-Z0-9_-]*$", 
-            ErrorMessage = "Only alphabets, numbers and the simbols: - or _ are allowed."),
-            CustomValidation(typeof(SensorValidation), "NameValidation")]
         public string Name { get; set; }
         [Required]
-        [Range(1, Double.PositiveInfinity)]
+        [Range(1, double.PositiveInfinity)]
         public int UploadInterval { get; set; }
         [Required]
         public double Latitude { get; set; }

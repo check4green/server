@@ -6,9 +6,9 @@ namespace SensorsManager.Web.Api.Models
     public class SensorReadingModelPost
     {
         [Required]
-        public string SensorGatewayAddress { get; set; }
+        public string GatewayAddress { get; set; }
         [Required]
-        public string SensorClientAddress { get; set; }
+        public string SensorAddress { get; set; }
         public decimal Value { get; set; }
         public DateTimeOffset ReadingDate { get; set; }
     }

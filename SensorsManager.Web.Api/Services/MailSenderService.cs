@@ -1,8 +1,4 @@
-﻿
-
-using SensorsManager.Web.Api.Security.ServiceInterfaces;
-using SensorsManager.Web.Api.ServiceInterfaces;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 
 namespace SensorsManager.Web.Api.Services

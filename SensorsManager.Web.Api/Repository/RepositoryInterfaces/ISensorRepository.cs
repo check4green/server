@@ -5,12 +5,10 @@ namespace SensorsManager.Web.Api.Repository
 {
     public interface ISensorRepository
     {
-        Sensor AddSensor(Sensor sensor);
-        Sensor GetSensorByAddress(string gatewayAdress, string clientAdress);
-        IQueryable<Sensor> GetSensosByGatewayAddress(string gatewayAdress);
-        Sensor GetSensorById(int id);
-        IQueryable<Sensor> GetAllSensors();
-        void DeleteSensor(int id);
-        void UpdateSensor(Sensor sensor);
+        Sensor Add(Sensor sensor);
+        Sensor Get(int id);
+        IQueryable<Sensor> GetAll();
+        void Delete(int id);
+        void Update(Sensor sensor);
     }
 }

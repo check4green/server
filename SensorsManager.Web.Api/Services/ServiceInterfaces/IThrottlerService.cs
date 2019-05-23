@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SensorsManager.Web.Api.ServiceInterfaces
+﻿namespace SensorsManager.Web.Api.Services
 {
     public interface IThrottlerService
     {

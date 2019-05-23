@@ -1,6 +1,4 @@
-﻿using SensorsManager.Web.Api.Security.ServiceInterfaces;
-using SensorsManager.Web.Api.ServiceInterfaces;
-using System;
+﻿using System;
 using System.Runtime.Caching;
 
 namespace SensorsManager.Web.Api.Services

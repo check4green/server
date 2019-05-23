@@ -7,7 +7,7 @@ namespace SensorsManager.Web.Api.Models
         public int Id { get; set; }
         [Required]
         [MaxLength(50)]
-        public string Code { get; set; }
+        public string Name { get; set; }
         [MaxLength(50)]
         public string Description { get; set; }
         [Required]

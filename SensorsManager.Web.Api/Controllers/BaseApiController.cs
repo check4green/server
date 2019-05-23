@@ -1,18 +1,18 @@
 ﻿using SensorsManager.Web.Api.ActionResults;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Pending;
-using SensorsManager.Web.Api.ServiceInterfaces;
+using SensorsManager.Web.Api.Services;
 using System.Web.Http;
 
 namespace SensorsManager.Web.Api.Controllers
 {
     public class BaseApiController : ApiController
     {
-        private static ModelToEntityMap modelToEntityMap;
+        private static ModelMapper modelMapper;
         private ModelFactory modelFactory;
         private static SensorIntervalPending sensorIntervalPending;
 
-        protected ModelFactory TheModelFactory
+        protected ModelFactory ModelFactory
         {
             get
             {
@@ -24,15 +24,15 @@ namespace SensorsManager.Web.Api.Controllers
             }
         }
 
-        protected ModelToEntityMap TheModelToEntityMap
+        protected ModelMapper ModelToEntityMap
         {
             get
             {
-                if (modelToEntityMap == null)
+                if (modelMapper == null)
                 {
-                    modelToEntityMap = new ModelToEntityMap();
+                    modelMapper = new ModelMapper();
                 }
-                return modelToEntityMap;
+                return modelMapper;
             }
         }
 

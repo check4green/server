@@ -8,7 +8,7 @@ namespace SensorsManager.Web.Api.Repository
 {
     public class SensorTypesRepository : ISensorTypesRepository
     {
-        public SensorType AddSensorType(SensorType sensorType)
+        public SensorType Add(SensorType sensorType)
         {
             using (DataContext db = new DataContext())
             {
@@ -18,7 +18,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public SensorType GetSensorTypeById(int id)
+        public SensorType Get(int id)
         {
             using (DataContext db = new DataContext())
             {
@@ -26,7 +26,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public IQueryable<SensorType> GetAllSensorTypes()
+        public IQueryable<SensorType> GetAll()
         {
             using (DataContext db = new DataContext())
             {
@@ -34,7 +34,16 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public void DeleteSensorType(int id)
+        public void Update(SensorType sensorType)
+        {
+            using (DataContext db = new DataContext())
+            {
+                db.Entry(sensorType).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+        }
+
+        public void Delete(int id)
         {
             using (DataContext db = new DataContext())
             {
@@ -66,16 +75,6 @@ namespace SensorsManager.Web.Api.Repository
 
                 } while (saveFailed);
             }
-        }
-
-        public void UpdateSensorType(SensorType sensorType)
-        {
-            using (DataContext db = new DataContext())
-            {
-                db.Entry(sensorType).State = EntityState.Modified;
-                db.SaveChanges();
-
-            }     
         }
     }
 }

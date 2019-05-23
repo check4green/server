@@ -17,12 +17,8 @@ namespace SensorsManager.Web.Api
                 .FirstOrDefault();
             jsonFormatter.SerializerSettings.ContractResolver =
                 new CamelCasePropertyNamesContractResolver();
-
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             config.EnableCors();
-            
-          
-
         }
     }
 }

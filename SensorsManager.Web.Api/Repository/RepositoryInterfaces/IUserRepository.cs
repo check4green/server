@@ -1,14 +1,13 @@
 ﻿using SensorsManager.DomainClasses;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace SensorsManager.Web.Api.Repository
 {
     public interface IUserRepository
     {
-        User GetUser(string email, string password);
-        List<User> GetAllUsers();
-        User AddUser(User user);
-        void UpdateUser(User user);
-        void DeleteUser(string email, string password);
+        User Get(string email, string password);
+        IQueryable<User> GetAll();
+        User Add(User user);
+        void Update(User user);
     }
 }

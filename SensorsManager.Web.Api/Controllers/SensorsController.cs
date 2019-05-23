@@ -1,12 +1,14 @@
 ﻿using SensorsManager.Web.Api.Repository;
 using System.Linq;
-using System.Net;
 using System.Web.Http;
 using System;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Security;
 using System.Web.Http.Cors;
-using SensorsManager.Web.Api.ServiceInterfaces;
+using SensorsManager.Web.Api.Services;
+using System.Net;
+using SensorsManager.Web.Api.Validations;
+using SensorsManager.Web.Api.DependencyBlocks;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -14,94 +16,60 @@ namespace SensorsManager.Web.Api.Controllers
         exposedHeaders: "X-Tracker-Pagination-Page,X-Tracker-Pagination-PageSize," +
         "X-Tracker-Pagination-PageCount,X-Tracker-Pagination-TotalCount," +
         "X-Tracker-Pagination-PrevPage,X-Tracker-Pagination-NextPage")]
-    [RoutePrefix("api/sensors")]
-    [SensorsManagerAuthorize]
+    [RoutePrefix("api/networks/{networkId:int}/sensors")]
+   
     public class SensorsController : BaseApiController
     {
-        ISensorRepository _sensorRep;
-        ISensorTypesRepository _sensorTypeRep;
-        ISensorReadingRepository _readingRep;
         IUserRepository _userRep;
-        IDateTimeService _dateTime;
+        INetworkRepository _networkRep;
+        ISensorTypesRepository _typeRep;
+        ISensorRepository _sensorRep;
+        IGatewayConnectionRepository _connetionRep;
         ICredentialService _credentials;
+        IDateTimeService _dateTime;
 
 
-        public SensorsController(
-            ISensorRepository sensorRep,
-            ISensorTypesRepository sensorTypeRep,
-            ISensorReadingRepository readingRep,
-            IUserRepository userRep,
-            IDateTimeService dateTime,
-            ICredentialService credentials
-            )
+        public SensorsController(ISensorsControllerDependencyBlock dependencyBlock)
         {
-            _sensorRep = sensorRep;
-            _sensorTypeRep = sensorTypeRep;
-            _readingRep = readingRep;
-            _userRep = userRep;
-            _dateTime = dateTime;
-            _credentials = credentials;
+            _userRep = dependencyBlock.UserRepository;
+            _networkRep = dependencyBlock.NetworkRepository;
+            _typeRep = dependencyBlock.TypesRepository;
+            _sensorRep = dependencyBlock.SensorRepository;
+            _connetionRep = dependencyBlock.ConnectionRepository;
+            _credentials = dependencyBlock.CredentialService;
+            _dateTime = dependencyBlock.DateTimeService;
         }
 
-
-        [Route("", Name = "AddSensorRoute")]
-        [HttpPost]
-        public IHttpActionResult AddSensor(SensorModelPost sensorModel)
+        [SensorsManagerAuthorize]
+        [HttpPost,Route(""),ValidateModel]
+        public IHttpActionResult Add(int networkId, SensorModelPost sensorModel)
         {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+            var network = _networkRep.Get(networkId);
+            if(network == null || network.User_Id != userId)
+            {
+                return NotFound();
+            }
 
             if (sensorModel == null)
             {
                 return BadRequest("You have sent an empty object.");
             }
 
-            if (ModelState.IsValid == false)
-            {
-
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
-            }
-
-
-            if (_sensorTypeRep.GetSensorTypeById(sensorModel.SensorTypeId) == null)
+            if (_typeRep.Get(sensorModel.SensorTypeId) == null)
             {
                 return NotFound($"There is no sensor type with the id:{sensorModel.SensorTypeId}.");
             }
 
-            if (sensorModel.GatewayAddress == sensorModel.ClientAddress)
-            {
-                return BadRequest("The gateway and client addresses must be distinct.");
-            }
-
-            if (_sensorRep.GetAllSensors()
-                .Where(p => p.ClientAddress == sensorModel.ClientAddress).
+            if (_sensorRep.GetAll()
+                .Where(p => p.Address == sensorModel.Address).
                 SingleOrDefault() != null)
             {
-                return Conflict("There already is a sensor with that client address.");
+                return Conflict("There already is a sensor with that address.");
             }
 
-            if (_sensorRep.GetAllSensors()
-                .Where(p => p.GatewayAddress == sensorModel.ClientAddress)
-                .SingleOrDefault() != null)
-            {
-                return Conflict("Your client address matches an existing gateway address.");
-            }
-
-            if (_sensorRep.GetAllSensors()
-                .Where(p => p.ClientAddress == sensorModel.GatewayAddress)
-                .SingleOrDefault() != null)
-            {
-                return Conflict("Your gateway address matches an existing client address.");
-            }
-
-            if (_sensorRep.GetAllSensors()
+            if (_sensorRep.GetAll()
                .Where(p => p.Name == sensorModel.Name)
                .SingleOrDefault() != null)
             {
@@ -109,328 +77,176 @@ namespace SensorsManager.Web.Api.Controllers
             }
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
+            sensorModel.ProductionDate = _dateTime.GetDateTime();
+            sensorModel.NetworkId = networkId;
+            var sensor = ModelToEntityMap.MapToEntity(sensorModel);
+            _sensorRep.Add(sensor);
 
-            var sensor = TheModelToEntityMap.MapSensorModelToSensorEntity(sensorModel, userId);
-            _sensorRep.AddSensor(sensor);
 
-
-            return CreatedAtRoute("GetSensorByAddressRoute",
-                new
-                {
-                    gatewayAddress = sensor.GatewayAddress,
-                    clientAddress = sensor.ClientAddress
-                },
+            return CreatedAtRoute("GetSensor",
+                new {id = sensor.Id},
                 sensor);
 
         }
-
-
-        [Route("address/{gatewayAddress}/{clientAddress}", Name = "GetSensorByAddressRoute")]
-        [HttpGet]
-        public IHttpActionResult GetSensorByAddress(string gatewayAddress, string clientAddress)
+        [SensorsManagerAuthorize]
+        [HttpGet,Route("{id:int}", Name = "GetSensor")]
+        public IHttpActionResult Get(int networkId, int id)
         {
-
-            var sensor = _sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
-
-            if (sensor == null)
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+            var network = _networkRep.Get(networkId);
+            if (network == null || network.User_Id != userId)
             {
                 return NotFound();
             }
 
-            var sensorModel = TheModelFactory.CreateSensorModel(sensor);
+            var sensor = _sensorRep.Get(id);
+            if(sensor == null)
+            {
+                return NotFound();
+            }
+
+            var sensorModel = ModelFactory.CreateModel(sensor);
 
             return Ok(sensorModel);
         }
 
-
-        [Route("address/{gatewayAddress}", Name = "GetSensorsByGatewayAddressRoute")]
-        [HttpGet]
-        public IHttpActionResult GetSensorsByGatewayAddress(string gatewayAddress, int page = 1, int pageSize = 30)
+        //for device
+        [HttpGet, Route("~/api/sensors/{address}", Name = "GetSensorByAddress")]
+        public IHttpActionResult Get(string address)
         {
-            var query = _sensorRep.GetSensosByGatewayAddress(gatewayAddress);
-            var totalCount = query.Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
-
-
-            var results = _sensorRep.GetSensosByGatewayAddress(gatewayAddress)
-               .OrderByDescending(p => p.Id)
-               .Skip(pageSize * (page - 1))
-               .Take(pageSize)
-               .Select(p => TheModelFactory.CreateSensorModel(p))
-               .ToList();
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetSensorsByGatewayAddressRoute", page, pageSize, pageCount, totalCount, results);
-        }
-
-        [Route("", Name = "GetAllSensorsRoute")]
-        [HttpGet]
-        public IHttpActionResult GetAllSensors(int page = 1, int pageSize = 30)
-        {
-            var query = _sensorRep.GetAllSensors();
-            var totalCount = query.Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
-
-
-
-            var results = _sensorRep.GetAllSensors()
-                .OrderByDescending(p => p.Id)
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
-                .Select(p => TheModelFactory.CreateSensorModel(p))
-                .ToList();
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetAllSensorsRoute", page, pageSize, pageCount, totalCount, results);
-        }
-
-        [Route("~/api/users/sensors", Name = "GetSensorsByUser")]
-        [HttpGet]
-        public IHttpActionResult GetSensorsByUser(int page = 1, int pageSize = 30)
-        {
-
-            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
-            var query = _sensorRep.GetAllSensors().Where(s => s.UserId == userId);
-            var totalCount = query.Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
-
-            var results = _sensorRep
-                .GetAllSensors().Where(s => s.UserId == userId)
-                .OrderByDescending(s => s.Id)
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
-                .Select(s => TheModelFactory.CreateSensorModel(s))
-                .ToList();
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetSensorsByUser", page, pageSize, pageCount, totalCount, results);
-        }
-
-        [Route("~/api/sensor-types/{id}/sensors", Name = "GetSensorsBySensorType")]
-        [HttpGet]
-        public IHttpActionResult GetSensorsBySensorType(int id, int page = 1, int pageSize = 30)
-        {
-            var query = _sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id);
-            var totalCount = query.Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
-
-            var results = _sensorRep.GetAllSensors().Where(s => s.SensorTypeId == id)
-                .OrderByDescending(s => s.Id)
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
-                .Select(s => TheModelFactory.CreateSensorModel(s))
-                .ToList();
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetSensorsBySensorType", page, pageSize, pageCount, totalCount, results);
-        }
-
-
-        [Route("~/api/sensor-types/{id}/users/sensors", Name = "GetSensorsBySensorTypeAndUser")]
-        [HttpGet]
-        public IHttpActionResult GetSensorsBySensorTypeAndUser(int id, int page = 1, int pageSize = 30)
-        {
-            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<----
-            var userId = _userRep.GetUser(_credentials.Email, _credentials.Password).Id;
-
-            var query = _sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id &&
-                            p.UserId == userId);
-
-            var totalCount = query.Count();
-
-            if (totalCount == 0)
-            {
-                return NotFound();
-            }
-
-            if (page < 1) { page = 1; }
-            if (pageSize < 1) { pageSize = 30; }
-
-            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
-
-
-            var results = _sensorRep.GetAllSensors().Where(p => p.SensorTypeId == id && p.UserId == userId)
-                .OrderByDescending(p => p.Id)
-                .Skip(pageSize * (page - 1))
-                .Take(pageSize)
-                .Select(p => TheModelFactory.CreateSensorModel(p))
-                .ToList();
-
-            if (results.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return Ok("GetSensorsBySensorTypeAndUser", page, pageSize, pageCount, totalCount, results);
-
-        }
-
-
-        [Route("address/{gatewayAddress}/{clientAddress}")]
-        [HttpPut]
-        public IHttpActionResult UpdateSensorByAddress(string gatewayAddress,
-            string clientAddress, SensorModelPut sensorModel)
-        {
-
-            if (sensorModel == null)
-            {
-                return BadRequest("You have sent an empty object.");
-            }
-
-            var sensor = _sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
-
+            var sensor = _sensorRep.GetAll().SingleOrDefault(s => s.Address == address);
             if (sensor == null)
             {
                 return NotFound();
             }
 
-            if (!ModelState.IsValid)
+            var sensorModel = ModelFactory.CreateModel(sensor);
+
+            return Ok(sensorModel);
+        }
+
+        [SensorsManagerAuthorize]
+        [HttpGet,Route("", Name = "GetAllSensors")]
+        public IHttpActionResult GetAll(int networkId,int page = 1, int pageSize = 30)
+        {
+
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+            var network = _networkRep.Get(networkId);
+            if (network == null || network.User_Id != userId)
             {
-                var error = ModelState.SelectMany(m => m.Value.Errors)
-                    .Where(m => m.ErrorMessage != "")
-                    .FirstOrDefault();
-
-                if (error == null)
-                {
-                    return BadRequest();
-                }
-
-                return BadRequest(error.ErrorMessage);
+                return NotFound();
             }
 
-            var compareName = _sensorRep.GetAllSensors()
-               .Where(p =>
-               p.Name == sensorModel.Name
-               && !string.Equals(p.GatewayAddress + p.ClientAddress
-               , gatewayAddress + clientAddress))
-               .SingleOrDefault();
+            var query = _sensorRep.GetAll().Where(s => s.Network_Id == networkId);
+            var totalCount = query.Count();
 
-            if (compareName != null)
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
+            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
+
+            var results = query
+                .OrderByDescending(p => p.Id)
+                .Skip(pageSize * (page - 1))
+                .Take(pageSize)
+                .Select(p => ModelFactory.CreateModel(p))
+                .ToList();
+
+
+            return Ok("GetAllSensors", page, pageSize, pageCount, totalCount, results);
+        }
+
+        [SensorsManagerAuthorize]
+        [HttpGet,Route("", Name = "GetSensorsBySensorType")]
+        public IHttpActionResult GetAll(int networkId,int typeId, int page = 1, int pageSize = 30)
+        {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+            var network = _networkRep.Get(networkId);
+            var sensorType = _typeRep.Get(typeId);
+            if (network == null || network.User_Id != userId || sensorType == null)
             {
-                return Conflict("There already is a sensor with that name.");
+                return NotFound();
+            }
+
+            var query = _sensorRep.GetAll()
+                .Where(p => p.SensorType_Id == typeId && p.Network_Id == networkId);
+            var totalCount = query.Count();
+
+            if (page < 1) { page = 1; }
+            if (pageSize < 1) { pageSize = 30; }
+
+            var pageCount = (int)Math.Ceiling((float)totalCount / pageSize);
+
+            var results = _sensorRep.GetAll()
+                .Where(s => s.SensorType_Id == typeId && s.Network_Id == networkId)
+                .OrderByDescending(s => s.Id)
+                .Skip(pageSize * (page - 1))
+                .Take(pageSize)
+                .Select(s => ModelFactory.CreateModel(s))
+                .ToList();
+
+            return Ok("GetSensorsBySensorType", page, pageSize, pageCount, totalCount, results);
+        }
+
+        [SensorsManagerAuthorize]
+        [HttpPut,HttpPatch,Route("{id:int}"),ValidateModel]
+        public IHttpActionResult Update(int networkId, int id, SensorModelPut sensorModel)
+        {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+
+            var network = _networkRep.GetAll()
+                .SingleOrDefault(p => p.Id == networkId
+                && p.User_Id == userId);
+
+            if (network == null)
+            {
+                return NotFound();
+            }
+
+            if(sensorModel == null)
+            {
+                return BadRequest("You have sent an empty object!");
             }
 
 
+            var sensor = _sensorRep.GetAll().SingleOrDefault(
+                    p => p.Name == sensorModel.Name && p.Id != id
+                );
 
-            if (sensorModel.UploadInterval < sensor.UploadInterval
-                && sensor.Active == true)
+            if(sensor != null)
             {
-
-                var lastReading = _readingRep
-                    .GetSensorReadingBySensorId(sensor.Id)
-                    .OrderByDescending(r => r.InsertDate)
-                    .FirstOrDefault();
-                //Calculates the wait time
-                uint waitTime = (uint)(
-                   (lastReading.InsertDate
-                   .AddMinutes(sensor.UploadInterval)
-                   - _dateTime.GetDateTime() 
-                   ).TotalMinutes);
-                if (waitTime == 0)
-                {
-                    waitTime = 1;
-                }
-                var s = waitTime > 1 ? "s" : "";
-
-                //Store the model
-                var pendingModel =
-                    TheModelFactory
-                    .CreateSensorModel(sensor.Id, sensorModel.UploadInterval);
-
-                TheSensorIntervalPending.AddToPending(pendingModel);
-
-                sensorModel.UploadInterval = sensor.UploadInterval;
-                TheModelToEntityMap
-                          .MapSensorModelToSensorEntity(sensorModel, sensor);
-
-                _sensorRep.UpdateSensor(sensor);
-
-                return Ok($"It will take {waitTime} minute{s} to change the upload interval");
+                return Conflict("Sensor already exists");
             }
 
+            sensor = _sensorRep.Get(id);
+            if (sensor == null)
+            {
+                return NotFound();
+            }
 
-            TheModelToEntityMap
-                         .MapSensorModelToSensorEntity(sensorModel, sensor);
-            _sensorRep.UpdateSensor(sensor);
-
+            ModelToEntityMap.MapToEntity(sensorModel, sensor);
+            _sensorRep.Update(sensor);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-
         [SensorsManagerAuthorize]
-        [Route("address/{gatewayAddress}/{clientAddress}", Name = "DeleteSensorAddressRoute")]
-        [HttpDelete]
-        public  void DeleteSensorByAddress(string gatewayAddress, string clientAddress)
+        [HttpDelete,Route("{id:int}")]
+        public void Delete(int networkId, int id)
         {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            var sensor = _sensorRep.GetSensorByAddress(gatewayAddress, clientAddress);
-            if (sensor != null)
+            var sensor = _sensorRep.Get(id);
+            if (sensor != null && sensor.Network_Id == networkId && sensor.Network.User_Id == userId)
             {
-                _sensorRep.DeleteSensor(sensor.Id);
+                _sensorRep.Delete(id);
+                _connetionRep.Delete(id);
             }
         }
-
-        //[SensorsManagerAuthorize]
-        //[Route("~/api/registered-sensors/{id}")]
-        //[HttpPut]
-        //public IHttpActionResult RegisterSensor(int id)
-        //{
-        //    return StatusCode(HttpStatusCode.NotImplemented);
-        //}
     }
 }

@@ -1,5 +1,4 @@
-﻿using SensorsManager.Web.Api.ServiceInterfaces;
-using System;
+﻿using System;
 
 namespace SensorsManager.Web.Api.Services
 {

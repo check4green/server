@@ -1,4 +1,4 @@
-﻿using SensorsManager.Web.Api.ServiceInterfaces;
+﻿using SensorsManager.Web.Api.Services;
 using System.Net;
 using System.Net.Http;
 using System.Threading;

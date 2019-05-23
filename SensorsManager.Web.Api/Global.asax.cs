@@ -10,6 +10,12 @@ namespace SensorsManager.Web.Api
             GlobalConfiguration.Configure(WebApiConfig.Register);
             UnityConfig.RegisterComponents();
             ActivityCheck.CheckSensorActivity();
+            //Ignore the self referencing loop
+            GlobalConfiguration.Configuration
+                .Formatters
+                .JsonFormatter
+                .SerializerSettings
+                .ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         }
 
         

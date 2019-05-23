@@ -5,15 +5,15 @@ using System;
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class ModelToEntityMap
+    public class ModelMapper
     {
-        public void MapSensorModelToSensorEntity(
+        public void MapToEntity(
           SensorPendingModel sensorPendingModel, Sensor sensor)
         {
             sensor.UploadInterval = sensorPendingModel.UploadInterval;
         }
 
-        public void MapSensorModelToSensorEntity(SensorModelPut sensorModel, Sensor sensor)
+        public void MapToEntity(SensorModelPut sensorModel, Sensor sensor)
         {
             sensor.Name = sensorModel.Name;
             sensor.UploadInterval = sensorModel.UploadInterval;
@@ -21,72 +21,70 @@ namespace SensorsManager.Web.Api.Models
             sensor.Longitude = sensorModel.Longitude;
         }
 
-        public Sensor MapSensorModelToSensorEntity(SensorModelPost sensorModel, int userId)
+        public Sensor MapToEntity(SensorModelPost sensorModel)
         {
             return new Sensor
             {
                 Name = sensorModel.Name,
-                SensorTypeId = sensorModel.SensorTypeId,
+                SensorType_Id = sensorModel.SensorTypeId,
+                Network_Id = sensorModel.NetworkId,
                 ProductionDate = sensorModel.ProductionDate,
                 UploadInterval = sensorModel.UploadInterval,
-                GatewayAddress = sensorModel.GatewayAddress.ToLower(),
-                ClientAddress = sensorModel.ClientAddress.ToLower(),
+                Address = sensorModel.Address,
                 Latitude = sensorModel.Latitude,
-                Longitude = sensorModel.Longitude,
-                UserId = userId
+                Longitude = sensorModel.Longitude
             };
         }
 
-       public SensorReading MapSensorReadingModelToSensorReadingEntity(SensorReadingModelPost sensorReadingModel,int sensorId)
+        public SensorReading MapToEntity(SensorReadingModelPost sensorReadingModel, int sensorId)
         {
             return new SensorReading
             {
-                SensorId = sensorId,
+                Sensor_Id = sensorId,
+                GatewayAddress = sensorReadingModel.GatewayAddress,
                 Value = sensorReadingModel.Value,
                 ReadingDate = sensorReadingModel.ReadingDate,
                 InsertDate = DateTime.UtcNow
             };
         }
 
-        public Measurement MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel)
+        public Measurement MapToEntity(MeasurementModel measurementModel)
         {
             return new Measurement
             {
                 Description = measurementModel.Description,
                 UnitOfMeasure = measurementModel.UnitOfMeasure
-
             };
         }
-        public void MapMeasurementModelToMeasurementEntity(MeasurementModel measurementModel, Measurement measurement)
+
+        public void MapToEntity(MeasurementModel measurementModel, Measurement measurement)
         {
             measurement.Description = measurementModel.Description;
             measurement.UnitOfMeasure = measurementModel.UnitOfMeasure;
         }
 
-        public SensorType MapSensorTypeModelToSensorTypeEnrity(SensorTypeModel sensorTypeModel)
+        public SensorType MapToEntity(SensorTypeModel sensorTypeModel)
         {
             return new SensorType
             {
-                Code = sensorTypeModel.Code,
+                Name = sensorTypeModel.Name,
                 Description = sensorTypeModel.Description,
                 MinValue = sensorTypeModel.MinValue,
                 MaxValue = sensorTypeModel.MaxValue,
-                MeasureId = sensorTypeModel.MeasureId,
-                Multiplier = sensorTypeModel.Multiplier
+                Measure_Id = sensorTypeModel.MeasureId,
             };
         }
 
-        public void MapSensorTypeModelToSensorTypeEntity(SensorTypeModel sensorTypeModel, SensorType sensorType)
+        public void MapToEntity(SensorTypeModel sensorTypeModel, SensorType sensorType)
         {
-            sensorType.Code = sensorTypeModel.Code;
+            sensorType.Name = sensorTypeModel.Name;
             sensorType.Description = sensorTypeModel.Description;
             sensorType.MinValue = sensorTypeModel.MinValue;
             sensorType.MaxValue = sensorTypeModel.MaxValue;
-            sensorType.MeasureId = sensorTypeModel.MeasureId;
-            sensorType.Multiplier = sensorTypeModel.Multiplier;
+            sensorType.Measure_Id = sensorTypeModel.MeasureId;
         }
 
-        public User MapUserModelToUserEntity(UserModel userModel)
+        public User MapToEntity(UserModel userModel)
         {
             return new User
             {
@@ -100,7 +98,7 @@ namespace SensorsManager.Web.Api.Models
             };
         }
 
-        public void MapUserModelToUserEntity(UserModel userModel, User result)
+        public void MapToEntity(UserModel userModel, User result)
         {
             result.FirstName = userModel.FirstName;
             result.LastName = userModel.LastName;
@@ -109,6 +107,41 @@ namespace SensorsManager.Web.Api.Models
             result.CompanyName = userModel.CompanyName ?? "";
             result.Country = userModel.Country;
             result.PhoneNumber = userModel.PhoneNumber;
+        }
+
+        public Network MapToEntity(NetworkModelPost networkModel)
+        {
+            return new Network
+            {
+                Name = networkModel.Name,
+                Address = networkModel.Address,
+                User_Id = networkModel.User_Id
+            };
+        }
+
+        public void MapToEntity(NetworkModelPut networkModel, Network network)
+        {
+            network.Name = networkModel.Name;
+        }
+
+        public Gateway MapToEntity(GatewayModelPost gatewayModel)
+        {
+            return new Gateway
+            {
+                Name = gatewayModel.Name,
+                Address = gatewayModel.Address,
+                Network_Id = gatewayModel.Network_Id,
+                Latitude = gatewayModel.Latitude,
+                Longitude = gatewayModel.Longitude,
+                UploadInterval = gatewayModel.UploadInterval
+            };
+        }
+
+        public void MapToEntity(GatewayModelPut gatewayModel, Gateway gateway)
+        {
+            gateway.Name = gatewayModel.Name;
+            gateway.Latitude = gatewayModel.Latitude;
+            gateway.Longitude = gatewayModel.Longitude;
         }
     }
 }

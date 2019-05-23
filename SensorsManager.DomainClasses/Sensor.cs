@@ -1,48 +1,24 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace SensorsManager.DomainClasses
 {
     public class Sensor
     {
-        [Required]
-        [Key]
         public int Id { get; set; }
-
-        [Required]
-        [ForeignKey("SensorType")]
-        public int SensorTypeId { get; set; }
-        
-        [Required, MaxLength(50)]
+        public int Network_Id { get; set; }
+        public int SensorType_Id { get; set; }
         public string Name { get; set; }
-
+        public string Address { get; set; }
         public DateTime ProductionDate { get; set; }
-
-        [Required]
         public int UploadInterval { get; set; }
-
-        [Required,MaxLength(4)]
-        public string GatewayAddress { get; set; }
-
-        [Required,MaxLength(4)]
-        public string ClientAddress { get; set; }
-
-        [Required]
-        public double Latitude { get; set; }
-
-        [Required]
-        public double Longitude { get; set; }
-
-
-
         public bool Active { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+       
 
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-
-      
-        public  User User { get; set; }
-        public  SensorType SensorType { get; set; }
+        public SensorType SensorType { get; set; }
+        public Network Network { get; set; }
+        public List<SensorReading> SensorReadings { get; set; }
     }
 }

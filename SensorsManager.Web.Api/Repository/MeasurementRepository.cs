@@ -8,7 +8,7 @@ namespace SensorsManager.Web.Api.Repository
 {
     public class MeasurementRepository : IMeasurementRepository
     {
-        public Measurement AddMeasurement(Measurement measurement)
+        public Measurement Add(Measurement measurement)
         {
             using (DataContext db = new DataContext())
             {
@@ -18,7 +18,7 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public Measurement GetMeasurementById(int id)
+        public Measurement Get(int id)
         {
             using(DataContext db = new DataContext())
             {
@@ -26,7 +26,7 @@ namespace SensorsManager.Web.Api.Repository
             }
          }
 
-        public IQueryable<Measurement> GetAllMeasurements()
+        public IQueryable<Measurement> GetAll()
         {
             using(DataContext db = new DataContext())
             {
@@ -34,7 +34,18 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public void DeleteMeasurement(int id)
+        public void Update(Measurement measurement)
+        {
+
+            using (DataContext db = new DataContext())
+            {
+
+                db.Entry(measurement).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+        }
+
+        public void Delete(int id)
         {
             using(DataContext db = new DataContext())
             {
@@ -68,17 +79,6 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-       public void UpdateMeasurement(Measurement measurement)
-        {
-          
-            using (DataContext db = new DataContext())
-            {
-
-                db.Entry(measurement).State = EntityState.Modified;
-                db.SaveChanges();
-                   
-                
-            }
-        }
+     
     }
 }

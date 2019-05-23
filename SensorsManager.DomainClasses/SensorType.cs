@@ -1,28 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
 
 namespace SensorsManager.DomainClasses
 {
     public class SensorType
     {
-        [Required]
-        [Key]
         public int Id { get; set; }
-        [Required]
-        [MaxLength(50)]
-        public string Code { get; set; }
-        [MaxLength(50)]
+        public int Measure_Id { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
-        [Required]
         public decimal MinValue { get; set; }
-        [Required]
         public decimal MaxValue { get; set; }
-        [Required]
-        [ForeignKey("Measurement")]
-        public int MeasureId { get; set; }
-        [Required]
-        public decimal Multiplier { get; set; }
-
-        public  Measurement Measurement { get; set; }
+        
+        public Measurement Measurement { get; set; }
+        public List<Sensor> Sensors { get; set; }
     }
 }

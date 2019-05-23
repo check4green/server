@@ -1,6 +1,5 @@
 ﻿using SensorsManager.DataLayer;
 using SensorsManager.DomainClasses;
-using System;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -9,7 +8,7 @@ namespace SensorsManager.Web.Api.Repository
 {
     public class SensorRepository : ISensorRepository
     {
-        public Sensor AddSensor(Sensor sensor)
+        public Sensor Add(Sensor sensor)
         {
             using (DataContext db = new DataContext())
             {
@@ -19,45 +18,35 @@ namespace SensorsManager.Web.Api.Repository
             }
         }
 
-        public Sensor GetSensorByAddress(string gatewayAdress, string clientAdress)
+        public Sensor Get(int id)
         {
             using (DataContext db = new DataContext())
             {
-                return db.Sensors.Include(p => p.SensorType).Include(p => p.User)
-                    .Where(p => p.GatewayAddress == gatewayAdress && p.ClientAddress == clientAdress)
-                    .SingleOrDefault();
-            }
-        }
-
-        public IQueryable<Sensor> GetSensosByGatewayAddress(string gatewayAdress)
-        {
-            using (DataContext db = new DataContext())
-            {
-                return db.Sensors.Include(p => p.SensorType).Include(p => p.User)
-                    .Where(p => p.GatewayAddress == gatewayAdress)
-                    .ToList().AsQueryable();
-            }
-        }
-
-        public Sensor GetSensorById(int id)
-        {
-            using (DataContext db = new DataContext())
-            {
-                return db.Sensors.Include(p => p.SensorType).Include(p => p.User)
+                return db.Sensors.Include(p => p.SensorType)
+                    .Include(p => p.Network)
                     .Where(p => p.Id == id).SingleOrDefault();
             }
         }
 
-        public IQueryable<Sensor> GetAllSensors()
+        public IQueryable<Sensor> GetAll()
         {
             using (DataContext db = new DataContext())
             {
-                return db.Sensors.Include(p => p.SensorType).Include(p => p.User)
+                return db.Sensors.Include(p => p.SensorType)
                     .ToList().AsQueryable();
             }
         }
 
-        public void DeleteSensor(int id)
+        public void Update(Sensor sensor)
+        {
+            using (DataContext db = new DataContext())
+            {
+                db.Entry(sensor).State = EntityState.Modified;
+                db.SaveChanges();
+            }
+        }
+
+        public void Delete(int id)
         {
             using (DataContext db = new DataContext())
             {
@@ -69,11 +58,11 @@ namespace SensorsManager.Web.Api.Repository
                     db.Entry(sensor).State = EntityState.Deleted;
                     try
                     {
-                       
+
                         db.SaveChanges();
                     }
 
-                    catch(DbUpdateConcurrencyException ex)
+                    catch (DbUpdateConcurrencyException ex)
                     {
                         saveFailed = true;
                         var entry = ex.Entries.Single();
@@ -88,22 +77,8 @@ namespace SensorsManager.Web.Api.Repository
                     }
 
                 } while (saveFailed);
-                
+
             }
         }
-
-      
-
-
-        public void UpdateSensor(Sensor sensor)
-        {
-            using(DataContext db = new DataContext())
-            {
-                db.Entry(sensor).State = EntityState.Modified;
-                db.SaveChanges();
-            }
-        }
-
-      
     }
 }

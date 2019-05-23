@@ -48,68 +48,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataContext.cs" />
-    <Compile Include="Migrations\201803010229388_Initial.cs" />
-    <Compile Include="Migrations\201803010229388_Initial.Designer.cs">
-      <DependentUpon>201803010229388_Initial.cs</DependentUpon>
+    <Compile Include="Configurations\GatewayConfiguration.cs" />
+    <Compile Include="Configurations\MeasurementConfiguration.cs" />
+    <Compile Include="Configurations\NetworkConfiguration.cs" />
+    <Compile Include="Configurations\GatewayConnectionConfiguration.cs" />
+    <Compile Include="Migrations\201904250858435_NewDesing.cs" />
+    <Compile Include="Migrations\201904250858435_NewDesing.Designer.cs">
+      <DependentUpon>201904250858435_NewDesing.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803011023115_SensorReadings.cs" />
-    <Compile Include="Migrations\201803011023115_SensorReadings.Designer.cs">
-      <DependentUpon>201803011023115_SensorReadings.cs</DependentUpon>
+    <Compile Include="Migrations\201904251036522_dasd.cs" />
+    <Compile Include="Migrations\201904251036522_dasd.Designer.cs">
+      <DependentUpon>201904251036522_dasd.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201803041638321_Sensor.cs" />
-    <Compile Include="Migrations\201803041638321_Sensor.Designer.cs">
-      <DependentUpon>201803041638321_Sensor.cs</DependentUpon>
+    <Compile Include="Migrations\201905080924568_GatewayLocation.cs" />
+    <Compile Include="Migrations\201905080924568_GatewayLocation.Designer.cs">
+      <DependentUpon>201905080924568_GatewayLocation.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201805201950045_PageCountAndTotalCount.cs" />
-    <Compile Include="Migrations\201805201950045_PageCountAndTotalCount.Designer.cs">
-      <DependentUpon>201805201950045_PageCountAndTotalCount.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201805211113021_ForeignKeysForReadings.cs" />
-    <Compile Include="Migrations\201805211113021_ForeignKeysForReadings.Designer.cs">
-      <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201805240854113_FixedSpellingErrors.cs" />
-    <Compile Include="Migrations\201805240854113_FixedSpellingErrors.Designer.cs">
-      <DependentUpon>201805240854113_FixedSpellingErrors.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.cs" />
-    <Compile Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.Designer.cs">
-      <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201806190828527_ActivInactive.cs" />
-    <Compile Include="Migrations\201806190828527_ActivInactive.Designer.cs">
-      <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201806260736393_FixedTypo.cs" />
-    <Compile Include="Migrations\201806260736393_FixedTypo.Designer.cs">
-      <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201807161043592_UserPassword.cs" />
-    <Compile Include="Migrations\201807161043592_UserPassword.Designer.cs">
-      <DependentUpon>201807161043592_UserPassword.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201807180956022_AdditionalInfoForUser.cs" />
-    <Compile Include="Migrations\201807180956022_AdditionalInfoForUser.Designer.cs">
-      <DependentUpon>201807180956022_AdditionalInfoForUser.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201809030852209_Coordinates.cs" />
-    <Compile Include="Migrations\201809030852209_Coordinates.Designer.cs">
-      <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201809180916161_UserRegister.cs" />
-    <Compile Include="Migrations\201809180916161_UserRegister.Designer.cs">
-      <DependentUpon>201809180916161_UserRegister.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201809190909097_RemoveRegistration.cs" />
-    <Compile Include="Migrations\201809190909097_RemoveRegistration.Designer.cs">
-      <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201811201319274_GoodbyeBatchSize.cs" />
-    <Compile Include="Migrations\201811201319274_GoodbyeBatchSize.Designer.cs">
-      <DependentUpon>201811201319274_GoodbyeBatchSize.cs</DependentUpon>
+    <Compile Include="Migrations\201905230852362_LastSensorDate.cs" />
+    <Compile Include="Migrations\201905230852362_LastSensorDate.Designer.cs">
+      <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Configurations\SensorConfiguration.cs" />
+    <Compile Include="Configurations\SensorReadingConfiguration.cs" />
+    <Compile Include="Configurations\SensorTypeConfiguration.cs" />
+    <Compile Include="Configurations\UserConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SensorsManager.DomainClasses\SensorsManager.DomainClasses.csproj">
@@ -118,54 +82,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201803010229388_Initial.resx">
-      <DependentUpon>201803010229388_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201803011023115_SensorReadings.resx">
-      <DependentUpon>201803011023115_SensorReadings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201803041638321_Sensor.resx">
-      <DependentUpon>201803041638321_Sensor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201805201950045_PageCountAndTotalCount.resx">
-      <DependentUpon>201805201950045_PageCountAndTotalCount.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201805211113021_ForeignKeysForReadings.resx">
-      <DependentUpon>201805211113021_ForeignKeysForReadings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201805240854113_FixedSpellingErrors.resx">
-      <DependentUpon>201805240854113_FixedSpellingErrors.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201805250848266_FixedSensorAndSensorReadingRelationship.resx">
-      <DependentUpon>201805250848266_FixedSensorAndSensorReadingRelationship.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201806190828527_ActivInactive.resx">
-      <DependentUpon>201806190828527_ActivInactive.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201806260736393_FixedTypo.resx">
-      <DependentUpon>201806260736393_FixedTypo.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807161043592_UserPassword.resx">
-      <DependentUpon>201807161043592_UserPassword.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807180956022_AdditionalInfoForUser.resx">
-      <DependentUpon>201807180956022_AdditionalInfoForUser.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201809030852209_Coordinates.resx">
-      <DependentUpon>201809030852209_Coordinates.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201809180916161_UserRegister.resx">
-      <DependentUpon>201809180916161_UserRegister.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201809190909097_RemoveRegistration.resx">
-      <DependentUpon>201809190909097_RemoveRegistration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201811201319274_GoodbyeBatchSize.resx">
-      <DependentUpon>201811201319274_GoodbyeBatchSize.cs</DependentUpon>
-    </EmbeddedResource>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <EmbeddedResource Include="Migrations\201904250858435_NewDesing.resx">
+      <DependentUpon>201904250858435_NewDesing.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201904251036522_dasd.resx">
+      <DependentUpon>201904251036522_dasd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201905080924568_GatewayLocation.resx">
+      <DependentUpon>201905080924568_GatewayLocation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201905230852362_LastSensorDate.resx">
+      <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

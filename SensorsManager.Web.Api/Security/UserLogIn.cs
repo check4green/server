@@ -7,7 +7,7 @@ namespace SensorsManager.Web.Api.Security
         public static bool LogIn(string email, string password)
         {
             var userRep = new UserRepository();
-            var user = userRep.GetUser(email, password);
+            var user = userRep.Get(email, password);
             if (user != null)
             {
                 return true;

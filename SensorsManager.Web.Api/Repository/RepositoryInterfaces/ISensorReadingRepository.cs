@@ -5,7 +5,7 @@ namespace SensorsManager.Web.Api.Repository
 {
     public interface ISensorReadingRepository
     {
-        SensorReading AddSensorReading(SensorReading sensorReading);
-        IQueryable<SensorReading> GetSensorReadingBySensorId(int id);
+        SensorReading Add(SensorReading sensorReading);
+        IQueryable<SensorReading> Get(int id);
     }
 }
