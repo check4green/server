@@ -84,6 +84,8 @@ namespace SensorsManager.Web.Api.Controllers
                 }
 
                 sensor.Active = true;
+                sensor.LastReadingDate = reading.ReadingDate;
+                sensor.LastInsertDate = reading.InsertDate;
                 _sensorRep.Update(sensor);
 
                 var address = sensorReadingModel.SensorAddress;

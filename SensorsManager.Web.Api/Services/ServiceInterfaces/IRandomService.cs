@@ -8,6 +8,6 @@ namespace SensorsManager.Web.Api.Services
 {
     public interface IRandomService
     {
-        int Next(int minValue, int maxValue);
+        int GetRandomNumber(int minValue, int maxValue);
     }
 }

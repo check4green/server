@@ -47,6 +47,7 @@ namespace SensorsManager.Web.Api
             container.RegisterType<ISensorsControllerDependencyBlock, SensorsControllerDependencyBlock>();
             container.RegisterType<ISensorTypesControllerDependencyBlock, SensorTypesControllerDependencyBlock>();
             container.RegisterType<IUsersControllerDependencyBlock, UsersControllerDependencyBlock>();
+
                                                                                                       
 
             GlobalConfiguration.Configuration.DependencyResolver = new UnityDependencyResolver(container);

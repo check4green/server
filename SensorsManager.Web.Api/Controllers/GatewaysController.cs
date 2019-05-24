@@ -157,8 +157,7 @@ namespace SensorsManager.Web.Api.Controllers
             var networkModel = ModelFactory.CreateModel(network.Address, network.Sensors);
             
 
-            return Ok(networkModel);
-            
+            return Ok(networkModel);    
         }
 
         [SensorsManagerAuthorize]

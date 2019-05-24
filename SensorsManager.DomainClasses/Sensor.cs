@@ -11,6 +11,10 @@ namespace SensorsManager.DomainClasses
         public string Name { get; set; }
         public string Address { get; set; }
         public DateTime ProductionDate { get; set; }
+        public DateTimeOffset? LastReadingDate { get; set; }
+        public DateTimeOffset? LastInsertDate { get; set; }
+
+
         public int UploadInterval { get; set; }
         public bool Active { get; set; }
         public double Latitude { get; set; }

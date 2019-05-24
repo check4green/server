@@ -8,4 +8,4 @@ namespace SensorsManager.Web.Api.Models
         [EmailAddress(ErrorMessage = "Invalid email.")]
         public string Email { get; set; }
     }
-}
+}                                 

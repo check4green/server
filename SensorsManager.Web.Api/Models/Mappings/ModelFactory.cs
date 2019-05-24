@@ -14,6 +14,7 @@ namespace SensorsManager.Web.Api.Models
                 Id = sensor.Id,
                 Name = sensor.Name,
                 ProductionDate = sensor.ProductionDate,
+                LastReadingDate = sensor.LastReadingDate,
                 SensorTypeId = sensor.SensorType_Id,
                 UploadInterval = sensor.UploadInterval,
                 Address = sensor.Address,

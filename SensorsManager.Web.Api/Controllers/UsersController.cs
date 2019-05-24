@@ -202,7 +202,7 @@ namespace SensorsManager.Web.Api.Controllers
             try
             {
 
-                var code = _random.Next(1000, 9999).ToString();
+                var code = _random.GetRandomNumber(1000, 9999).ToString();
                 _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
 
                 _mailSender.SendMail(userModel.Email, "Reset password",
@@ -251,7 +251,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             try
             {
-                var code = _random.Next(1000, 9999).ToString();
+                var code = _random.GetRandomNumber(1000, 9999).ToString();
                 _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
 
                 _mailSender.SendMail(userModel.Email, "Validation code",

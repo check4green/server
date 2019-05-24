@@ -68,6 +68,10 @@
     <Compile Include="Migrations\201905230852362_LastSensorDate.Designer.cs">
       <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201905240802546_LastReadingDateForSensor.cs" />
+    <Compile Include="Migrations\201905240802546_LastReadingDateForSensor.Designer.cs">
+      <DependentUpon>201905240802546_LastReadingDateForSensor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configurations\SensorConfiguration.cs" />
@@ -96,6 +100,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201905230852362_LastSensorDate.resx">
       <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201905240802546_LastReadingDateForSensor.resx">
+      <DependentUpon>201905240802546_LastReadingDateForSensor.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
