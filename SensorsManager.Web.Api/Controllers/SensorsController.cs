@@ -9,6 +9,11 @@ using SensorsManager.Web.Api.Services;
 using System.Net;
 using SensorsManager.Web.Api.Validations;
 using SensorsManager.Web.Api.DependencyBlocks;
+using AutoMapper;
+using SensorsManager.DomainClasses;
+using SensorsManager.Web.Api.Pending;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -27,8 +32,8 @@ namespace SensorsManager.Web.Api.Controllers
         IGatewayConnectionRepository _connetionRep;
         ICredentialService _credentials;
         IDateTimeService _dateTime;
-
-
+        IMapper _mapper;
+        IMessageService _messages;
         public SensorsController(ISensorsControllerDependencyBlock dependencyBlock)
         {
             _userRep = dependencyBlock.UserRepository;
@@ -38,6 +43,8 @@ namespace SensorsManager.Web.Api.Controllers
             _connetionRep = dependencyBlock.ConnectionRepository;
             _credentials = dependencyBlock.CredentialService;
             _dateTime = dependencyBlock.DateTimeService;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
         [SensorsManagerAuthorize]
@@ -46,46 +53,50 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
-            if(network == null || network.User_Id != userId)
+
+            if(!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             if (sensorModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            if (_typeRep.Get(sensorModel.SensorTypeId) == null)
+            if (!_typeRep.Exists(sensorModel.SensorTypeId))
             {
-                return NotFound($"There is no sensor type with the id:{sensorModel.SensorTypeId}.");
-            }
-
-            if (_sensorRep.GetAll()
-                .Where(p => p.Address == sensorModel.Address).
-                SingleOrDefault() != null)
-            {
-                return Conflict("There already is a sensor with that address.");
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type", "Id");
+                return NotFound(errorMessage);
             }
 
             if (_sensorRep.GetAll()
-               .Where(p => p.Name == sensorModel.Name)
-               .SingleOrDefault() != null)
+                .Any(p => p.Address == sensorModel.Address))
             {
-                return Conflict("There already is a sensor with that name.");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor", "Address");
+                return Conflict(errorMessage);
+            }
+
+            if (_sensorRep.GetAll()
+               .Any(p => p.Name == sensorModel.Name))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor", "Name");
+                return Conflict(errorMessage);
             }
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             sensorModel.ProductionDate = _dateTime.GetDateTime();
             sensorModel.NetworkId = networkId;
-            var sensor = ModelToEntityMap.MapToEntity(sensorModel);
+            var sensor = _mapper.Map<Sensor>(sensorModel);
             _sensorRep.Add(sensor);
 
+            var createdSensor = _mapper.Map<SensorModelGet>(sensor);
 
             return CreatedAtRoute("GetSensor",
                 new {id = sensor.Id},
-                sensor);
+                createdSensor);
 
         }
         [SensorsManagerAuthorize]
@@ -94,19 +105,21 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
-            if (network == null || network.User_Id != userId)
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             var sensor = _sensorRep.Get(id);
             if(sensor == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor");
+                return NotFound(errorMessage);
             }
 
-            var sensorModel = ModelFactory.CreateModel(sensor);
+            var sensorModel = _mapper.Map<SensorModelGet>(sensor);
 
             return Ok(sensorModel);
         }
@@ -118,10 +131,11 @@ namespace SensorsManager.Web.Api.Controllers
             var sensor = _sensorRep.GetAll().SingleOrDefault(s => s.Address == address);
             if (sensor == null)
             {
-                return NotFound();
+                var errorMssage = _messages.GetMessage(Custom.NotFound, "Sensor");
+                return NotFound(errorMssage);
             }
 
-            var sensorModel = ModelFactory.CreateModel(sensor);
+            var sensorModel = _mapper.Map<SensorModelGet>(sensor);
 
             return Ok(sensorModel);
         }
@@ -133,10 +147,11 @@ namespace SensorsManager.Web.Api.Controllers
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
-            if (network == null || network.User_Id != userId)
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             var query = _sensorRep.GetAll().Where(s => s.Network_Id == networkId);
@@ -151,7 +166,7 @@ namespace SensorsManager.Web.Api.Controllers
                 .OrderByDescending(p => p.Id)
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(p => ModelFactory.CreateModel(p))
+                .Select(p => _mapper.Map<SensorModelGet>(p))
                 .ToList();
 
 
@@ -164,11 +179,18 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
             var sensorType = _typeRep.Get(typeId);
-            if (network == null || network.User_Id != userId || sensorType == null)
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
+            }
+
+            if(!_typeRep.GetAll().Any(st => st.Id == typeId))
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type", "Id");
+                return NotFound(errorMessage);
             }
 
             var query = _sensorRep.GetAll()
@@ -185,50 +207,179 @@ namespace SensorsManager.Web.Api.Controllers
                 .OrderByDescending(s => s.Id)
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(s => ModelFactory.CreateModel(s))
+                .Select(s => _mapper.Map<SensorModelGet>(s))
                 .ToList();
 
             return Ok("GetSensorsBySensorType", page, pageSize, pageCount, totalCount, results);
         }
 
         [SensorsManagerAuthorize]
-        [HttpPut,HttpPatch,Route("{id:int}"),ValidateModel]
+        [HttpPut,Route("{id:int}"),ValidateModel]
         public IHttpActionResult Update(int networkId, int id, SensorModelPut sensorModel)
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            var network = _networkRep.GetAll()
-                .SingleOrDefault(p => p.Id == networkId
-                && p.User_Id == userId);
-
-            if (network == null)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             if(sensorModel == null)
             {
-                return BadRequest("You have sent an empty object!");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-
-            var sensor = _sensorRep.GetAll().SingleOrDefault(
-                    p => p.Name == sensorModel.Name && p.Id != id
-                );
-
-            if(sensor != null)
+            if(_sensorRep.GetAll().Any(
+                    p => p.Name == sensorModel.Name && p.Id != id))
             {
-                return Conflict("Sensor already exists");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor", "Name");
+                return Conflict(errorMessage);
             }
 
-            sensor = _sensorRep.Get(id);
+            var sensor = _sensorRep.Get(id);
             if (sensor == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor");
+                return NotFound(errorMessage);
             }
 
-            ModelToEntityMap.MapToEntity(sensorModel, sensor);
+
+            //Pending
+            if (sensorModel.UploadInterval < sensor.UploadInterval
+                && sensor.Active == true)
+            {
+                var lastInsertDate = sensor.LastInsertDate.Value;
+                var waitTime = (uint)
+                    (
+                        lastInsertDate.AddMinutes(sensor.UploadInterval) - _dateTime.GetDateTime()
+                    ).TotalMinutes;
+
+                if (waitTime == 0)
+                {
+                    waitTime = 1;
+                }
+                var s = waitTime > 1 ? "s" : "";
+
+                var pendingModel = _mapper.Map<Sensor, SensorPendingModel>(sensor,
+                    opt => opt.AfterMap((dest, src) =>
+                        src.UploadInterval = sensorModel.UploadInterval));
+
+                TheSensorIntervalPending.AddToPending(pendingModel);
+
+                _mapper.Map(sensorModel, sensor,
+                    opts => opts.BeforeMap((src, dest) => {
+                        src.UploadInterval = dest.UploadInterval;
+                    }));
+                _sensorRep.Update(sensor);
+                   
+                return Ok($"It will take {waitTime} minute{s} to change the upload interval");
+            }
+
+            _mapper.Map(sensorModel, sensor);
+            _sensorRep.Update(sensor);
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [SensorsManagerAuthorize]
+        [HttpPatch, Route("{id:int}")]
+        public IHttpActionResult PartialUpdate(int networkId, int id, JsonPatchDocument<SensorModelPut> patchDoc)
+        {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
+            }
+
+            if(patchDoc == null)
+            {
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
+            }
+
+            var sensor = _sensorRep.Get(id);
+            if(sensor == null)
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor");
+                return NotFound(errorMessage);
+            }
+
+            var sensorModel = _mapper.Map<SensorModelPut>(sensor);
+
+            try
+            {
+                patchDoc.ApplyTo(sensorModel);
+            }
+            catch (JsonPatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            Validate(sensorModel);
+
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                     .Where(m => m.ErrorMessage != "")
+                     .FirstOrDefault();
+                var errorMessage = error != null ?
+                    error.ErrorMessage : _messages.GetMessage(Generic.InvalidRequest);
+                return BadRequest(errorMessage);
+            }
+
+            if (_sensorRep.GetAll().Any(
+                    p => p.Name == sensorModel.Name && p.Id != id))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor", "Name");
+                return Conflict(errorMessage);
+            }
+
+
+            if (sensorModel.UploadInterval < sensor.UploadInterval
+              && sensor.Active == true)
+            {
+                var lastInsertDate = sensor.LastInsertDate.Value;
+                var waitTime = (uint)
+                    (
+                        lastInsertDate.AddMinutes(sensor.UploadInterval) - _dateTime.GetDateTime()
+                    ).TotalMinutes;
+
+                if (waitTime == 0)
+                {
+                    waitTime = 1;
+                }
+                var s = waitTime > 1 ? "s" : "";
+
+                var pendingModel = _mapper.Map<Sensor, SensorPendingModel>(sensor,
+                    opt => opt.AfterMap((dest, src) =>
+                        src.UploadInterval = sensorModel.UploadInterval));
+
+                TheSensorIntervalPending.AddToPending(pendingModel);
+
+                _mapper.Map(sensorModel, sensor,
+                    opts => opts.BeforeMap((src, dest) => {
+                        src.UploadInterval = dest.UploadInterval;
+                    }));
+                _sensorRep.Update(sensor);
+
+                return Ok($"It will take {waitTime} minute{s} to change the upload interval");
+            }
+
+            _mapper.Map(sensorModel, sensor);
             _sensorRep.Update(sensor);
 
             return StatusCode(HttpStatusCode.NoContent);
@@ -236,17 +387,26 @@ namespace SensorsManager.Web.Api.Controllers
 
         [SensorsManagerAuthorize]
         [HttpDelete,Route("{id:int}")]
-        public void Delete(int networkId, int id)
+        public IHttpActionResult Delete(int networkId, int id)
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            var sensor = _sensorRep.Get(id);
-            if (sensor != null && sensor.Network_Id == networkId && sensor.Network.User_Id == userId)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
+            }
+
+            if (_sensorRep.Exists(id))
             {
                 _sensorRep.Delete(id);
-                _connetionRep.Delete(id);
-            }
+                if (_connetionRep.Exists(id))
+                {
+                    _connetionRep.Delete(id);
+                }  
+            }         
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

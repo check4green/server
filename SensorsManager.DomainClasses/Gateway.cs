@@ -10,6 +10,7 @@ namespace SensorsManager.DomainClasses
         public int Network_Id { get; set; }
         public string Address { get; set; }
         public string Name { get; set; }
+        public DateTime ProductionDate { get; set; }
         public DateTime? LastSignalDate { get; set; }
         public DateTimeOffset? LastSensorDate { get; set; }
         public int UploadInterval { get; set; }

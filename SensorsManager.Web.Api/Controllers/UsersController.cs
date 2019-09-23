@@ -1,9 +1,14 @@
 ﻿
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
+using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
 using SensorsManager.Web.Api.Services;
+using SensorsManager.Web.Api.Validations;
 using System;
 using System.Linq;
 using System.Net;
@@ -22,7 +27,8 @@ namespace SensorsManager.Web.Api.Controllers
         IMemCacheService _memCache;
         IRandomService _random;
         IMailSenderService _mailSender;
-
+        IMapper _mapper;
+        IMessageService _messages;
 
         public UsersController(IUsersControllerDependencyBlock dependencyBlock)
         {
@@ -32,37 +38,42 @@ namespace SensorsManager.Web.Api.Controllers
             _memCache = dependencyBlock.MemCacheService;
             _random = dependencyBlock.RandomService;
             _mailSender = dependencyBlock.MailSenderService;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
-        [HttpPost,Route("")]
-        public IHttpActionResult Add(UserModel userModel)
+        [HttpPost,Route(""), ValidateModel]
+        public IHttpActionResult Add(UserModelPost userModel)
         {
             if (userModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
             var checkedUser = _userRep.Get(userModel.Email, userModel.Password);
 
-
             if (checkedUser != null)
             {
-                return Conflict("There already is a user with that email.");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "User", "Email");
+                return Conflict(errorMessage);
             }
 
             var email = _memCache.Get(userModel.Email);
             if (email == null)
             {
-                return Unauthorized("Your email has not been validated!");
+                var errorMessage = _messages.GetMessage(Email.InvalidEmail);
+                return Unauthorized(errorMessage);
             }
 
-
-            var user = ModelToEntityMap.MapToEntity(userModel);
+            var user = _mapper.Map<User>(userModel);
             _userRep.Add(user);
 
             _memCache.Remove(user.Email);
 
-            return CreatedAtRoute("GetUser", new { email = user.Email }, user);
+            var createdUser = _mapper.Map<UserModelGet>(user);
+
+            return CreatedAtRoute("GetUser", new { email = user.Email }, createdUser);
         }
 
         [HttpPost,Route("~/api/demoRequest")]
@@ -70,7 +81,8 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (requestModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
             try
@@ -98,11 +110,13 @@ namespace SensorsManager.Web.Api.Controllers
                 }
 
                 _mailSender.SendMail("info@check4green.com", "Request demo", body);
-                return Ok("Mail has been sent.");
+                var message = _messages.GetMessage(Email.MailSucceded);
+                return Ok(message);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return ExpectationFailed(e.Message);
+                var errorMessage = _messages.GetMessage(Email.MailFailed);
+                return ExpectationFailed(errorMessage);
             }
         }
 
@@ -111,9 +125,9 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (contactInfoModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
-
             try
             {
 
@@ -123,11 +137,13 @@ namespace SensorsManager.Web.Api.Controllers
                     $"Message: {contactInfoModel.Message}";
 
                 _mailSender.SendMail("info@check4green.com", "Contact info", body);
-                return Ok("Mail has been sent.");
+                var message = _messages.GetMessage(Email.MailSucceded);
+                return Ok(message);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return ExpectationFailed(e.Message);
+                var errorMessage = _messages.GetMessage(Email.MailFailed);
+                return ExpectationFailed(errorMessage);
             }
         }
 
@@ -139,10 +155,11 @@ namespace SensorsManager.Web.Api.Controllers
             var user = _userRep.Get(_credentials.Email, _credentials.Password);
             if (user == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "User", "Email");
+                return NotFound(errorMessage);
             }
 
-            var userModel = ModelFactory.CreateModel(user);
+            var userModel = _mapper.Map<UserModelGet>(user);
 
             return Ok(userModel);
         }
@@ -154,68 +171,133 @@ namespace SensorsManager.Web.Api.Controllers
             return Ok("Authorization succeded!");
         }
 
-        [SensorsManagerAuthorize]
+        [SensorsManagerAuthorize, ValidateModel]
         [HttpPut,Route("")]
-        public IHttpActionResult Update(UserModel userModel)
+        public IHttpActionResult Update(UserModelPut userModel)
         {
             if (userModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);//<---Remov
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
 
             var user = _userRep.Get(_credentials.Email, _credentials.Password);
 
             if (user == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "User", "Email");
+                return NotFound(errorMessage);
             }
 
-            var compareName = _userRep.GetAll()
-              .Where(u =>
-              u.Email == userModel.Email
-              && u.Id != user.Id).Count();
-            if (compareName != 0)
+            if (_userRep.GetAll()
+                    .Any(u => u.Email == userModel.Email && u.Id != user.Id))
             {
-                return Conflict("There already is a user with that email.");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "User", "Email");
+                return Conflict(errorMessage);
             }
 
-            ModelToEntityMap.MapToEntity(userModel, user);
+            _mapper.Map(userModel, user);
             _userRep.Update(user);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [HttpPut,Route("getResetCode")]
+        [SensorsManagerAuthorize]
+        [HttpPatch, Route("")]
+        public IHttpActionResult PartialUpdate([FromBody] JsonPatchDocument<UserModelPut> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
+            }
+
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+
+            var user = _userRep.Get(_credentials.Email, _credentials.Password);
+
+            if (user == null)
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "User", "Email");
+                return NotFound(errorMessage);
+            }
+
+            var userModel = _mapper.Map<UserModelPut>(user);
+            try
+            {
+                patchDoc.ApplyTo(userModel);
+            }
+            catch (JsonPatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            Validate(userModel);
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
+                var errorMessage = error != null ?
+                    error.ErrorMessage : _messages.GetMessage(Generic.InvalidRequest);
+                return BadRequest(errorMessage);
+            }
+
+            if (_userRep.GetAll()
+                  .Any(u => u.Email == userModel.Email && u.Id != user.Id))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "User", "Email");
+                return Conflict(errorMessage);
+            }
+
+            _mapper.Map(userModel, user);
+            _userRep.Update(user);
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpPut,Route("resetCode"), ValidateModel]
         public IHttpActionResult SendResetPasswordCode(UserModel_Email userModel)
         {
             if (userModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
             var user = _userRep.GetAll().Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user == null)
             {
-                return NotFound($"There is no user with the email {userModel.Email}.");
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "User", "Email");
+                return NotFound(errorMessage);
             }
             try
             {
-
                 var code = _random.GetRandomNumber(1000, 9999).ToString();
                 _memCache.Add(code, code, _dateTime.GetDateOffSet().AddMinutes(5));
 
                 _mailSender.SendMail(userModel.Email, "Reset password",
                     $"Here is your password reset code: {code}");
-                return Ok("Check your mail, you have been sent a reset code.");
+                var message = _messages.GetMessage(Email.MailSucceded_Code);
+                return Ok(message);
             }
             catch
             {
-                return ExpectationFailed("Failed to send mail. Please try again.");
+                var errorMessage = _messages.GetMessage(Email.MailFailed);
+                return ExpectationFailed(errorMessage);
             }
         }
 
-        [HttpPut,Route("resetPassword")]
+        [HttpPut,Route("password"), ValidateModel] 
         public IHttpActionResult ResetPassword(UserModel_Code userModel)
         {
             var code = _memCache.Get(userModel.Code);
@@ -227,7 +309,8 @@ namespace SensorsManager.Web.Api.Controllers
                 .Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user == null)
             {
-                return NotFound($"There is no user with the email {userModel.Email}");
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "User", "Email");
+                return NotFound(errorMessage);
             }
             user.Password = userModel.Password;
             _userRep.Update(user);
@@ -235,17 +318,19 @@ namespace SensorsManager.Web.Api.Controllers
             return Ok("Password has been reset.");
         }
 
-        [HttpPut,Route("getValidationCode")]
+        [HttpPut,Route("validationCode"), ValidateModel]
         public IHttpActionResult SendValidationCode(UserModel_Email userModel)
         {
 
             if (userModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
             var user = _userRep.GetAll().Where(u => u.Email == userModel.Email).SingleOrDefault();
             if (user != null)
             {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "User", "Email");
                 return Conflict($"There already exists an user with the mail {userModel.Email}.");
             }
 
@@ -256,15 +341,17 @@ namespace SensorsManager.Web.Api.Controllers
 
                 _mailSender.SendMail(userModel.Email, "Validation code",
                     $"Here is your validation code: {code}");
-                return Ok("Check your mail, you have been sent a validation code.");
+                var errorMessage = _messages.GetMessage(Email.MailSucceded_Code);
+                return Ok(errorMessage);
             }
             catch
             {
-                return ExpectationFailed("Failed to send mail. Please try again.");
+                var errorMessage = _messages.GetMessage(Email.MailFailed);
+                return ExpectationFailed(errorMessage);
             }
         }
 
-        [HttpPut,Route("validation")]
+        [HttpPut,Route("validation"), ValidateModel]
         public IHttpActionResult ValidateUser(UserModel_Validation userModel)
         {
             var code = _memCache.Get(userModel.Code);

@@ -5,11 +5,14 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using System.Security.Principal;
 using System.Threading;
-
+            
 namespace SensorsManager.Web.Api.Security
 {
     public class SensorsManagerAuthorizeAttribute : AuthorizationFilterAttribute
     {
+        private ICredentialService _credentials = new CredentialService();
+        private IUserLogIn _userLogIn = new UserLogIn();
+
         public override void OnAuthorization(HttpActionContext actionContext)
         {
             if (Thread.CurrentPrincipal.Identity.IsAuthenticated)
@@ -22,13 +25,12 @@ namespace SensorsManager.Web.Api.Security
                 if (authHeader.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase)
                     && !string.IsNullOrWhiteSpace(authHeader.Parameter) && (authHeader.Parameter.Length % 4 == 0))
                 {
-                    var credentials = new CredentialService();
-                    credentials.SetCredentials(authHeader.Parameter);
+                    _credentials.SetCredentials(authHeader.Parameter);
 
-                    if (UserLogIn.LogIn(credentials.Email, credentials.Password))
+                    if (_userLogIn.LogIn(_credentials.Email, _credentials.Password))
                     {
                       
-                            var principal = new GenericPrincipal(new GenericIdentity(credentials.Email), null);
+                            var principal = new GenericPrincipal(new GenericIdentity(_credentials.Email), null);
                             Thread.CurrentPrincipal = principal;
                             return;
                     }

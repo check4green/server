@@ -1,5 +1,4 @@
 ﻿using SensorsManager.Web.Api.ActionResults;
-using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Pending;
 using SensorsManager.Web.Api.Services;
 using System.Web.Http;
@@ -8,34 +7,7 @@ namespace SensorsManager.Web.Api.Controllers
 {
     public class BaseApiController : ApiController
     {
-        private static ModelMapper modelMapper;
-        private ModelFactory modelFactory;
         private static SensorIntervalPending sensorIntervalPending;
-
-        protected ModelFactory ModelFactory
-        {
-            get
-            {
-                if (modelFactory == null)
-                {
-                    modelFactory = new ModelFactory();
-                }
-                return modelFactory;
-            }
-        }
-
-        protected ModelMapper ModelToEntityMap
-        {
-            get
-            {
-                if (modelMapper == null)
-                {
-                    modelMapper = new ModelMapper();
-                }
-                return modelMapper;
-            }
-        }
-
         protected SensorIntervalPending TheSensorIntervalPending
         {
             get

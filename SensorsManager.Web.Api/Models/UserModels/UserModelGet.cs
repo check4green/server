@@ -11,6 +11,5 @@ namespace SensorsManager.Web.Api.Models
         public string CompanyName { get; set; }
         public string Country { get; set; }
         public string PhoneNumber { get; set; }
-        List<SensorType> SensorTypes { get; set; }
     }
 }

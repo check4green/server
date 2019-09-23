@@ -1,4 +1,5 @@
 ﻿using SensorsManager.Web.Api.Validations;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace SensorsManager.Web.Api.Models
@@ -11,6 +12,7 @@ namespace SensorsManager.Web.Api.Models
         public string Address { get; set; }
         [Required, MaxLength(50)]
         public string Name { get; set; }
+        public DateTime ProductionDate { get; set; }
         public int UploadInterval { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }

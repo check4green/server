@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using AutoMapper;
+using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Hubs;
 using SensorsManager.Web.Api.Models;
@@ -20,17 +22,19 @@ namespace SensorsManager.Web.Api.Controllers
 
     public class ReadingsController : ApiControllerWithHub<ReadingsHub>
     {
-        IUserRepository _userRep;
-        INetworkRepository _networkRep;
-        ISensorRepository _sensorRep;
-        IGatewayRepository _gatewayRep;
-        IGatewayConnectionRepository _connectionRep;
-        ISensorReadingRepository _readingRep;
-        ICredentialService _credentials;
-        IThrottlerService _throttler;
-        IGatewayConnectionService _connectionService;
-
-
+        private readonly IUserRepository _userRep;
+        private readonly INetworkRepository _networkRep;
+        private readonly ISensorRepository _sensorRep;
+        private readonly IGatewayRepository _gatewayRep;
+        private readonly IGatewayConnectionRepository _connectionRep;
+        private readonly ISensorReadingRepository _readingRep;
+        private readonly ICredentialService _credentials;
+        private readonly IThrottlerService _throttler;
+        private readonly IGatewayConnectionService _connectionService;
+        private readonly IVibrationFilter _vibrationFilter;
+        private readonly IDateTimeService _dateTime;
+        private readonly IMapper _mapper;
+        private readonly IMessageService _messages;
         public ReadingsController(IReadingsControllerDependencyBlock dependencyBlock)
         {
             _userRep = dependencyBlock.UserRepository;
@@ -42,6 +46,10 @@ namespace SensorsManager.Web.Api.Controllers
             _credentials = dependencyBlock.CredentialService;
             _throttler = dependencyBlock.ThrottlerService;
             _connectionService = dependencyBlock.ConnectionService;
+            _vibrationFilter = dependencyBlock.VibrationFilter;
+            _dateTime = dependencyBlock.DateTimeService;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
         [HttpPost,Route("~/api/readings/address"),ValidateModel]
@@ -49,7 +57,8 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (sensorReadingModel == null)
             {
-                return BadRequest("You have sent an empty object");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
             _throttler.ThrottlerSetup(sensorReadingModel.SensorAddress, 1, 3);
@@ -58,18 +67,16 @@ namespace SensorsManager.Web.Api.Controllers
                 return TooManyRequests(_throttler);
             }
 
-
             var sensor = _sensorRep.GetAll()
                 .Where(s => s.Address == sensorReadingModel.SensorAddress)
-                .SingleOrDefault();
-                
+                .SingleOrDefault();         
 
             if (sensor != null)
             {
-                var sensorReading = ModelToEntityMap
-                    .MapToEntity(sensorReadingModel, sensor.Id);
-
-                var reading = _readingRep.Add(sensorReading);
+                var sensorReading = _mapper.Map<SensorReading>(sensorReadingModel);
+                sensorReading.Sensor_Id = sensor.Id;
+                sensorReading.InsertDate = _dateTime.GetDateOffSet(); 
+                _readingRep.Add(sensorReading);
 
                 var pending =
                          TheSensorIntervalPending
@@ -78,14 +85,13 @@ namespace SensorsManager.Web.Api.Controllers
                 //Check if the penging exists
                 if (pending != null)
                 {
-                    ModelToEntityMap
-                       .MapToEntity(pending, sensor);
+                    _mapper.Map(pending, sensor);
                     TheSensorIntervalPending.ClearPending(pending);
                 }
 
                 sensor.Active = true;
-                sensor.LastReadingDate = reading.ReadingDate;
-                sensor.LastInsertDate = reading.InsertDate;
+                sensor.LastReadingDate = sensorReading.ReadingDate;
+                sensor.LastInsertDate = sensorReading.InsertDate;
                 _sensorRep.Update(sensor);
 
                 var address = sensorReadingModel.SensorAddress;
@@ -94,32 +100,31 @@ namespace SensorsManager.Web.Api.Controllers
                 var gateway = _gatewayRep.GetAll()
                     .SingleOrDefault(g => g.Address == sensorReadingModel.GatewayAddress);
 
+                //add the gateway connections
                 if (gateway != null)
                 {
-                    var oldConnection = _connectionRep.GetAll()
-                                      .SingleOrDefault(
-                        c => c.Gateway_Id == gateway.Id
-                        && c.Sensor_Id == sensor.Id);
-
-                    if (oldConnection == null)
+                    if (!_connectionRep.GetAll()
+                                      .Any(
+                                            c => c.Gateway_Id == gateway.Id
+                                            && c.Sensor_Id == sensor.Id)
+                                      )
                     {
                         var connection = _connectionService.Create(gateway.Id, sensor.Id);
                         _connectionRep.Add(connection);
                     }
 
-                    gateway.LastSensorDate = reading.ReadingDate;
+                    gateway.LastSensorDate = sensorReading.ReadingDate;
                     _gatewayRep.Update(gateway);
                 }
 
-
-                return Created($"api/networks/{sensor.Network_Id}/sensors/{sensor.Id}/readings", sensorReading);
+                var createdReading = _mapper.Map<SensorReadingModelGet>(sensorReading);
+                return Created($"api/networks/{sensor.Network_Id}/sensors/{sensor.Id}/readings", createdReading);
             }
             else
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor", "Address");
+                return NotFound(errorMessage);
             }
-
-
         }
 
         [SensorsManagerAuthorize]
@@ -128,26 +133,29 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
-            if (network == null || network.User_Id != userId)
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             var sensor = _sensorRep.Get(sensorId);
 
             if(sensor == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             if (page < 1) { page = 1; }
             if (pageSize < 1) { pageSize = 30; }
-
+           
+            //This needs to go!!!!
             var sensorReadings =
-                sensor.SensorType.Name != "vibration" ?
+                sensor.SensorType.Name.ToLower() != "vibration" ?
                 _readingRep.Get(sensor.Id)
-                : _readingRep.Get(sensor.Id).Where(r => r.Value != 0);
+                : _readingRep.Get(sensor.Id).Where(r => _vibrationFilter.ValidValues().Contains((int)r.Value));
 
             var totalCount = sensorReadings.Count();
 
@@ -156,11 +164,10 @@ namespace SensorsManager.Web.Api.Controllers
             var results = sensorReadings.OrderByDescending(r => r.InsertDate)
                                         .Skip(pageSize * (page - 1))
                                         .Take(pageSize)
-                                        .Select(p => ModelFactory.CreateModel(p))
+                                        .Select(p => _mapper.Map<SensorReadingModelGet>(p))
                                         .ToList();
 
             return Ok("GetSensorReadings", page, pageSize, pageCount, totalCount, results);
-
         }
     }
 }

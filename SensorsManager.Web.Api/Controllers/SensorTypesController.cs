@@ -7,6 +7,11 @@ using SensorsManager.Web.Api.Models;
 using System;
 using SensorsManager.Web.Api.Validations;
 using SensorsManager.Web.Api.DependencyBlocks;
+using AutoMapper;
+using SensorsManager.DomainClasses;
+using Microsoft.AspNetCore.JsonPatch;
+using SensorsManager.Web.Api.Services;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
 
 namespace SensorsManager.Web.Api.Controllers
 {
@@ -19,11 +24,15 @@ namespace SensorsManager.Web.Api.Controllers
     {
         IMeasurementRepository _measureRep;
         ISensorTypesRepository _typeRep;
+        IMapper _mapper;
+        IMessageService _messages;
         
         public SensorTypesController(ISensorTypesControllerDependencyBlock dependencyBlock)
         {
             _measureRep = dependencyBlock.MeasurementRepository;
             _typeRep = dependencyBlock.TypesRepository;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
         [HttpPost,Route(""),ValidateModel]
@@ -31,28 +40,24 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (sensorTypeModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
-            var measure = _measureRep.Get(sensorTypeModel.MeasureId);
-            if (measure == null)
+     
+            if (!_measureRep.Exists(sensorTypeModel.MeasureId))
             {
-                return NotFound($"There is no measurement with the id {sensorTypeModel.MeasureId}");
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Measurement", "Id");
+                return NotFound(errorMessage);
             }
 
-            var checkedSensorType =
-                _typeRep.GetAll()
-                .Where(st => st.Name == sensorTypeModel.Name)
-                .SingleOrDefault();
-
-            if (checkedSensorType != null)
+            if (_typeRep.GetAll().Any(st => st.Name == sensorTypeModel.Name))
             {
-                return Conflict("The code filed must be unique");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor Type", "Name");
+                return Conflict(errorMessage);
             }
 
-            var sensorType = ModelToEntityMap.MapToEntity(sensorTypeModel);
+            var sensorType = _mapper.Map<SensorType>(sensorTypeModel);
             _typeRep.Add(sensorType);
-
-
 
             return CreatedAtRoute("GetSensorType", new { id = sensorType.Id }, sensorType);
         }
@@ -63,9 +68,10 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorType = _typeRep.Get(id);
             if (sensorType == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type");
+                return NotFound(errorMessage);
             }
-            var sensorTypeModel = ModelFactory.CreateModel(sensorType);
+            var sensorTypeModel = _mapper.Map<SensorTypeModel>(sensorType);
 
             return Ok(sensorTypeModel);
         }
@@ -88,40 +94,96 @@ namespace SensorsManager.Web.Api.Controllers
                     .Skip(pageSize * (page - 1))
                     .Take(pageSize)
                     .OrderBy(st => st.Id)
-                    .Select(st => ModelFactory.CreateModel(st)).ToList();
+                    .Select(st => _mapper.Map<SensorTypeModel>(st)).ToList();
 
             return Ok("GetAllSensorTypes", page, pageSize, pageCount, totalCount, results);
         }
 
         [HttpPut,Route("{id:int}"),ValidateModel]
-        public IHttpActionResult Update(int id, SensorTypeModel sensorTypeModel)
+        public IHttpActionResult Update(int id, SensorTypeModelUpdate sensorTypeModel)
         {
             if (sensorTypeModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
             var sensorType = _typeRep.Get(id);
             if (sensorType == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type");
+                return NotFound(errorMessage);
             }
 
-            var checkedSensorType = _typeRep
-                .GetAll()
-                .Where(
-                st => st.Name == sensorTypeModel.Name
-                && st.Id != id).SingleOrDefault();
-
-            if (checkedSensorType != null)
+            if (_typeRep.GetAll().Any(st => st.Name == sensorTypeModel.Name
+                && st.Id != id))
             {
-                return Conflict("There already exists a sensor-type with that code.");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor Type", "Name");
+                return Conflict(errorMessage);
             }
 
-            ModelToEntityMap
-                .MapToEntity(sensorTypeModel, sensorType);
+            _mapper.Map(sensorTypeModel, sensorType);
 
             _typeRep.Update(sensorType);
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpPatch,Route("{id:int}")]
+        public IHttpActionResult PartialUpdate(int id, [FromBody] JsonPatchDocument<SensorTypeModelUpdate> patchDoc)
+        {
+            if(patchDoc == null)
+            {
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
+            }
+
+            var type = _typeRep.Get(id);
+            if (type == null)
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type");
+                return NotFound(errorMessage);
+            }
+
+            var typeModel = _mapper.Map<SensorTypeModelUpdate>(type);
+            try
+            {
+                patchDoc.ApplyTo(typeModel);
+            }
+            catch (JsonPatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            Validate(typeModel);
+
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
+                var errorMessage = error != null ?
+                    error.ErrorMessage : _messages.GetMessage(Generic.InvalidRequest);
+                return BadRequest(errorMessage);
+            }
+
+            if (_typeRep.GetAll().Any(st => st.Name == typeModel.Name
+                && st.Id != id))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Sensor Type", "Name");
+                return Conflict(errorMessage);
+            }
+
+            _mapper.Map(typeModel, type);
+            _typeRep.Update(type);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
@@ -129,7 +191,10 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete,Route("{id:int}")]
         public void Delete(int id)
         {
-           _typeRep.Delete(id);
+            if(_typeRep.Exists(id))
+            {
+                _typeRep.Delete(id);
+            }          
         }
     }
 }

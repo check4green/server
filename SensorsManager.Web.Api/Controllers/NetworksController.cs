@@ -1,4 +1,6 @@
-﻿using SensorsManager.Web.Api.DependencyBlocks;
+﻿using AutoMapper;
+using SensorsManager.DomainClasses;
+using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -20,10 +22,13 @@ namespace SensorsManager.Web.Api.Controllers
     [SensorsManagerAuthorize]
     public class NetworksController : BaseApiController
     {
-        IUserRepository _userRep;
-        INetworkRepository _networkRep;
-        ICredentialService _credentials;
-        IGuidService _guid;
+        private readonly IUserRepository _userRep;
+        private readonly INetworkRepository _networkRep;
+        private readonly ICredentialService _credentials;
+        private readonly IGuidService _guid;
+        private readonly IDateTimeService _dateTime;
+        private readonly IMapper _mapper;
+        private readonly IMessageService _messages;
 
         public NetworksController(INetworksControllerDependencyBlock dependencyBlock)
         {
@@ -31,22 +36,25 @@ namespace SensorsManager.Web.Api.Controllers
             _networkRep = dependencyBlock.NetworkRepository;
             _credentials = dependencyBlock.CredentialService;
             _guid = dependencyBlock.GuidService;
+            _dateTime = dependencyBlock.DateTimeService;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
-        [HttpPost, Route(""),ValidateModel]
+        [HttpPost, Route(""), ValidateModel]
         public IHttpActionResult Add(NetworkModelPost networkModel)
         {
             if (networkModel == null)
             {
-                return BadRequest("You have sent an empty object");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            var network = _networkRep.GetAll()
-                .SingleOrDefault(p => p.Name == networkModel.Name);
-
-            if (network != null)
+            if (_networkRep.GetAll()
+                .Any(p => p.Name == networkModel.Name))
             {
-                return Conflict("This network already exists");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Network", "Name");
+                return Conflict(errorMessage);
             }
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
@@ -54,15 +62,14 @@ namespace SensorsManager.Web.Api.Controllers
 
             networkModel.User_Id = userId;
             networkModel.Address = _guid.GetAddress();
+            networkModel.ProductionDate = _dateTime.GetDateTime();
 
-            var newNetwork = ModelToEntityMap
-                .MapToEntity(networkModel);
-
+            var newNetwork = _mapper.Map<Network>(networkModel);
             _networkRep.Add(newNetwork);
+
+            var createdNetwork = _mapper.Map<NetworkModelGet>(newNetwork);
             return CreatedAtRoute("GetNetwork",
-                new { id = newNetwork.Id }, newNetwork);
-
-
+                new { id = newNetwork.Id }, createdNetwork);
         }
 
         [HttpGet, Route("{id:int}", Name = "GetNetwork")]
@@ -72,10 +79,11 @@ namespace SensorsManager.Web.Api.Controllers
 
             if (network == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network");
+                return NotFound(errorMessage);
             }
 
-            var networkModel = ModelFactory.CreateModel(network);
+            var networkModel = _mapper.Map<NetworkModelGet>(network);
 
             return Ok(networkModel);
         }
@@ -85,6 +93,7 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+
             var query = _networkRep.GetAll().Where(p => p.User_Id == userId);
             var totalCount = query.Count();
 
@@ -96,7 +105,7 @@ namespace SensorsManager.Web.Api.Controllers
             var results = query
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(p => ModelFactory.CreateModel(p))
+                .Select(p => _mapper.Map<NetworkModelGet>(p))
                 .ToList();
 
 
@@ -109,24 +118,25 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (networkModel == null)
             {
-                return BadRequest("You have sent an empty object");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            var network = _networkRep.GetAll()
-                .SingleOrDefault(p => p.Name == networkModel.Name && p.Id != id);
-
-            if (network != null)
+            if (_networkRep.GetAll()
+                .Any(p => p.Name == networkModel.Name && p.Id != id))
             {
-                return Conflict("This network already exists");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Network", "Name");
+                return Conflict(errorMessage);
             }
 
-            network = _networkRep.Get(id);
+            var network = _networkRep.Get(id);
             if (network == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network");
+                return NotFound(errorMessage);
             }
 
-            ModelToEntityMap.MapToEntity(networkModel, network);
+            _mapper.Map(networkModel, network);
             _networkRep.Update(network);
 
             return StatusCode(HttpStatusCode.NoContent);
@@ -135,13 +145,10 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete, Route("{id:int}")]
         public void Delete(int id)
         {
-            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(id);
-            if (network != null && network.User_Id == userId)
+            if (_networkRep.Exists(id))
             {
-                _networkRep.Delete(network.Id);
-            }
+                _networkRep.Delete(id);
+            }        
         }
     }
 }

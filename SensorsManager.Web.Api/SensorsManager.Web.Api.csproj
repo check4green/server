@@ -1,5 +1,5 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.Net.Compilers.2.10.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.2.10.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\packages\Microsoft.Net.Compilers.3.2.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.2.1\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -47,8 +47,8 @@
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="CommonServiceLocator, Version=2.0.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\CommonServiceLocator.dll</HintPath>
+    <Reference Include="AutoMapper, Version=9.0.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.9.0.0\lib\net461\AutoMapper.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
@@ -56,11 +56,14 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.4.0\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.4.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.4.0\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.4.1\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.JsonPatch, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNetCore.JsonPatch.2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.JsonPatch.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -72,17 +75,17 @@
     <Reference Include="Microsoft.Owin.Cors, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Cors.4.0.1\lib\net45\Microsoft.Owin.Cors.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.2.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.4.0.1\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Security, Version=4.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.4.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
@@ -92,7 +95,13 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Security" />
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.3\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Cors, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.7\lib\net45\System.Web.Cors.dll</HintPath>
     </Reference>
@@ -117,6 +126,9 @@
     <Reference Include="System.Web.Http.WebHost, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.7\lib\net45\System.Web.Http.WebHost.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.7\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.7\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
@@ -136,29 +148,14 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
-    <Reference Include="Unity.Abstractions, Version=2.2.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.Abstractions.dll</HintPath>
+    <Reference Include="Unity.Abstractions, Version=5.11.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Abstractions.5.11.1\lib\net47\Unity.Abstractions.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Configuration, Version=5.0.3.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.Configuration.dll</HintPath>
+    <Reference Include="Unity.AspNet.WebApi, Version=5.11.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.AspNet.WebApi.5.11.1\lib\net47\Unity.AspNet.WebApi.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Container, Version=5.2.0.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.Container.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Interception, Version=5.0.4.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.Interception.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Interception.Configuration, Version=5.0.4.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.Interception.Configuration.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.RegistrationByConvention, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.RegistrationByConvention.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.ServiceLocation, Version=2.0.3.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.5.2.0\lib\net47\Unity.ServiceLocation.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.WebApi, Version=5.3.0.0, Culture=neutral, PublicKeyToken=43da31bc42a85347, processorArchitecture=MSIL">
-      <HintPath>..\packages\Unity.WebAPI.5.3.0\lib\net45\Unity.WebApi.dll</HintPath>
+    <Reference Include="Unity.Container, Version=5.11.1.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.Container.5.11.1\lib\net47\Unity.Container.dll</HintPath>
     </Reference>
     <Reference Include="WebActivatorEx, Version=2.0.0.0, Culture=neutral, PublicKeyToken=7b26dc2a43f6a0d4, processorArchitecture=MSIL">
       <HintPath>..\packages\WebActivatorEx.2.2.0\lib\net40\WebActivatorEx.dll</HintPath>
@@ -166,11 +163,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
-    <None Include="Scripts\jquery-1.6.4-vsdoc.js" />
-    <Content Include="Scripts\jquery-1.6.4.js" />
-    <Content Include="Scripts\jquery-1.6.4.min.js" />
-    <Content Include="Scripts\jquery.signalR-2.4.0.js" />
-    <Content Include="Scripts\jquery.signalR-2.4.0.min.js" />
+    <None Include="Scripts\jquery-3.4.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.4.1.js" />
+    <Content Include="Scripts\jquery-3.4.1.min.js" />
+    <Content Include="Scripts\jquery-3.4.1.slim.js" />
+    <Content Include="Scripts\jquery-3.4.1.slim.min.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.1.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.1.min.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -183,8 +182,10 @@
     <Compile Include="ActionResults\PagedActionResult.cs" />
     <Compile Include="ActionResults\TooManyRequestsActionResult.cs" />
     <Compile Include="ActionResults\UnauthorizedActionResult.cs" />
-    <Compile Include="App_Start\ActivityCheck.cs" />
-    <Compile Include="App_Start\UnityConfig.cs" />
+    <Compile Include="App_Start\ActivityManager\ActivityManager.cs" />
+    <Compile Include="App_Start\ActivityManager\IActivityManager.cs" />
+    <Compile Include="App_Start\Unity\UnityConfig.cs" />
+    <Compile Include="App_Start\Unity\UnityWebApiActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\ApiControllerWithHub.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
@@ -196,22 +197,22 @@
     <Compile Include="Controllers\SensorsController.cs" />
     <Compile Include="Controllers\SensorTypesController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
-    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IConnectionsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IGatewaysControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IMeasurementsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\INetworksControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IReadingsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\ISensorTypesControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\IUsersControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\DependencyBlocksInterfaces\ISensorsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock .cs" />
-    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock\ConnectionsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock\IConnectionsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock\IGatewaysControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock\GatewaysControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock\IMeasurementsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock\INetworksControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock\IReadingsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock\ISensorTypesControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock\IUsersControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock\ISensorsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock\MeasurementsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock\NetworksControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock\ReadingsControllerDependencyBlock .cs" />
+    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock\SensorsControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock\SensorTypesControllerDependencyBlock.cs" />
+    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock\UsersControllerDependencyBlock.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -219,6 +220,7 @@
     <Compile Include="Models\GatewayModels\GatewayModelGet.cs" />
     <Compile Include="Models\GatewayModels\GatewayModelPost.cs" />
     <Compile Include="Models\GatewayModels\GatewayModelPut.cs" />
+    <Compile Include="Models\MapperProfile.cs" />
     <Compile Include="Models\NetworkModels\NetworkModelGet.cs" />
     <Compile Include="Models\NetworkModels\NetworkModelPost.cs" />
     <Compile Include="Models\NetworkModels\NetworkModelPut.cs" />
@@ -226,58 +228,64 @@
     <Compile Include="Models\Other\ContactInfoModel.cs" />
     <Compile Include="Models\Other\DemoRequestModel.cs" />
     <Compile Include="Models\MeasurementModels\MeasurementModel.cs" />
-    <Compile Include="Models\Mappings\ModelFactory.cs" />
-    <Compile Include="Models\Mappings\ModelMapper.cs" />
     <Compile Include="Models\SensorModels\SensorModelGet.cs" />
     <Compile Include="Models\SensorModels\SensorModelPut.cs" />
     <Compile Include="Models\SensorModels\SensorModelPost.cs" />
     <Compile Include="Models\SensorReadingModels\SensorReadingModelGet.cs" />
     <Compile Include="Models\SensorReadingModels\SensorReadingModelPost.cs" />
     <Compile Include="Models\SensorTypeModels\SensorTypeModel.cs" />
+    <Compile Include="Models\SensorTypeModels\SensorTypeModelUpdate.cs" />
     <Compile Include="Models\UserModels\UserModelGet.cs" />
     <Compile Include="Models\UserModels\UserModelPost.cs" />
+    <Compile Include="Models\UserModels\UserModelPut.cs" />
     <Compile Include="Models\UserModels\UserModel_Code.cs" />
     <Compile Include="Models\UserModels\UserModel_Email.cs" />
     <Compile Include="Models\UserModels\UserModel_Registration.cs" />
     <Compile Include="Pending\SensorPendingModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repository\GatewayConnectionRepository.cs" />
-    <Compile Include="Repository\GatewayRepository.cs" />
-    <Compile Include="Repository\MeasurementRepository.cs" />
-    <Compile Include="Repository\NetworkRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\IGatewayConnectionRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\IGatewayRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\IMeasurementRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\INetworkRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\ISensorReadingRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\ISensorRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\ISensorTypesRepository.cs" />
-    <Compile Include="Repository\RepositoryInterfaces\IUserRepository.cs" />
-    <Compile Include="Repository\SensorReadingRepository.cs" />
-    <Compile Include="Repository\SensorRepository.cs" />
-    <Compile Include="Repository\SensorTypesRepository.cs" />
-    <Compile Include="Repository\UserRepository.cs" />
-    <Compile Include="Security\CredentialService.cs" />
-    <Compile Include="Security\ICredentialService.cs" />
-    <Compile Include="Services\DateTimeService.cs" />
-    <Compile Include="Services\GatewayConnectionService.cs" />
-    <Compile Include="Services\GuidService.cs" />
-    <Compile Include="Services\MailSenderService.cs" />
-    <Compile Include="Services\MemCacheService.cs" />
-    <Compile Include="Services\RandomService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IDateTimeService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IGatewayConnectionService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IGuidService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IMailSenderService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IMemCacheService.cs" />
+    <Compile Include="Repository\GatewayConnectionRepository\GatewayConnectionRepository.cs" />
+    <Compile Include="Repository\GatewayRepository\GatewayRepository.cs" />
+    <Compile Include="Repository\MeasurementRepository\MeasurementRepository.cs" />
+    <Compile Include="Repository\NetworkRepository\NetworkRepository.cs" />
+    <Compile Include="Repository\GatewayConnectionRepository\IGatewayConnectionRepository.cs" />
+    <Compile Include="Repository\GatewayRepository\IGatewayRepository.cs" />
+    <Compile Include="Repository\MeasurementRepository\IMeasurementRepository.cs" />
+    <Compile Include="Repository\NetworkRepository\INetworkRepository.cs" />
+    <Compile Include="Repository\SensorReadingRepository\ISensorReadingRepository.cs" />
+    <Compile Include="Repository\SensorRepository\ISensorRepository.cs" />
+    <Compile Include="Repository\SensorTypeRepository\ISensorTypesRepository.cs" />
+    <Compile Include="Repository\UserRepository\IUserRepository.cs" />
+    <Compile Include="Repository\SensorReadingRepository\SensorReadingRepository.cs" />
+    <Compile Include="Repository\SensorRepository\SensorRepository.cs" />
+    <Compile Include="Repository\SensorTypeRepository\SensorTypesRepository.cs" />
+    <Compile Include="Repository\UserRepository\UserRepository.cs" />
+    <Compile Include="Security\CredentialService\CredentialService.cs" />
+    <Compile Include="Security\CredentialService\ICredentialService.cs" />
+    <Compile Include="Security\UserLogin\IUserLogIn.cs" />
+    <Compile Include="Services\DateTimeService\DateTimeService.cs" />
+    <Compile Include="Services\GatewayConnectionService\GatewayConnectionService.cs" />
+    <Compile Include="Services\GuidService\GuidService.cs" />
+    <Compile Include="Services\MessagesService\IMessageService.cs" />
+    <Compile Include="Services\MessagesService\MessageService.cs" />
+    <Compile Include="Services\MessagesService\MessageTypes.cs" />
+    <Compile Include="Validations\IVibrationFilter.cs" />
+    <Compile Include="Services\MailSenderService\MailSenderService.cs" />
+    <Compile Include="Services\MemCacheService\MemCacheService.cs" />
+    <Compile Include="Services\RandomService\RandomService.cs" />
+    <Compile Include="Services\DateTimeService\IDateTimeService.cs" />
+    <Compile Include="Services\GatewayConnectionService\IGatewayConnectionService.cs" />
+    <Compile Include="Services\GuidService\IGuidService.cs" />
+    <Compile Include="Services\MailSenderService\IMailSenderService.cs" />
+    <Compile Include="Services\MemCacheService\IMemCacheService.cs" />
     <Compile Include="Security\SensorsManagerAuthorizeAttribute.cs" />
-    <Compile Include="Security\UserLogIn.cs" />
+    <Compile Include="Security\UserLogin\UserLogIn.cs" />
     <Compile Include="Pending\SensorIntervalPending.cs" />
-    <Compile Include="Services\ServiceInterfaces\IRandomService.cs" />
-    <Compile Include="Services\ServiceInterfaces\IThrottlerService.cs" />
+    <Compile Include="Services\RandomService\IRandomService.cs" />
+    <Compile Include="Services\ThrottlerService\IThrottlerService.cs" />
+    <Compile Include="Validations\VibrationFilter.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Validations\NameValidation.cs" />
-    <Compile Include="Services\ThrottlerService.cs" />
+    <Compile Include="Services\ThrottlerService\ThrottlerService.cs" />
     <Compile Include="Validations\ValidateModelAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -289,6 +297,8 @@
     <Content Include="swiss-iot.PublishSettings">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
+    <Content Include="Scripts\jquery-3.4.1.min.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
       <SubType>Designer</SubType>
@@ -310,6 +320,9 @@
       <Project>{34abe9bd-5bc8-4e00-bf56-3e6de0fc3dae}</Project>
       <Name>SensorsManager.DomainClasses</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -343,7 +356,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.2.10.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.2.10.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.2.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.2.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

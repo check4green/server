@@ -8,8 +8,7 @@ namespace SensorsManager.Web.Api
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
-            UnityConfig.RegisterComponents();
-            ActivityCheck.CheckSensorActivity();
+            ActivityManager.CheckActivity();
             //Ignore the self referencing loop
             GlobalConfiguration.Configuration
                 .Formatters
@@ -18,6 +17,7 @@ namespace SensorsManager.Web.Api
                 .ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
         }
 
-        
+        private IActivityManager ActivityManager
+           => (IActivityManager)GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(IActivityManager));
     }
 }

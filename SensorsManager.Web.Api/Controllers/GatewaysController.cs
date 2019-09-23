@@ -1,4 +1,8 @@
-﻿using SensorsManager.Web.Api.DependencyBlocks;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
+using SensorsManager.DomainClasses;
+using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -20,11 +24,13 @@ namespace SensorsManager.Web.Api.Controllers
     
     public class GatewaysController : BaseApiController
     {
-        IUserRepository _userRep;
-        INetworkRepository _networkRep;
-        IGatewayRepository _gatewayRep;
-        ICredentialService _credentials;
-        IDateTimeService _dateTime;
+        private readonly IUserRepository _userRep;
+        private readonly INetworkRepository _networkRep;
+        private readonly IGatewayRepository _gatewayRep;
+        private readonly ICredentialService _credentials;
+        private readonly IDateTimeService _dateTime;
+        private readonly IMapper _mapper;
+        private readonly IMessageService _messages;
 
         public GatewaysController(IGatewaysControllerDependencyBlock dependencyBlock)
         {
@@ -33,6 +39,8 @@ namespace SensorsManager.Web.Api.Controllers
             _gatewayRep = dependencyBlock.GatewayRepository;
             _credentials = dependencyBlock.CredentialService;
             _dateTime = dependencyBlock.DateTimeService;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
         [SensorsManagerAuthorize]
@@ -42,67 +50,67 @@ namespace SensorsManager.Web.Api.Controllers
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            var network = _networkRep.GetAll()
-                .SingleOrDefault(p => p.Id == networkId
-                && p.User_Id == userId);
-
-            if (network == null)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             if (gatewayModel == null)
             {
-                return BadRequest("You have sent an empty object");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-
-            var gateway = _gatewayRep.GetAll()
-                .SingleOrDefault(p => p.Name == gatewayModel.Name
-                || p.Address == gatewayModel.Address
-                );
-
-            if (gateway != null)
+            if (_gatewayRep.GetAll().Any(g => g.Name == gatewayModel.Name))
             {
-                return Conflict("This gateway already exists!");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Gateway", "Name");
+                return Conflict(errorMessage);
             }
 
-
-
+            if(_gatewayRep.GetAll().Any(g => g.Address == gatewayModel.Address))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Gateway", "Address");
+                return Conflict(errorMessage);
+            }
+            
             gatewayModel.Network_Id = networkId;
-            gatewayModel.UploadInterval = 5;
+            gatewayModel.ProductionDate = _dateTime.GetDateTime();
 
-            var newGateway = ModelToEntityMap.MapToEntity(gatewayModel);
+            var newGateway = _mapper.Map<Gateway>(gatewayModel);
             _gatewayRep.Add(newGateway);
+
+            var createdGateway = _mapper.Map<GatewayModelGet>(newGateway);
 
             return CreatedAtRoute("GetGateway", new
             {
                 networkId,
                 id = newGateway.Id
-            }, newGateway);
+            }, createdGateway);
         }
 
         [SensorsManagerAuthorize]
         [HttpGet, Route("{id:int}", Name = "GetGateway")]
         public IHttpActionResult Get(int networkId, int id)
         {
-            var network = _networkRep.Get(networkId);
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            if (network == null || network.User_Id != userId)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             var gateway = _gatewayRep.Get(id);
 
             if (gateway == null)
             {
-                return NotFound();
+                var errorMesssage = _messages.GetMessage(Custom.NotFound, "Gateway");
+                return NotFound(errorMesssage);
             }
 
-            var gatewayModel = ModelFactory.CreateModel(gateway);
+            var gatewayModel = _mapper.Map<GatewayModelGet>(gateway);
 
             return Ok(gatewayModel);
         }
@@ -113,11 +121,11 @@ namespace SensorsManager.Web.Api.Controllers
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
-            var network = _networkRep.Get(networkId);
 
-            if (network == null || network.User_Id != userId)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                NotFound(errorMessage);
             }
 
             var query = _gatewayRep.GetAll().Where(p => p.Network_Id == networkId);
@@ -131,7 +139,7 @@ namespace SensorsManager.Web.Api.Controllers
             var results = query
                 .Skip(pageSize * (page - 1))
                 .Take(pageSize)
-                .Select(p => ModelFactory.CreateModel(p))
+                .Select(p => _mapper.Map<GatewayModelGet>(p))
                 .ToList();
 
 
@@ -147,16 +155,17 @@ namespace SensorsManager.Web.Api.Controllers
 
             if(gateway == null)
             {
-                NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Gateway");
+                return NotFound(errorMessage);
             }
+
             gateway.Active = true;
             gateway.LastSignalDate = _dateTime.GetDateTime();
             _gatewayRep.Update(gateway);
 
             var network = _networkRep.Get(gateway.Network_Id);
-            var networkModel = ModelFactory.CreateModel(network.Address, network.Sensors);
-            
-
+            var networkModel = _mapper.Map<NetworkWithSensorsModel>(network);
+           
             return Ok(networkModel);    
         }
 
@@ -167,54 +176,128 @@ namespace SensorsManager.Web.Api.Controllers
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            var network = _networkRep.GetAll()
-                .SingleOrDefault(p => p.Id == networkId
-                && p.User_Id == userId);
-
-            if (network == null)
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
             }
 
             if (gatewayModel == null)
             {
-                return BadRequest("You have sent an empty object!");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-
-            var gateway = _gatewayRep.GetAll().SingleOrDefault(
-                p => p.Name == gatewayModel.Name && p.Id != id);
-
-            if (gateway != null)
+            if (_gatewayRep.GetAll().Any(
+                g => g.Name == gatewayModel.Name && g.Id != id))
             {
-                return Conflict("This gateway already exits!");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Gateway", "Name");
+                return Conflict(errorMessage);
             }
 
-            gateway = _gatewayRep.Get(id);
+            var gateway = _gatewayRep.Get(id);
 
             if (gateway == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Gateway");
+                return NotFound(errorMessage);
             }
 
-            ModelToEntityMap.MapToEntity(gatewayModel, gateway);
+            _mapper.Map(gatewayModel, gateway);
             _gatewayRep.Update(gateway);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         [SensorsManagerAuthorize]
-        [HttpDelete, Route("{id:int}")]
-        public void Delete(int networkId, int id)
+        [HttpPatch, Route("{id:int}"), ValidateModel]
+        public IHttpActionResult PartialUpdate(int networkId, int id, JsonPatchDocument<GatewayModelPut> patchDoc)
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
+            }
+
+            if (patchDoc == null)
+            {
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
+            }
+
             var gateway = _gatewayRep.Get(id);
-            if (gateway != null && gateway.Network_Id == networkId && gateway.Network.User_Id == userId)
+            if(gateway == null)
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Gateway");
+                return NotFound(errorMessage);
+            }
+
+            var gatewayModel = _mapper.Map<GatewayModelPut>(gateway);
+            try
+            {
+                patchDoc.ApplyTo(gatewayModel);
+            }
+            catch (JsonPatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            Validate(gatewayModel);
+
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
+                var errorMessage = error != null ?
+                    error.ErrorMessage : _messages.GetMessage(Generic.InvalidRequest);
+                return BadRequest(errorMessage);
+            }
+
+            if (_gatewayRep.GetAll().Any(
+                g => g.Name == gatewayModel.Name && g.Id != id))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Gateway", "Name");
+                return Conflict(errorMessage);
+            }
+
+            _mapper.Map(gatewayModel, gateway);
+            _gatewayRep.Update(gateway);
+
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [SensorsManagerAuthorize]
+        [HttpDelete, Route("{id:int}")]
+        public IHttpActionResult Delete(int networkId, int id)
+        {
+            _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
+            var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
+
+            if (!_networkRep.GetAll().Any(n => n.Id == networkId && n.User_Id == userId))
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                return NotFound(errorMessage);
+            }
+
+            if (_gatewayRep.Exists(id))
             {
                 _gatewayRep.Delete(id);
             }
+            
+            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

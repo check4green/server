@@ -1,0 +1,62 @@
+--R1
+--1 sa se afiseze toate cartile cu mai mult de 100 de pagini ordonat crescator dupa titlu si care sunt in stoc
+select * from Carti c
+where c.Pagini > 100 and c.In_Stoc = 1
+order by c.Titlu
+--2 sa se afiseze toate cartile scrise in 2005 si 2007, care sunt in stoc sa se ordoneze dupa titlu
+select * from Carti c
+where YEAR(c.Data) in (2005,2007) and c.In_Stoc = 1
+order by c.Titlu
+--3 sa se afiseze toate cartile publicate la editura Teora intre 2001 si 2005
+--ordonate crescator dupa titlu
+select e.Nume, c.Titlu, c.Data from Carti c
+inner join Edituri e on c.Id_Editura = e.Id 
+	and YEAR(c.Data) > 2001 and YEAR(c.Data) < 2005
+	and e.Nume = 'Teora'
+--4 sa se afiseze cate carti au fost publicate la editura Diverta in 2010
+--Se va afisa editura si numarul de carti
+select e.Nume, count(c.Id) Numar_Carti from Carti c
+inner join Edituri e on e.Id = c.Id_Editura 
+	--and e.Nume = 'Diverta'
+	--and year(c.Data) = 2010
+	where e.Nume = 'Diverta' and year(c.Data) = 2010
+group by e.Nume
+--5 sa se afiseze ce carti au fost inchiriate de la editura Teora in 2015
+--se va afisa titlul si data inchirierii, ordonate crescator dupa titlu
+select c.Titlu, i.Data from Carti c
+inner join Edituri e on e.Id = c.Id_Editura
+inner join Inchirieri i on i.Id_Carte = c.Id
+where YEAR(i.Data) = 2015 and e.Nume = 'Teora'
+order by c.Titlu asc
+--6 sa se afiseze ce carti a inchiriat Ion Pavelescu si la ce editura au fost publicat
+--sa se afiseze titlul, editura, data publicarii
+select c.Titlu, e.Nume, c.Data from Carti c
+inner join Inchirieri i on i.Id_Carte = c.Id
+inner join Clienti cl on cl.Id = i.Id_Client
+inner join Edituri e on e.Id = c.Id_Editura
+where cl.Prenume = 'Ion' and cl.Nume = 'Pavelescu'
+--7 Sa se afiseze cati autori are cartea Banchet La Rusu
+select count(a.Id) Numar_Carti from Autori a
+inner join CartiAutori ca on a.Id = ca.Id_Autori
+inner join Carti c on c.Id = ca.Id_Carte
+where c.Titlu = 'Banchet la Rusa'                                                                               
+--8 
+--ALTER TABLE T1
+--ADD FOREIGN KEY (C1) REFERENCES T2(C2);
+--9 sa se introduca o carte in tabela de carti tinand cont ca nu exista inca edituri
+insert Carti(Titlu, Data, Pagini, In_Stoc, Pret)
+	values('Teste', '1999-09-09', 200, 1, 699)
+select * from Carti order by Id desc
+--10 sa se scrie o instructiune care mareste cu 7 cartile care sunt in stoc
+update Carti
+	set Pret += 7
+where In_Stoc = 1
+--11 sa se stearga inchirierile facut in 1 mai 2012
+delete from Inchirieri
+	where YEAR(Data) = 2012 
+		and MONTH(Data) = 05
+		and DAY(DATA) = 01
+select * from Inchirieri i
+where YEAR(Data) = 2012 
+		and MONTH(Data) = 05
+		and DAY(DATA) = 01 

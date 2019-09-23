@@ -3,9 +3,14 @@ using System.Linq;
 using System.Net;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
+using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
+using SensorsManager.Web.Api.Services;
 using SensorsManager.Web.Api.Validations;
 
 namespace SensorsManager.Web.Api.Controllers
@@ -17,11 +22,15 @@ namespace SensorsManager.Web.Api.Controllers
     [RoutePrefix("api/measurements")]
     public class MeasurementsController : BaseApiController
     {
-        IMeasurementRepository _measureRep;
+        private readonly IMeasurementRepository _measureRep;
+        private readonly IMapper _mapper;
+        private readonly IMessageService _messages;
 
         public MeasurementsController(IMeasurementsControllerDependencyBlock dependencyBlock)
         {
             _measureRep = dependencyBlock.MeasurementRepository;
+            _mapper = dependencyBlock.Mapper;
+            _messages = dependencyBlock.MessageService;
         }
 
         [HttpPost,Route(""),ValidateModel]
@@ -29,39 +38,38 @@ namespace SensorsManager.Web.Api.Controllers
         {
             if (measureModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            var measure = _measureRep
-                .GetAll()
-                .Where(m => m.UnitOfMeasure == measureModel.UnitOfMeasure)
-                .SingleOrDefault();
-
-            if (measure != null)
+            if (_measureRep.GetAll().Any(m => m.UnitOfMeasure == measureModel.UnitOfMeasure))
             {
-                return Conflict("This unit of measure already exists!");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Measurement", "Unit Of Measure");
+                return Conflict(errorMessage);
             }
 
-            var newMeasure = ModelToEntityMap
-                .MapToEntity(measureModel);
+            var newMeasure = _mapper.Map<Measurement>(measureModel);
             _measureRep.Add(newMeasure);
 
+
+            var createdMeasure = _mapper.Map<MeasurementModel>(newMeasure);
+
             return CreatedAtRoute("GetMeasurement",
-                new { id = newMeasure.Id }, newMeasure);
+                new { id = newMeasure.Id }, createdMeasure);
         }
 
         [HttpGet,Route("{id:int}", Name = "GetMeasurement")]
         public IHttpActionResult Get(int id)
         {
-
             var measurement = _measureRep.Get(id);
 
             if (measurement == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Measurement");
+                return NotFound(errorMessage);
             }
 
-            var measurementModel = ModelFactory.CreateModel(measurement);
+            var measurementModel = _mapper.Map<MeasurementModel>(measurement);
 
             return Ok(measurementModel);
         }
@@ -78,41 +86,98 @@ namespace SensorsManager.Web.Api.Controllers
 
             var results = _measureRep.GetAll()
                  .Skip(pageSize * (page - 1))
-                 .Take(pageSize).Select(m => ModelFactory.CreateModel(m))
+                 .Take(pageSize).Select(m => _mapper.Map<MeasurementModel>(m))
                  .OrderBy(m => m.Id).ToList();
 
             return Ok("GetAllMeasurements", page, pageSize, pageCount, totalCount, results);
 
         }
 
-        [HttpPut,Route("{id:int}"),ValidateModel]
+        [HttpPut,Route("{id:int}"), ValidateModel]
         public IHttpActionResult Update(int id, MeasurementModel measureModel)
         {
-
             if (measureModel == null)
             {
-                return BadRequest("You have sent an empty object.");
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
             }
 
-            var checkedMeasure = _measureRep.GetAll()
-                .Where(m =>
-                m.UnitOfMeasure == measureModel.UnitOfMeasure
-                && m.Id != id)
-                .SingleOrDefault();
-
-            if (checkedMeasure != null)
+            if (_measureRep.GetAll().Any(m => m.UnitOfMeasure == measureModel.UnitOfMeasure
+                && m.Id != id))
             {
-                return Conflict("This unit of measure already exists!");
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Measurement", "Unit Of Measure");
+                return Conflict(errorMessage);
             }
 
             var measurement = _measureRep.Get(id);
             if (measurement == null)
             {
-                return NotFound();
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Measurement");
+                return NotFound(errorMessage);
             }
 
-            ModelToEntityMap.MapToEntity(measureModel, measurement);
+            _mapper.Map(measureModel, measurement);
             _measureRep.Update(measurement);
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [HttpPatch, Route("{id:int}")]
+        public IHttpActionResult PartialUpdate(int id, [FromBody] JsonPatchDocument<MeasurementModel> patchDoc)
+        {
+            if(patchDoc == null)
+            {
+                var errorMessage = _messages.GetMessage(Generic.NullObject);
+                return BadRequest(errorMessage);
+            }
+
+            var measure = _measureRep.Get(id);
+            if(measure == null)
+            {
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Measurement");
+                return NotFound(errorMessage);
+            }
+
+            var measureModel = _mapper.Map<MeasurementModel>(measure);
+
+            try
+            {
+                patchDoc.ApplyTo(measureModel);
+            }
+            catch (JsonPatchException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            Validate(measureModel);
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.SelectMany(m => m.Value.Errors)
+                    .Where(m => m.ErrorMessage != "")
+                    .FirstOrDefault();
+                var errorMessage = error != null ? 
+                    error.ErrorMessage : _messages.GetMessage(Generic.InvalidRequest);
+                return BadRequest(errorMessage);
+            }
+
+            if (_measureRep.GetAll().Any(m => m.UnitOfMeasure == measureModel.UnitOfMeasure
+                && m.Id != id))
+            {
+                var errorMessage = _messages.GetMessage(Custom.Conflict, "Measurement", "Unit Of Measure");
+                return Conflict(errorMessage);
+            }
+
+            _mapper.Map(measureModel, measure);
+            _measureRep.Update(measure);
+
 
             return StatusCode(HttpStatusCode.NoContent);
         }
@@ -120,7 +185,10 @@ namespace SensorsManager.Web.Api.Controllers
         [HttpDelete,Route("{id:int}")]
         public void Delete(int id)
         {
-           _measureRep.Delete(id);
+            if (_measureRep.Exists(id))
+            {
+                _measureRep.Delete(id);
+            }
         }
     }
 }
