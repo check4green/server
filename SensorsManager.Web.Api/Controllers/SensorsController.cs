@@ -141,8 +141,8 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [SensorsManagerAuthorize]
-        [HttpGet,Route("", Name = "GetAllSensors")]
-        public IHttpActionResult GetAll(int networkId,int page = 1, int pageSize = 30)
+        [HttpGet, Route("", Name = "GetAllSensors")]
+        public IHttpActionResult GetAll(int networkId, int page = 1, int pageSize = 30)
         {
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
@@ -174,8 +174,8 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [SensorsManagerAuthorize]
-        [HttpGet,Route("", Name = "GetSensorsBySensorType")]
-        public IHttpActionResult GetAll(int networkId,int typeId, int page = 1, int pageSize = 30)
+        [HttpGet, Route("bytype/{typeId:int}", Name = "GetSensorsBySensorType")]
+        public IHttpActionResult GetAll(int networkId, int typeId, int page = 1, int pageSize = 30)
         {
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
@@ -187,7 +187,7 @@ namespace SensorsManager.Web.Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            if(!_typeRep.GetAll().Any(st => st.Id == typeId))
+            if (!_typeRep.GetAll().Any(st => st.Id == typeId))
             {
                 var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type", "Id");
                 return NotFound(errorMessage);

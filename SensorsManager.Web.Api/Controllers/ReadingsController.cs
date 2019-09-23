@@ -144,7 +144,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             if(sensor == null)
             {
-                var errorMessage = _messages.GetMessage(Custom.NotFound, "Network", "Id");
+                var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor", "Id");
                 return NotFound(errorMessage);
             }
 

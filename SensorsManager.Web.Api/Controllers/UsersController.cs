@@ -59,13 +59,14 @@ namespace SensorsManager.Web.Api.Controllers
                 return Conflict(errorMessage);
             }
 
+#if !DEBUG
             var email = _memCache.Get(userModel.Email);
             if (email == null)
             {
                 var errorMessage = _messages.GetMessage(Email.InvalidEmail);
                 return Unauthorized(errorMessage);
             }
-
+#endif
             var user = _mapper.Map<User>(userModel);
             _userRep.Add(user);
 
