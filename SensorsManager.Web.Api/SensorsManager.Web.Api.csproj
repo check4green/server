@@ -187,8 +187,8 @@
     <Compile Include="ActionResults\UnauthorizedActionResult.cs" />
     <Compile Include="App_Start\ActivityManager\ActivityManager.cs" />
     <Compile Include="App_Start\ActivityManager\IActivityManager.cs" />
-    <Compile Include="App_Start\AuthorizationOperationFilter.cs" />
-    <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="App_Start\Swagger\AuthorizationOperationFilter.cs" />
+    <Compile Include="App_Start\Swagger\SwaggerConfig.cs" />
     <Compile Include="App_Start\Unity\UnityConfig.cs" />
     <Compile Include="App_Start\Unity\UnityWebApiActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
