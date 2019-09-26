@@ -226,9 +226,9 @@
     <Compile Include="Models\GatewayModels\GatewayModelPost.cs" />
     <Compile Include="Models\GatewayModels\GatewayModelPut.cs" />
     <Compile Include="Models\MapperProfile.cs" />
+    <Compile Include="Models\MeasurementModels\MeasurementModelGet.cs" />
     <Compile Include="Models\NetworkModels\NetworkModelGet.cs" />
-    <Compile Include="Models\NetworkModels\NetworkModelPost.cs" />
-    <Compile Include="Models\NetworkModels\NetworkModelPut.cs" />
+    <Compile Include="Models\NetworkModels\NetworkModel.cs" />
     <Compile Include="Models\NetworkModels\NetworkWithSensorsModel.cs" />
     <Compile Include="Models\Other\ContactInfoModel.cs" />
     <Compile Include="Models\Other\DemoRequestModel.cs" />
@@ -238,7 +238,8 @@
     <Compile Include="Models\SensorModels\SensorModelPost.cs" />
     <Compile Include="Models\SensorReadingModels\SensorReadingModelGet.cs" />
     <Compile Include="Models\SensorReadingModels\SensorReadingModelPost.cs" />
-    <Compile Include="Models\SensorTypeModels\SensorTypeModel.cs" />
+    <Compile Include="Models\SensorTypeModels\SensorTypeModelGet.cs" />
+    <Compile Include="Models\SensorTypeModels\SensorTypeModelPost.cs" />
     <Compile Include="Models\SensorTypeModels\SensorTypeModelUpdate.cs" />
     <Compile Include="Models\UserModels\UserModelGet.cs" />
     <Compile Include="Models\UserModels\UserModelPost.cs" />

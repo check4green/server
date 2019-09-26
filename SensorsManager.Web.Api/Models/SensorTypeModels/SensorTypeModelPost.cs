@@ -2,9 +2,8 @@
 
 namespace SensorsManager.Web.Api.Models
 {
-    public class SensorTypeModel
+    public class SensorTypeModelPost
     {
-        public int Id { get; set; }
         [Required]
         [MaxLength(50)]
         public string Name { get; set; }
@@ -16,7 +15,5 @@ namespace SensorsManager.Web.Api.Models
         public decimal MaxValue { get; set; }
         [Required]
         public int MeasureId { get; set; }
-        [Required]
-        public decimal Multiplier { get; set; }
     }
 }

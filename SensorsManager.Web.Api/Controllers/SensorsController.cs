@@ -87,15 +87,16 @@ namespace SensorsManager.Web.Api.Controllers
             }
 
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
-            sensorModel.ProductionDate = _dateTime.GetDateTime();
-            sensorModel.NetworkId = networkId;
+            
             var sensor = _mapper.Map<Sensor>(sensorModel);
+            sensor.ProductionDate = _dateTime.GetDateTime();
+            sensor.Network_Id = networkId;
             _sensorRep.Add(sensor);
 
             var createdSensor = _mapper.Map<SensorModelGet>(sensor);
 
             return CreatedAtRoute("GetSensor",
-                new {id = sensor.Id},
+                new {id = createdSensor.Id},
                 createdSensor);
 
         }

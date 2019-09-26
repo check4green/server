@@ -13,11 +13,15 @@ namespace SensorsManager.Web.Api.Models
         [RegularExpression("^[a-zA-Z-.]*$",
             ErrorMessage = "Only alphabets, numbers and the simbols: - and . are allowed.")]
         public string LastName { get; set; }
-        [Required,MinLength(6), MaxLength(50)]
-        public string Password { get; set; }
+
         [Required, MaxLength(50)]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
         public string Email { get; set; }
+
+        [Required,MinLength(6), MaxLength(50)]
+        public string Password { get; set; }
+
+        
         [RegularExpression("^[a-zA-Z0-9-.]*$",
             ErrorMessage = "Only alphabets, numbers and the simbols: - and . are allowed.")]
         [MaxLength(100)]

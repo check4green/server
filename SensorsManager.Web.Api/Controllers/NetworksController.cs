@@ -42,7 +42,7 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [HttpPost, Route(""), ValidateModel]
-        public IHttpActionResult Add(NetworkModelPost networkModel)
+        public IHttpActionResult Add(NetworkModel networkModel)
         {
             if (networkModel == null)
             {
@@ -60,16 +60,15 @@ namespace SensorsManager.Web.Api.Controllers
             _credentials.SetCredentials(Request.Headers.Authorization.Parameter);
             var userId = _userRep.Get(_credentials.Email, _credentials.Password).Id;
 
-            networkModel.User_Id = userId;
-            networkModel.Address = _guid.GetAddress();
-            networkModel.ProductionDate = _dateTime.GetDateTime();
-
             var newNetwork = _mapper.Map<Network>(networkModel);
+            newNetwork.User_Id = userId;
+            newNetwork.Address = _guid.GetAddress();
+            newNetwork.ProductionDate = _dateTime.GetDateTime();
             _networkRep.Add(newNetwork);
 
             var createdNetwork = _mapper.Map<NetworkModelGet>(newNetwork);
             return CreatedAtRoute("GetNetwork",
-                new { id = newNetwork.Id }, createdNetwork);
+                new { id = createdNetwork.Id }, createdNetwork);
         }
 
         [HttpGet, Route("{id:int}", Name = "GetNetwork")]
@@ -114,7 +113,7 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [HttpPut, Route("{id:int}"),ValidateModel]
-        public IHttpActionResult Update(int id, NetworkModelPut networkModel)
+        public IHttpActionResult Update(int id, NetworkModel networkModel)
         {
             if (networkModel == null)
             {

@@ -36,7 +36,7 @@ namespace SensorsManager.Web.Api.Controllers
         }
 
         [HttpPost,Route(""),ValidateModel]
-        public IHttpActionResult Add(SensorTypeModel sensorTypeModel)
+        public IHttpActionResult Add(SensorTypeModelPost sensorTypeModel)
         {
             if (sensorTypeModel == null)
             {
@@ -59,7 +59,9 @@ namespace SensorsManager.Web.Api.Controllers
             var sensorType = _mapper.Map<SensorType>(sensorTypeModel);
             _typeRep.Add(sensorType);
 
-            return CreatedAtRoute("GetSensorType", new { id = sensorType.Id }, sensorType);
+            var createdType = _mapper.Map<SensorTypeModelGet>(sensorType);
+
+            return CreatedAtRoute("GetSensorType", new { id = createdType.Id }, createdType);
         }
 
         [HttpGet,Route("{id:int}", Name = "GetSensorType")]
@@ -71,7 +73,7 @@ namespace SensorsManager.Web.Api.Controllers
                 var errorMessage = _messages.GetMessage(Custom.NotFound, "Sensor Type");
                 return NotFound(errorMessage);
             }
-            var sensorTypeModel = _mapper.Map<SensorTypeModel>(sensorType);
+            var sensorTypeModel = _mapper.Map<SensorTypeModelGet>(sensorType);
 
             return Ok(sensorTypeModel);
         }
@@ -94,7 +96,7 @@ namespace SensorsManager.Web.Api.Controllers
                     .Skip(pageSize * (page - 1))
                     .Take(pageSize)
                     .OrderBy(st => st.Id)
-                    .Select(st => _mapper.Map<SensorTypeModel>(st)).ToList();
+                    .Select(st => _mapper.Map<SensorTypeModelGet>(st)).ToList();
 
             return Ok("GetAllSensorTypes", page, pageSize, pageCount, totalCount, results);
         }

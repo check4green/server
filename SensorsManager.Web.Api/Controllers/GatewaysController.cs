@@ -73,11 +73,11 @@ namespace SensorsManager.Web.Api.Controllers
                 var errorMessage = _messages.GetMessage(Custom.Conflict, "Gateway", "Address");
                 return Conflict(errorMessage);
             }
-            
-            gatewayModel.Network_Id = networkId;
-            gatewayModel.ProductionDate = _dateTime.GetDateTime();
+
 
             var newGateway = _mapper.Map<Gateway>(gatewayModel);
+            newGateway.Network_Id = networkId;
+            newGateway.ProductionDate = _dateTime.GetDateTime();
             _gatewayRep.Add(newGateway);
 
             var createdGateway = _mapper.Map<GatewayModelGet>(newGateway);
@@ -85,7 +85,7 @@ namespace SensorsManager.Web.Api.Controllers
             return CreatedAtRoute("GetGateway", new
             {
                 networkId,
-                id = newGateway.Id
+                id = createdGateway.Id
             }, createdGateway);
         }
 

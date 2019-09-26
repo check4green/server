@@ -5,6 +5,21 @@ namespace SensorsManager.DataLayer
 {
     public class DataContext : DbContext
     {
+        private static string _connectionString;
+
+        public static string ConnectionString
+        {
+            get
+            {
+#if DEBUG
+                _connectionString = "LocalContext";
+#else
+                _connectionString = "AzureContext";
+#endif
+                return _connectionString;
+            }
+        }
+
         public DbSet<Sensor> Sensors { get; set; }
         public DbSet<Measurement> Measurements { get; set; }
         public DbSet<SensorType> SensorsTypes { get; set; }
@@ -15,7 +30,7 @@ namespace SensorsManager.DataLayer
         public DbSet<GatewayConnection> GatewayConnections { get; set; }
 
         public DataContext()
-            :base("DataContext")
+            :base(ConnectionString)
         {
 
         }

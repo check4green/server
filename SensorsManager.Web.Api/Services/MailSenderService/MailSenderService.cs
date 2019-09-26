@@ -1,26 +1,29 @@
-﻿using System.Net;
+﻿using System.Configuration;
+using System.Net;
 using System.Net.Mail;
 
 namespace SensorsManager.Web.Api.Services
 {
     public class MailSenderService : IMailSenderService
     {
+        private static readonly string _email = ConfigurationManager.AppSettings["mailservice:email"];
+        private static readonly string _password = ConfigurationManager.AppSettings["mailservice:password"];
+        private static readonly string _host = ConfigurationManager.AppSettings["mailservice:host"];
+        private static readonly int _port = int.Parse(ConfigurationManager.AppSettings["mailservice:port"]);
         public void SendMail(string receiver, string subject = "", string body = "")
         {
-            var data = new { Email = "info@check4green.com", Password = "C6theo^AntU[" };
-
-            var mailMessage = new MailMessage(data.Email, receiver)
+            var mailMessage = new MailMessage(_email, receiver)
             {
                 Subject = subject,
                 Body = body
             };
 
-            var smptClient = new SmtpClient("mail.check4green.com", 587)
+            var smptClient = new SmtpClient(_host, _port)
             {
                 Credentials = new NetworkCredential()
                 {
-                    UserName = data.Email,
-                    Password = data.Password
+                    UserName = _email,
+                    Password = _password
                 },
                 EnableSsl = false,
             };

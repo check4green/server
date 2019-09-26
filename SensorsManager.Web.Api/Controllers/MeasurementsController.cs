@@ -52,7 +52,7 @@ namespace SensorsManager.Web.Api.Controllers
             _measureRep.Add(newMeasure);
 
 
-            var createdMeasure = _mapper.Map<MeasurementModel>(newMeasure);
+            var createdMeasure = _mapper.Map<MeasurementModelGet>(newMeasure);
 
             return CreatedAtRoute("GetMeasurement",
                 new { id = newMeasure.Id }, createdMeasure);
@@ -69,7 +69,7 @@ namespace SensorsManager.Web.Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            var measurementModel = _mapper.Map<MeasurementModel>(measurement);
+            var measurementModel = _mapper.Map<MeasurementModelGet>(measurement);
 
             return Ok(measurementModel);
         }
@@ -86,7 +86,7 @@ namespace SensorsManager.Web.Api.Controllers
 
             var results = _measureRep.GetAll()
                  .Skip(pageSize * (page - 1))
-                 .Take(pageSize).Select(m => _mapper.Map<MeasurementModel>(m))
+                 .Take(pageSize).Select(m => _mapper.Map<MeasurementModelGet>(m))
                  .OrderBy(m => m.Id).ToList();
 
             return Ok("GetAllMeasurements", page, pageSize, pageCount, totalCount, results);

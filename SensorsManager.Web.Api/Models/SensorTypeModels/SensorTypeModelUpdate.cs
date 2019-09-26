@@ -13,7 +13,5 @@ namespace SensorsManager.Web.Api.Models
         public decimal MinValue { get; set; }
         [Required]
         public decimal MaxValue { get; set; }
-        [Required]
-        public decimal Multiplier { get; set; }
     }
 }

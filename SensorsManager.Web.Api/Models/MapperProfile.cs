@@ -10,19 +10,19 @@ namespace SensorsManager.Web.Api.Models
         public MapperProfile()
         {
             //Measurement
-            CreateMap<Measurement, MeasurementModel>().ReverseMap()
-                 .ForMember(x => x.Id, opt => opt.Ignore());
+            CreateMap<Measurement, MeasurementModelGet>();
+            CreateMap<MeasurementModel, Measurement>().ReverseMap();
 
             //SensorType
-            CreateMap<SensorType, SensorTypeModel>().ReverseMap()
-                .ForMember(x => x.Id, opt => opt.Ignore());
+            CreateMap<SensorType, SensorTypeModelGet>()
+                .AfterMap((st, stm) => stm.MeasureId = st.Measure_Id);
+            CreateMap<SensorTypeModelPost, SensorType>()
+                .AfterMap((stm, st) => st.Measure_Id = stm.MeasureId);
             CreateMap<SensorTypeModelUpdate, SensorType>().ReverseMap();
 
             //Network
-            CreateMap<NetworkModelPost, Network>()
-                .ForMember(x => x.Id, opt => opt.Ignore());
             CreateMap<Network, NetworkModelGet>();
-            CreateMap<NetworkModelPut, Network>();
+            CreateMap<NetworkModel, Network>();
             CreateMap<Network, NetworkWithSensorsModel>()
                 .ForMember(x => x.Network, opt => opt.Ignore())
                 .ForMember(x => x.Sensors, opt => opt.Ignore())
@@ -30,11 +30,7 @@ namespace SensorsManager.Web.Api.Models
                 .AfterMap((n, nm) => { nm.Sensors = n.Sensors.Select(s => s.Address).ToList();});
 
             //Sensor
-            CreateMap<SensorModelPost, Sensor>()
-                .ForMember(x => x.Id, opt => opt.Ignore())
-                .ForMember(x => x.LastReadingDate, opt => opt.Ignore())
-                .ForMember(x => x.LastInsertDate, opt => opt.Ignore())
-                .ForMember(x => x.Active, opt => opt.Ignore());
+            CreateMap<SensorModelPost, Sensor>();
             CreateMap<Sensor, SensorModelGet>();
             CreateMap<SensorModelPut, Sensor>().ReverseMap();
             CreateMap<SensorPendingModel, Sensor>()
@@ -42,9 +38,6 @@ namespace SensorsManager.Web.Api.Models
 
             //Gateway
             CreateMap<GatewayModelPost, Gateway>()
-                .ForMember(x => x.Id, opt => opt.Ignore())
-                .ForMember(x => x.LastSignalDate, opt => opt.Ignore())
-                .ForMember(x => x.Active, opt => opt.Ignore())
                 .AfterMap((gm, g) => g.UploadInterval = 5);
             CreateMap<Gateway, GatewayModelGet>();
             CreateMap<GatewayModelPut, Gateway>().ReverseMap();
