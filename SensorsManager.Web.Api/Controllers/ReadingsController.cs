@@ -69,10 +69,21 @@ namespace SensorsManager.Web.Api.Controllers
 
             var sensor = _sensorRep.GetAll()
                 .Where(s => s.Address == sensorReadingModel.SensorAddress)
-                .SingleOrDefault();         
+                .SingleOrDefault();
+        
 
             if (sensor != null)
             {
+
+                var gateway = _gatewayRep.GetAll()
+                   .SingleOrDefault(g => g.Address == sensorReadingModel.GatewayAddress);
+
+                if(gateway == null)
+                {
+                    var errorMessage = _messages.GetMessage(Custom.NotFound, "Gateway", "Address");
+                    return NotFound(errorMessage);
+                }
+
                 var sensorReading = _mapper.Map<SensorReading>(sensorReadingModel);
                 sensorReading.Sensor_Id = sensor.Id;
                 sensorReading.InsertDate = _dateTime.GetDateOffSet(); 
@@ -82,7 +93,7 @@ namespace SensorsManager.Web.Api.Controllers
                          TheSensorIntervalPending
                          .GetPendingMember(sensor.Id);
 
-                //Check if the penging exists
+                //Check if the pending exists
                 if (pending != null)
                 {
                     _mapper.Map(pending, sensor);
@@ -97,25 +108,21 @@ namespace SensorsManager.Web.Api.Controllers
                 var address = sensorReadingModel.SensorAddress;
                 Hub.Clients.Group(address).refreshReadings();
 
-                var gateway = _gatewayRep.GetAll()
-                    .SingleOrDefault(g => g.Address == sensorReadingModel.GatewayAddress);
+               
 
                 //add the gateway connections
-                if (gateway != null)
+                if (!_connectionRep.GetAll()
+                                    .Any(
+                                        c => c.Gateway_Id == gateway.Id
+                                        && c.Sensor_Id == sensor.Id)
+                                    )
                 {
-                    if (!_connectionRep.GetAll()
-                                      .Any(
-                                            c => c.Gateway_Id == gateway.Id
-                                            && c.Sensor_Id == sensor.Id)
-                                      )
-                    {
-                        var connection = _connectionService.Create(gateway.Id, sensor.Id);
-                        _connectionRep.Add(connection);
-                    }
-
-                    gateway.LastSensorDate = sensorReading.ReadingDate;
-                    _gatewayRep.Update(gateway);
+                    var connection = _connectionService.Create(gateway.Id, sensor.Id);
+                    _connectionRep.Add(connection);
                 }
+
+                gateway.LastSensorDate = sensorReading.ReadingDate;
+                _gatewayRep.Update(gateway);
 
                 var createdReading = _mapper.Map<SensorReadingModelGet>(sensorReading);
                 return Created($"api/networks/{sensor.Network_Id}/sensors/{sensor.Id}/readings", createdReading);
