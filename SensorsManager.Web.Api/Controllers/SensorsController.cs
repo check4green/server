@@ -8,7 +8,6 @@ using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Services;
 using System.Net;
 using SensorsManager.Web.Api.Validations;
-using SensorsManager.Web.Api.DependencyBlocks;
 using AutoMapper;
 using SensorsManager.DomainClasses;
 using SensorsManager.Web.Api.Pending;
@@ -34,17 +33,20 @@ namespace SensorsManager.Web.Api.Controllers
         IDateTimeService _dateTime;
         IMapper _mapper;
         IMessageService _messages;
-        public SensorsController(ISensorsControllerDependencyBlock dependencyBlock)
+
+        public SensorsController(IUserRepository userRep, INetworkRepository networkRep, 
+            ISensorTypesRepository typeRep, ISensorRepository sensorRep, IGatewayConnectionRepository connetionRep, 
+            ICredentialService credentials, IDateTimeService dateTime, IMapper mapper, IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _networkRep = dependencyBlock.NetworkRepository;
-            _typeRep = dependencyBlock.TypesRepository;
-            _sensorRep = dependencyBlock.SensorRepository;
-            _connetionRep = dependencyBlock.ConnectionRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _dateTime = dependencyBlock.DateTimeService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _networkRep = networkRep;
+            _typeRep = typeRep;
+            _sensorRep = sensorRep;
+            _connetionRep = connetionRep;
+            _credentials = credentials;
+            _dateTime = dateTime;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [SensorsManagerAuthorize]

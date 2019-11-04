@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -27,16 +26,19 @@ namespace SensorsManager.Web.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IMessageService _messages;
 
-        public ConnectionsController(IConnectionsControllerDependencyBlock dependencyBlock)
+        public ConnectionsController(IUserRepository userRep, INetworkRepository networkRep, 
+            IGatewayRepository gatewayRep, ISensorRepository sensorRep, 
+            IGatewayConnectionRepository connectionRep, 
+            ICredentialService credentials, IMapper mapper, IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _networkRep = dependencyBlock.NetworkRepository;
-            _gatewayRep = dependencyBlock.GatewayRepository;
-            _sensorRep = dependencyBlock.SensorRepository;
-            _connectionRep = dependencyBlock.ConnectionRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _networkRep = networkRep;
+            _gatewayRep = gatewayRep;
+            _sensorRep = sensorRep;
+            _connectionRep = connectionRep;
+            _credentials = credentials;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpGet,Route("api/networks/{networkId:int}/gateways/{gatewayId:int}/connections",Name = "GetGatewayConnections")]

@@ -7,7 +7,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Services;
@@ -26,11 +25,11 @@ namespace SensorsManager.Web.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IMessageService _messages;
 
-        public MeasurementsController(IMeasurementsControllerDependencyBlock dependencyBlock)
+        public MeasurementsController(IMeasurementRepository measureRep, IMapper mapper, IMessageService messages)
         {
-            _measureRep = dependencyBlock.MeasurementRepository;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _measureRep = measureRep;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpPost,Route(""),ValidateModel]

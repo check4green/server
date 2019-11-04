@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -30,15 +29,17 @@ namespace SensorsManager.Web.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IMessageService _messages;
 
-        public NetworksController(INetworksControllerDependencyBlock dependencyBlock)
+        public NetworksController(IUserRepository userRep, INetworkRepository networkRep, 
+            ICredentialService credentials, IGuidService guid, 
+            IDateTimeService dateTime, IMapper mapper, IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _networkRep = dependencyBlock.NetworkRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _guid = dependencyBlock.GuidService;
-            _dateTime = dependencyBlock.DateTimeService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _networkRep = networkRep;
+            _credentials = credentials;
+            _guid = guid;
+            _dateTime = dateTime;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpPost, Route(""), ValidateModel]

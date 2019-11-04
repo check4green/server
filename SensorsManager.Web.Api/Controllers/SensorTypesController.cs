@@ -6,7 +6,6 @@ using System.Web.Http.Cors;
 using SensorsManager.Web.Api.Models;
 using System;
 using SensorsManager.Web.Api.Validations;
-using SensorsManager.Web.Api.DependencyBlocks;
 using AutoMapper;
 using SensorsManager.DomainClasses;
 using Microsoft.AspNetCore.JsonPatch;
@@ -26,13 +25,14 @@ namespace SensorsManager.Web.Api.Controllers
         ISensorTypesRepository _typeRep;
         IMapper _mapper;
         IMessageService _messages;
-        
-        public SensorTypesController(ISensorTypesControllerDependencyBlock dependencyBlock)
+
+        public SensorTypesController(IMeasurementRepository measureRep, ISensorTypesRepository typeRep, 
+            IMapper mapper, IMessageService messages)
         {
-            _measureRep = dependencyBlock.MeasurementRepository;
-            _typeRep = dependencyBlock.TypesRepository;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _measureRep = measureRep;
+            _typeRep = typeRep;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpPost,Route(""),ValidateModel]

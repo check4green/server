@@ -202,22 +202,6 @@
     <Compile Include="Controllers\SensorsController.cs" />
     <Compile Include="Controllers\SensorTypesController.cs" />
     <Compile Include="Controllers\UsersController.cs" />
-    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock\ConnectionsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\ConnectionsControllerDependencyBlock\IConnectionsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock\IGatewaysControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\GatewaysControllerDependencyBlock\GatewaysControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock\IMeasurementsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock\INetworksControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock\IReadingsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock\ISensorTypesControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock\IUsersControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock\ISensorsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\MeasurementsControllerDependencyBlock\MeasurementsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\NetworksControllerDependencyBlock\NetworksControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\ReadingsControllerDependencyBlock\ReadingsControllerDependencyBlock .cs" />
-    <Compile Include="DependencyBlocks\SensorsControllerDependencyBlock\SensorsControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\SensorTypesControllerDependencyBlock\SensorTypesControllerDependencyBlock.cs" />
-    <Compile Include="DependencyBlocks\UsersControllerDependencyBlock\UsersControllerDependencyBlock.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

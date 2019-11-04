@@ -4,7 +4,6 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using AutoMapper;
 using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Hubs;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
@@ -35,21 +34,27 @@ namespace SensorsManager.Web.Api.Controllers
         private readonly IDateTimeService _dateTime;
         private readonly IMapper _mapper;
         private readonly IMessageService _messages;
-        public ReadingsController(IReadingsControllerDependencyBlock dependencyBlock)
+
+        public ReadingsController(IUserRepository userRep, INetworkRepository networkRep, 
+            ISensorRepository sensorRep, IGatewayRepository gatewayRep, 
+            IGatewayConnectionRepository connectionRep, ISensorReadingRepository readingRep, 
+            ICredentialService credentials, IThrottlerService throttler, 
+            IGatewayConnectionService connectionService, IVibrationFilter vibrationFilter, 
+            IDateTimeService dateTime, IMapper mapper, IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _networkRep = dependencyBlock.NetworkRepository;
-            _gatewayRep = dependencyBlock.GatewayRepository;
-            _sensorRep = dependencyBlock.SensorRepository;
-            _readingRep = dependencyBlock.ReadingRepository;
-            _connectionRep = dependencyBlock.ConnectionRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _throttler = dependencyBlock.ThrottlerService;
-            _connectionService = dependencyBlock.ConnectionService;
-            _vibrationFilter = dependencyBlock.VibrationFilter;
-            _dateTime = dependencyBlock.DateTimeService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _networkRep = networkRep;
+            _sensorRep = sensorRep;
+            _gatewayRep = gatewayRep;
+            _connectionRep = connectionRep;
+            _readingRep = readingRep;
+            _credentials = credentials;
+            _throttler = throttler;
+            _connectionService = connectionService;
+            _vibrationFilter = vibrationFilter;
+            _dateTime = dateTime;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpPost,Route("~/api/readings/address"),ValidateModel]

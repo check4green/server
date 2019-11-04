@@ -3,7 +3,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -30,16 +29,18 @@ namespace SensorsManager.Web.Api.Controllers
         IMapper _mapper;
         IMessageService _messages;
 
-        public UsersController(IUsersControllerDependencyBlock dependencyBlock)
+        public UsersController(IUserRepository userRep, ICredentialService credentials, IDateTimeService dateTime, 
+            IMemCacheService memCache, IRandomService random, IMailSenderService mailSender, IMapper mapper, 
+            IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _dateTime = dependencyBlock.DateTimeService;
-            _memCache = dependencyBlock.MemCacheService;
-            _random = dependencyBlock.RandomService;
-            _mailSender = dependencyBlock.MailSenderService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _credentials = credentials;
+            _dateTime = dateTime;
+            _memCache = memCache;
+            _random = random;
+            _mailSender = mailSender;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [HttpPost,Route(""), ValidateModel]

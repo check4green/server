@@ -1,6 +1,5 @@
 using AutoMapper;
 using SensorsManager.DataLayer;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -71,16 +70,6 @@ namespace SensorsManager.Web.Api
             container.RegisterType<ISensorTypesRepository, SensorTypesRepository>();
             container.RegisterType<ISensorRepository, SensorRepository>();
             container.RegisterType<ISensorReadingRepository, SensorReadingRepository>();
-
-            //DependencyBlock
-            container.RegisterType<IConnectionsControllerDependencyBlock, ConnectionsControllerDependencyBlock>();
-            container.RegisterType<IGatewaysControllerDependencyBlock, GatewaysControllerDependencyBlock>();
-            container.RegisterType<IMeasurementsControllerDependencyBlock, MeasurementsControllerDependencyBlock>();
-            container.RegisterType<INetworksControllerDependencyBlock, NetworksControllerDependencyBlock>();
-            container.RegisterType<IReadingsControllerDependencyBlock, ReadingsControllerDependencyBlock>();
-            container.RegisterType<ISensorsControllerDependencyBlock, SensorsControllerDependencyBlock>();
-            container.RegisterType<ISensorTypesControllerDependencyBlock, SensorTypesControllerDependencyBlock>();
-            container.RegisterType<IUsersControllerDependencyBlock, UsersControllerDependencyBlock>();
 
             //Other
             container.RegisterType<IUserLogIn, UserLogIn>();

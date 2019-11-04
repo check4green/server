@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using SensorsManager.DomainClasses;
-using SensorsManager.Web.Api.DependencyBlocks;
 using SensorsManager.Web.Api.Models;
 using SensorsManager.Web.Api.Repository;
 using SensorsManager.Web.Api.Security;
@@ -32,15 +31,17 @@ namespace SensorsManager.Web.Api.Controllers
         private readonly IMapper _mapper;
         private readonly IMessageService _messages;
 
-        public GatewaysController(IGatewaysControllerDependencyBlock dependencyBlock)
+        public GatewaysController(IUserRepository userRep, INetworkRepository networkRep, 
+            IGatewayRepository gatewayRep, ICredentialService credentials, IDateTimeService dateTime, 
+            IMapper mapper, IMessageService messages)
         {
-            _userRep = dependencyBlock.UserRepository;
-            _networkRep = dependencyBlock.NetworkRepository;
-            _gatewayRep = dependencyBlock.GatewayRepository;
-            _credentials = dependencyBlock.CredentialService;
-            _dateTime = dependencyBlock.DateTimeService;
-            _mapper = dependencyBlock.Mapper;
-            _messages = dependencyBlock.MessageService;
+            _userRep = userRep;
+            _networkRep = networkRep;
+            _gatewayRep = gatewayRep;
+            _credentials = credentials;
+            _dateTime = dateTime;
+            _mapper = mapper;
+            _messages = messages;
         }
 
         [SensorsManagerAuthorize]
