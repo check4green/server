@@ -284,9 +284,6 @@
     </None>
     <None Include="Properties\PublishProfiles\swiss-iot - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\swiss-iot - Web Deploy.pubxml" />
-    <Content Include="swiss-iot.PublishSettings">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
     <None Include="Web.Debug.config">
