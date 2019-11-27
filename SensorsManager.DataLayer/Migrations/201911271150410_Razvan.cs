@@ -3,7 +3,7 @@ namespace SensorsManager.DataLayer.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class NewDesing : DbMigration
+    public partial class Razvan : DbMigration
     {
         public override void Up()
         {
@@ -26,8 +26,12 @@ namespace SensorsManager.DataLayer.Migrations
                         Network_Id = c.Int(nullable: false),
                         Address = c.String(nullable: false, maxLength: 10),
                         Name = c.String(nullable: false, maxLength: 50),
+                        ProductionDate = c.DateTime(nullable: false),
+                        LastSignalDate = c.DateTime(),
+                        LastSensorDate = c.DateTimeOffset(precision: 7),
                         UploadInterval = c.Int(nullable: false),
-                        LastSignalDate = c.DateTime(nullable: false),
+                        Latitude = c.Double(nullable: false),
+                        Longitude = c.Double(nullable: false),
                         Active = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
@@ -42,6 +46,7 @@ namespace SensorsManager.DataLayer.Migrations
                         Address = c.String(nullable: false, maxLength: 10, fixedLength: true),
                         Name = c.String(nullable: false, maxLength: 50),
                         User_Id = c.Int(nullable: false),
+                        ProductionDate = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Users", t => t.User_Id, cascadeDelete: true)
@@ -52,21 +57,23 @@ namespace SensorsManager.DataLayer.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
-                        SensorType_Id = c.Int(nullable: false),
                         Network_Id = c.Int(nullable: false),
+                        SensorType_Id = c.Int(nullable: false),
                         Name = c.String(nullable: false, maxLength: 50),
-                        ProductionDate = c.DateTime(nullable: false),
-                        UploadInterval = c.Int(nullable: false),
                         Address = c.String(nullable: false, maxLength: 10),
+                        ProductionDate = c.DateTime(nullable: false),
+                        LastReadingDate = c.DateTimeOffset(precision: 7),
+                        LastInsertDate = c.DateTimeOffset(precision: 7),
+                        UploadInterval = c.Int(nullable: false),
+                        Active = c.Boolean(nullable: false),
                         Latitude = c.Double(),
                         Longitude = c.Double(),
-                        Active = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Networks", t => t.Network_Id, cascadeDelete: true)
                 .ForeignKey("dbo.SensorTypes", t => t.SensorType_Id, cascadeDelete: true)
-                .Index(t => t.SensorType_Id)
-                .Index(t => t.Network_Id);
+                .Index(t => t.Network_Id)
+                .Index(t => t.SensorType_Id);
             
             CreateTable(
                 "dbo.SensorReadings",
@@ -88,11 +95,11 @@ namespace SensorsManager.DataLayer.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
+                        Measure_Id = c.Int(nullable: false),
                         Name = c.String(nullable: false, maxLength: 50),
                         Description = c.String(maxLength: 100),
                         MinValue = c.Decimal(nullable: false, precision: 18, scale: 2),
                         MaxValue = c.Decimal(nullable: false, precision: 18, scale: 2),
-                        Measure_Id = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
                 .ForeignKey("dbo.Measurements", t => t.Measure_Id, cascadeDelete: true)
@@ -115,8 +122,8 @@ namespace SensorsManager.DataLayer.Migrations
                         Id = c.Int(nullable: false, identity: true),
                         FirstName = c.String(nullable: false, maxLength: 50),
                         LastName = c.String(nullable: false, maxLength: 50),
-                        Password = c.String(nullable: false),
                         Email = c.String(nullable: false, maxLength: 50),
+                        Password = c.String(nullable: false),
                         CompanyName = c.String(maxLength: 100),
                         Country = c.String(nullable: false, maxLength: 50),
                         PhoneNumber = c.String(nullable: false),
@@ -136,8 +143,8 @@ namespace SensorsManager.DataLayer.Migrations
             DropForeignKey("dbo.Sensors", "Network_Id", "dbo.Networks");
             DropIndex("dbo.SensorTypes", new[] { "Measure_Id" });
             DropIndex("dbo.SensorReadings", new[] { "Sensor_Id" });
-            DropIndex("dbo.Sensors", new[] { "Network_Id" });
             DropIndex("dbo.Sensors", new[] { "SensorType_Id" });
+            DropIndex("dbo.Sensors", new[] { "Network_Id" });
             DropIndex("dbo.Networks", new[] { "User_Id" });
             DropIndex("dbo.Gateways", new[] { "Network_Id" });
             DropIndex("dbo.GatewayConnections", new[] { "Gateway_Id" });

@@ -7,13 +7,13 @@ namespace SensorsManager.DataLayer.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.2.0-61023")]
-    public sealed partial class AdditionalInfoForUser : IMigrationMetadata
+    public sealed partial class Razvan : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AdditionalInfoForUser));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Razvan));
         
         string IMigrationMetadata.Id
         {
-            get { return "201807180956022_AdditionalInfoForUser"; }
+            get { return "201911271150410_Razvan"; }
         }
         
         string IMigrationMetadata.Source

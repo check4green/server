@@ -49,7 +49,7 @@ namespace SensorsManager.Web.Api.Controllers
             _messages = messages;
         }
 
-        [SensorsManagerAuthorize]
+        [SensorsManagerAuthorize] 
         [HttpPost,Route(""),ValidateModel]
         public IHttpActionResult Add(int networkId, SensorModelPost sensorModel)
         {

@@ -232,7 +232,6 @@
     <Compile Include="Models\UserModels\UserModel_Email.cs" />
     <Compile Include="Models\UserModels\UserModel_Registration.cs" />
     <Compile Include="Pending\SensorPendingModel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\GatewayConnectionRepository\GatewayConnectionRepository.cs" />
     <Compile Include="Repository\GatewayRepository\GatewayRepository.cs" />
     <Compile Include="Repository\MeasurementRepository\MeasurementRepository.cs" />
@@ -282,8 +281,6 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Properties\PublishProfiles\swiss-iot - FTP.pubxml" />
-    <None Include="Properties\PublishProfiles\swiss-iot - Web Deploy.pubxml" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
     <None Include="Web.Debug.config">
@@ -297,6 +294,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SensorsManager.DataLayer\SensorsManager.DataLayer.csproj">

@@ -52,29 +52,9 @@
     <Compile Include="Configurations\MeasurementConfiguration.cs" />
     <Compile Include="Configurations\NetworkConfiguration.cs" />
     <Compile Include="Configurations\GatewayConnectionConfiguration.cs" />
-    <Compile Include="Migrations\201904250858435_NewDesing.cs" />
-    <Compile Include="Migrations\201904250858435_NewDesing.Designer.cs">
-      <DependentUpon>201904250858435_NewDesing.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201904251036522_dasd.cs" />
-    <Compile Include="Migrations\201904251036522_dasd.Designer.cs">
-      <DependentUpon>201904251036522_dasd.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201905080924568_GatewayLocation.cs" />
-    <Compile Include="Migrations\201905080924568_GatewayLocation.Designer.cs">
-      <DependentUpon>201905080924568_GatewayLocation.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201905230852362_LastSensorDate.cs" />
-    <Compile Include="Migrations\201905230852362_LastSensorDate.Designer.cs">
-      <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201905240802546_LastReadingDateForSensor.cs" />
-    <Compile Include="Migrations\201905240802546_LastReadingDateForSensor.Designer.cs">
-      <DependentUpon>201905240802546_LastReadingDateForSensor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201906040917396_ProductionDateForGatewayAndNetwork.cs" />
-    <Compile Include="Migrations\201906040917396_ProductionDateForGatewayAndNetwork.Designer.cs">
-      <DependentUpon>201906040917396_ProductionDateForGatewayAndNetwork.cs</DependentUpon>
+    <Compile Include="Migrations\201911271150410_Razvan.cs" />
+    <Compile Include="Migrations\201911271150410_Razvan.Designer.cs">
+      <DependentUpon>201911271150410_Razvan.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -93,23 +73,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201904250858435_NewDesing.resx">
-      <DependentUpon>201904250858435_NewDesing.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201904251036522_dasd.resx">
-      <DependentUpon>201904251036522_dasd.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201905080924568_GatewayLocation.resx">
-      <DependentUpon>201905080924568_GatewayLocation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201905230852362_LastSensorDate.resx">
-      <DependentUpon>201905230852362_LastSensorDate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201905240802546_LastReadingDateForSensor.resx">
-      <DependentUpon>201905240802546_LastReadingDateForSensor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201906040917396_ProductionDateForGatewayAndNetwork.resx">
-      <DependentUpon>201906040917396_ProductionDateForGatewayAndNetwork.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201911271150410_Razvan.resx">
+      <DependentUpon>201911271150410_Razvan.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

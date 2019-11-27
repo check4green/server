@@ -37,7 +37,7 @@ namespace SensorsManager.Web.Api.Security
                 }
 
             }
-                HandleUnauthorized(actionContext);
+            HandleUnauthorized(actionContext);
 
         }
 
